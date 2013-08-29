@@ -1,6 +1,9 @@
 *~
 *.swp
 *.pyc
+*.c
+*.cpp
+*.so
 bin
 eggs
 parts
@@ -11,3 +14,4 @@ src
 develop-eggs
 sphinx
 dist
+.nfs*
