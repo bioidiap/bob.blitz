@@ -39,5 +39,4 @@ cdef extern from "<blitz/array.h>" namespace "blitz":
 
 cdef extern from "<convert.h>":
 
-  object shallow_ndarray_u8d1 (Array[numpy.uint8_t,_1])
-
+  object shallow_ndarray_u8d1 (Array[numpy.uint8_t,_1], object)

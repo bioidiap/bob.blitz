@@ -15,6 +15,6 @@
 /**
  * Shallow conversion from blitz::Array<T,N> to numpy.ndarray
  */
-PyObject* shallow_ndarray_u8d1(blitz::Array<uint8_t,1>& a);
+PyObject* shallow_ndarray_u8d1(blitz::Array<uint8_t,1>& a, PyObject* owner);
 
 #endif /* XBOB_BLITZ_CONVERT_H */

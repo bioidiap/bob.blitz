@@ -17,3 +17,4 @@ dist
 .nfs*
 .gdb_history
 build
+cython_debug

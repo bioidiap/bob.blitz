@@ -37,4 +37,4 @@ cdef class u8d1:
     deref(self.thisptr)[key] = value
 
   def shallow_ndarray(self):
-    return shallow_ndarray_u8d1(deref(self.thisptr))
+    return shallow_ndarray_u8d1(deref(self.thisptr), self)

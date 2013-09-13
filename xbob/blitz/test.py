@@ -66,5 +66,7 @@ def test_underflow_detection():
 def test_shallow_ndarray():
 
   bz = array.u8d1(2)
+  bz[0] = 22
+  bz[1] = 4
   nd = bz.shallow_ndarray()
   assert nd.dtype == numpy.uint8

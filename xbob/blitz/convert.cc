@@ -12,11 +12,15 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 // Finally, we include numpy's arrayobject header. Not before!
-#define PY_ARRAY_UNIQUE_SYMBOL BLITZ_ARRAY_API
+#define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
 // maximum number of dimensions supported by this converter
 #define XBOB_BLITZ_MAXDIM 11
+
+#define NUMPY17_API 0x00000007
+#define NUMPY16_API 0x00000006
+#define NUMPY14_API 0x00000004
 
 /**
  * @brief Handles conversion checking possibilities
@@ -84,32 +88,53 @@ struct typeinfo {
 /**
  * Returns a shallow ndarray from a blitz::Array<T,N>
  */
-template<typename T, int N> PyObject* shallow_ndarray(blitz::Array<T,N>& a) {
+template<typename T, int N>
+PyObject* shallow_ndarray(blitz::Array<T,N>& a, PyObject* owner) {
 
-  //check
+  // array has to be contiguous
   if (!a.isStorageContiguous()) {
     throw std::runtime_error("input blitz::Array<T,N> is not contiguous");
   }
 
-  for (int i=0; i<a.rank(); ++i) {
+  // array has to be in C-order
+  for (int i=0; i<N; ++i) {
     if (!(a.isRankStoredAscending(i) && a.ordering(i)==a.rank()-1-i)) {
       throw std::runtime_error("input blitz::Array<T,N> is not stored in C-order");
     }
   }
 
-  for (int i=0; i<a.rank(); ++i) {
-    if (a.base(i)!=0 ) {
+  // array base has to be zero
+  for (int i=0; i<N; ++i) {
+    if (a.base(i) != 0) {
       throw std::runtime_error("input blitz::Array<T,N> is not zero-based in all dimensions");
     }
   }
 
   //if you survived to this point, converts into shallow numpy.ndarray
   typeinfo info(a);
-  return PyArray_New(&PyArray_Type, N, info.shape, info.type_num, info.stride,
-      static_cast<void*>(a.data()), 0, 0, 0);
+#if NPY_FEATURE_VERSION > NUMPY16_API /* NumPy C-API version > 1.6 */
+  int flags = NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED;
+#else
+  int flags = NPY_C_CONTIGUOUS | NPY_ALIGNED;
+#endif
+  PyObject* retval = PyArray_New(&PyArray_Type, N, info.shape, info.type_num,
+      info.stride, static_cast<void*>(a.data()), sizeof(T), flags, owner);
 
+  //set base object so the array can go independently
+#if NPY_FEATURE_VERSION > NUMPY16_API /* NumPy C-API version > 1.6 */
+  int status = PyArray_SetBaseObject(retval, owner);
+  if (status != 0) {
+    Py_XDECREF(retval);
+    throw std::runtime_error("cannot set base object of numpy.ndarray");
+  }
+#else
+  PyArray_BASE(retval) = owner;
+#endif
+  Py_INCREF(owner);
+
+  return retval;
 }
 
-PyObject* shallow_ndarray_u8d1(blitz::Array<uint8_t,1>& a) {
-  return shallow_ndarray<uint8_t,1>(a);
+PyObject* shallow_ndarray_u8d1(blitz::Array<uint8_t,1>& a, PyObject* owner) {
+  return shallow_ndarray<uint8_t,1>(a, owner);
 }
