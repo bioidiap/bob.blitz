@@ -6,10 +6,16 @@
 """Cython definitions for blitz::Array<>
 """
 
+from libcpp cimport bool
+
 cdef extern from *:
 
   ctypedef int _1 "1"
   ctypedef int _2 "2"
+
+cdef extern from "<convert.h>":
+
+  cdef shallow_ndarray_u8d1 "shallow_ndarray<uint8_t,1>"(array)
 
 cdef extern from "<blitz/array.h>" namespace "blitz":
 
@@ -20,5 +26,11 @@ cdef extern from "<blitz/array.h>" namespace "blitz":
     Array(int) nogil except +
     Array(int,int) nogil except +
 
-    T& operator()(int) nogil except +
-    T& operator()(int,int) nogil except +
+    T operator()(int) nogil except +
+    T operator()(int,int) nogil except +
+
+    T* data() nogil
+
+    int size() nogil
+    int extent(int) nogil except +
+    int stride(int) nogil except +

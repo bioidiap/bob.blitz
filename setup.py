@@ -6,6 +6,69 @@
 from setuptools import setup, find_packages
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
+import subprocess
+import numpy
+
+def pkgconfig(package):
+
+  def uniq(seq, idfun=None):
+   # order preserving
+   if idfun is None:
+       def idfun(x): return x
+   seen = {}
+   result = []
+   for item in seq:
+       marker = idfun(item)
+       # in old Python versions:
+       # if seen.has_key(marker)
+       # but in new ones:
+       if marker in seen: continue
+       seen[marker] = 1
+       result.append(item)
+   return result
+
+  flag_map = {
+      '-I': 'include_dirs',
+      '-L': 'library_dirs',
+      '-l': 'libraries',
+      }
+
+  cmd = [
+      'pkg-config',
+      '--libs',
+      '--cflags',
+      package,
+      ]
+
+  proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
+      stderr=subprocess.STDOUT)
+
+  output = proc.communicate()[0]
+  if isinstance(output, bytes) and not isinstance(output, str):
+    output = output.decode('utf8')
+
+  if proc.returncode != 0: return {}
+
+  kw = {}
+
+  for token in output.split():
+    if token[:2] in flag_map:
+      kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
+
+    else: # throw others to extra_link_args
+      kw.setdefault('extra_compile_args', []).append(token)
+
+  for k, v in kw.items(): # remove duplicated
+      kw[k] = uniq(v)
+
+  return kw
+
+import os
+package_dir = os.path.dirname(os.path.realpath(__file__))
+package_dir = os.path.join(package_dir, 'xbob', 'blitz')
+blitz_config = pkgconfig('blitz')
+include_dirs = blitz_config.get('include_dirs', []) + \
+    [numpy.get_include(), package_dir]
 
 # The only thing we do in this file is to call the setup() function with all
 # parameters that define our package.
@@ -35,7 +98,16 @@ setup(
 
     cmdclass = {'build_ext': build_ext},
     ext_modules = [
-      Extension("xbob.blitz.array", ["xbob/blitz/array.pyx"], language="c++")
+      Extension("xbob.blitz.array", 
+        ["xbob/blitz/array.pyx", "xbob/blitz/convert.cc"],
+        include_dirs=include_dirs,
+        language="c++",
+        extra_compile_args=[
+          '-Wno-parentheses',
+          '-Wno-unused-variable',
+          '-Wno-#warnings',
+          ]
+        )
       ],
 
     entry_points={
