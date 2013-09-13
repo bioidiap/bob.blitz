@@ -15,3 +15,5 @@ develop-eggs
 sphinx
 dist
 .nfs*
+.gdb_history
+build

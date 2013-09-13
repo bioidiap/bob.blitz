@@ -90,6 +90,7 @@ setup(
 
     install_requires=[
       'setuptools',
+      'numpy',
     ],
 
     namespace_packages = [
@@ -98,11 +99,12 @@ setup(
 
     cmdclass = {'build_ext': build_ext},
     ext_modules = [
-      Extension("xbob.blitz.array", 
+      Extension("xbob.blitz.array",
         ["xbob/blitz/array.pyx", "xbob/blitz/convert.cc"],
         include_dirs=include_dirs,
         language="c++",
         extra_compile_args=[
+          '-g',
           '-Wno-parentheses',
           '-Wno-unused-variable',
           '-Wno-#warnings',
