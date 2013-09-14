@@ -12,7 +12,6 @@
 #define NPY_NO_DEPRECATED_API NPY_1_7_API_VERSION
 
 // Finally, we include numpy's arrayobject header. Not before!
-#define NO_IMPORT_ARRAY
 #include <numpy/arrayobject.h>
 
 // maximum number of dimensions supported by this converter
@@ -21,6 +20,25 @@
 #define NUMPY17_API 0x00000007
 #define NUMPY16_API 0x00000006
 #define NUMPY14_API 0x00000004
+
+#if PY_VERSION_HEX >= 0x03000000
+static void* wrap_import_array() {
+  import_array();
+  return 0;
+}
+#else
+static void wrap_import_array() {
+  import_array();
+  return;
+}
+#endif
+
+void import_ndarray() {
+  static bool array_imported = false;
+  if (array_imported) return;
+  wrap_import_array();
+  array_imported = true;
+}
 
 /**
  * @brief Handles conversion checking possibilities
@@ -122,7 +140,7 @@ PyObject* shallow_ndarray(blitz::Array<T,N>& a, PyObject* owner) {
 
   //set base object so the array can go independently
 #if NPY_FEATURE_VERSION > NUMPY16_API /* NumPy C-API version > 1.6 */
-  int status = PyArray_SetBaseObject(retval, owner);
+  int status = PyArray_SetBaseObject(reinterpret_cast<PyArrayObject*>(retval), owner);
   if (status != 0) {
     Py_XDECREF(retval);
     throw std::runtime_error("cannot set base object of numpy.ndarray");
@@ -135,6 +153,6 @@ PyObject* shallow_ndarray(blitz::Array<T,N>& a, PyObject* owner) {
   return retval;
 }
 
-PyObject* shallow_ndarray_u8d1(blitz::Array<uint8_t,1>& a, PyObject* owner) {
+PyObject* shallow_ndarray_u8d1 (blitz::Array<uint8_t,1>& a, PyObject* owner) {
   return shallow_ndarray<uint8_t,1>(a, owner);
 }

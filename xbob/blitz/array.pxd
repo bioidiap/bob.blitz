@@ -6,8 +6,7 @@
 """Cython definitions for blitz::Array<>
 """
 
-cimport numpy
-from libcpp cimport bool
+from libc.stdint cimport uint8_t
 
 cdef extern from *:
 
@@ -39,4 +38,5 @@ cdef extern from "<blitz/array.h>" namespace "blitz":
 
 cdef extern from "<convert.h>":
 
-  object shallow_ndarray_u8d1 (Array[numpy.uint8_t,_1], object)
+  void import_ndarray()
+  object shallow_ndarray_u8d1 (Array[uint8_t,_1], object)

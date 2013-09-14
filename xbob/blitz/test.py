@@ -68,5 +68,13 @@ def test_shallow_ndarray():
   bz = array.u8d1(2)
   bz[0] = 22
   bz[1] = 4
-  nd = bz.shallow_ndarray()
+  nd = bz.ndarray()
   assert nd.dtype == numpy.uint8
+  assert nd.shape == (2,)
+  assert nd[0] == 22
+  assert nd[1] == 4
+  assert nd.flags.owndata == False
+  assert nd.flags.c_contiguous == True
+  assert nd.flags.aligned == True
+  assert nd.flags.writeable == False
+  assert nd.base == bz
