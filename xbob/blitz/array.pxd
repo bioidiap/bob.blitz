@@ -12,6 +12,9 @@ cdef extern from *:
 
   ctypedef int _1 "1"
   ctypedef int _2 "2"
+  ctypedef int _3 "3"
+  ctypedef int _4 "4"
+  ctypedef int _5 "5"
 
 cdef extern from "<blitz/array.h>" namespace "blitz":
 
@@ -39,4 +42,8 @@ cdef extern from "<blitz/array.h>" namespace "blitz":
 cdef extern from "<convert.h>":
 
   void import_ndarray()
-  object shallow_ndarray_u8d1 (Array[uint8_t,_1], object)
+  object shallow_ndarray_u8d1 "shallow_ndarray<uint8_t,1>" (Array[uint8_t,_1], object)
+  object shallow_ndarray_u8d2 "shallow_ndarray<uint8_t,2>" (Array[uint8_t,_2], object)
+  object shallow_ndarray_u8d3 "shallow_ndarray<uint8_t,3>" (Array[uint8_t,_3], object)
+  object shallow_ndarray_u8d4 "shallow_ndarray<uint8_t,4>" (Array[uint8_t,_4], object)
+  object shallow_ndarray_u8d4 "shallow_ndarray<uint8_t,5>" (Array[uint8_t,_5], object)
