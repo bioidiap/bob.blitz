@@ -105,6 +105,7 @@ setup(
         language="c++",
         extra_compile_args=[
           '-g',
+          '-std=c++11',
           '-Wno-parentheses',
           '-Wno-unused-variable',
           '-Wno-#warnings',
