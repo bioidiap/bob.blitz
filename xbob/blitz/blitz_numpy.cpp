@@ -6,7 +6,7 @@
  */
 
 #define xbob_IMPORT_ARRAY
-#include <convert.h>
+#include <blitz_numpy.h>
 #undef xbob_IMPORT_ARRAY
 
 #if PY_VERSION_HEX >= 0x03000000

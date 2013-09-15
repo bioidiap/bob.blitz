@@ -100,7 +100,7 @@ setup(
     cmdclass = {'build_ext': build_ext},
     ext_modules = [
       Extension("xbob.blitz.array",
-        ["xbob/blitz/array.pyx", "xbob/blitz/convert.cc"],
+        ["xbob/blitz/array.pyx", "xbob/blitz/blitz_numpy.cpp"],
         include_dirs=include_dirs,
         language="c++",
         extra_compile_args=[

@@ -39,7 +39,7 @@ cdef extern from "<blitz/array.h>" namespace "blitz":
     int extent(int) nogil except +
     int stride(int) nogil except +
 
-cdef extern from "<convert.h>":
+cdef extern from "<blitz_numpy.h>":
 
   void import_ndarray()
   object shallow_ndarray_u8d1 "shallow_ndarray<uint8_t,1>" (Array[libc.stdint.uint8_t,_1], object) except +
