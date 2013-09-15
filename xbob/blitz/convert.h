@@ -87,6 +87,11 @@ struct typeinfo {
    * @brief Constructs from a blitz::Array<T,N>
    */
   template <typename T, int N> typeinfo(const blitz::Array<T,N>& a) {
+    // maximum supported number of dimensions
+    if (N > XBOB_BLITZ_MAXDIM) {
+      throw std::runtime_error("can only work with blitz::Array<>'s with up to 11 dimensions");
+    }
+
     nd = N;
     type_num = ctype_to_num<T>();
     for (int i=0; i<N; ++i) {
@@ -104,7 +109,7 @@ PyObject* shallow_ndarray(blitz::Array<T,N>& a, PyObject* owner) {
 
   // maximum supported number of dimensions
   if (N > XBOB_BLITZ_MAXDIM) {
-    throw std::runtime_error("can only convert arrays with up to 11 dimensions");
+    throw std::runtime_error("can only work with blitz::Array<>'s with up to 11 dimensions");
   }
 
   // array has to be contiguous
