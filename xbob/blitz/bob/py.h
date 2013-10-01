@@ -109,7 +109,7 @@ namespace bob { namespace python {
       return retval;
     }
 
-    int status = PyArray_SETITEM(zerodim, 
+    int status = PyArray_SETITEM(zerodim,
         reinterpret_cast<char*>(PyArray_DATA(zerodim)), o);
 
     if (status != 0) {
@@ -124,7 +124,7 @@ namespace bob { namespace python {
       T retval = 0;
       return retval;
     }
-    
+
     T retval = 0;
     PyArray_ScalarAsCtype(scalar, &retval);
     Py_DECREF(scalar);
@@ -267,7 +267,7 @@ namespace bob { namespace python {
 
       // transforms the data and wraps with an auto-deletable object
       PyObject* newref = PyArray_FromAny(o, req_dtype, N, N,
-#     if NPY_FEATURE_VERSION >= NUMPY16_API /* NumPy C-API version >= 1.6 */
+#     if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
           NPY_ARRAY_CARRAY_RO,
 #     else
           NPY_CARRAY_RO,
@@ -356,7 +356,7 @@ namespace bob { namespace python {
 
   template <typename T, int N> struct ShallowBlitzArray {
 
-    blitz::Array<T,N> call(PyObject* o, bool readwrite) const { 
+    blitz::Array<T,N> call(PyObject* o, bool readwrite) const {
       return shallow_blitz_array<T,N>(o);
     }
 
@@ -364,7 +364,7 @@ namespace bob { namespace python {
 
   template <typename T, int N> struct ReadonlyBlitzArray {
 
-    blitz::Array<T,N> call(PyObject* o) const { 
+    blitz::Array<T,N> call(PyObject* o) const {
       return readonly_blitz_array<T,N>(o);
     }
 
@@ -372,7 +372,7 @@ namespace bob { namespace python {
 
   template <typename T, int N> struct NumpyArrayCopy {
 
-    PyObject* call(const blitz::Array<T,N>& a) const { 
+    PyObject* call(const blitz::Array<T,N>& a) const {
       return ndarray_copy(a);
     }
 
