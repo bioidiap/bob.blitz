@@ -100,7 +100,10 @@ setup(
     cmdclass = {'build_ext': build_ext},
     ext_modules = [
       Extension("xbob.blitz.array",
-        ["xbob/blitz/array.pyx", "xbob/blitz/blitz_numpy.cpp"],
+        [
+          "xbob/blitz/array.pyx",
+          "xbob/blitz/bob_python.cpp"
+          ],
         include_dirs=include_dirs,
         language="c++",
         extra_compile_args=[
@@ -109,6 +112,11 @@ setup(
           '-Wno-parentheses',
           '-Wno-unused-variable',
           '-Wno-#warnings',
+          ],
+        define_macros=[
+          ("PY_ARRAY_UNIQUE_SYMBOL", "BOB_NUMPY_ARRAY_API"),
+          ("NO_IMPORT_ARRAY", "1"),
+          #("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"),
           ]
         )
       ],
@@ -125,5 +133,4 @@ setup(
       'Programming Language :: Python',
       'Programming Language :: Python :: 3',
       'Topic :: Software Development :: Libraries :: Python Modules',
-      ],
-)
+      ],)
