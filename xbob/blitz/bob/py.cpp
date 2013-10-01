@@ -22,18 +22,27 @@ static void wrap_import_array() {
 }
 #endif
 
+static void pyobject_delete(PyObject* o) {
+  Py_XDECREF(o);
+}
+
+static void pyobject_keep(PyObject* o) {
+}
+
 namespace bob { namespace python {
 
-  /**
-   * @brief Imports the numpy.ndarray infrastructure once
-   */
   void bob_import_array() {
     wrap_import_array();
   }
 
-  /**
-   * Converts from numpy type_num to a string representation
-   */
+  std::shared_ptr<PyObject> new_reference(PyObject* o) {
+    return std::shared_ptr<PyObject>(o, &pyobject_deleter);
+  }
+
+  std::shared_ptr<PyObject> borrowed(PyObject* o) {
+    return std::shared_ptr<PyObject>(o, &pyobject_keep);
+  }
+
   const char* num_to_str(int typenum) {
     switch (typenum) {
       case NPY_BOOL:
@@ -141,14 +150,16 @@ namespace bob { namespace python {
   template <> int ctype_to_num<std::complex<long double>>() { return NPY_COMPLEX256; }
 #endif
 
-  template <> int ctype_to_num<long>() { 
+#ifdef __APPLE__
+  template <> int ctype_to_num<long>() {
     if (sizeof(long) == 4) return NPY_INT32;
     return NPY_INT64;
   }
 
-  template <> int ctype_to_num<unsigned long>() { 
+  template <> int ctype_to_num<unsigned long>() {
     if (sizeof(unsigned long) == 4) return NPY_UINT32;
     return NPY_UINT64;
   }
+#endif
 
 }}

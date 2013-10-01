@@ -3,7 +3,7 @@
 # Andre Anjos <andre.anjos@idiap.ch>
 # Mon 16 Apr 08:18:08 2012 CEST
 
-from setuptools import setup, find_packages
+from setuptools import setup, find_packages, dist
 from distutils.extension import Extension
 from Cython.Distutils import build_ext
 import subprocess
@@ -76,7 +76,7 @@ setup(
 
     name='xbob.blitz',
     version='0.0.1a0',
-    description='Cython bindings for Blitz++ (a C++ array template library)',
+    description='Bindings for Blitz++ (a C++ array template library)',
 
     url='http://pypi.python.org/pypi/plytz',
     license='GPLv3',
@@ -97,11 +97,11 @@ setup(
       'xbob',
     ],
 
-    cmdclass = {'build_ext': build_ext},
+    #cmdclass = {'build_ext': build_ext},
     ext_modules = [
-      Extension("xbob.blitz.__test_array__",
+      Extension("xbob.blitz.array2",
         [
-          "xbob/blitz/array.pyx",
+          "xbob/blitz/array2.cpp",
           "xbob/blitz/bob/py.cpp"
           ],
         include_dirs=include_dirs,

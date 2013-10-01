@@ -16,6 +16,7 @@
 #include <stdexcept>
 #include <numpy/arrayobject.h>
 #include <typeinfo>
+#include <memory>
 
 #define NUMPY17_API 0x00000007
 #define NUMPY16_API 0x00000006
@@ -27,6 +28,18 @@ namespace bob { namespace python {
    * @brief Imports the numpy.ndarray infrastructure once
    */
   void bob_import_array();
+
+  /**
+   * Returns a std::shared_ptr that wraps a PyObject and will Py_XDECREF'it
+   * when gone.
+   */
+  std::shared_ptr<PyObject> new_reference(PyObject* o);
+
+  /**
+   * Returns a std::shared_ptr that wraps a PyObject and will NOT Py_XDECREF'it
+   * when gone.
+   */
+  std::shared_ptr<PyObject> borrowed(PyObject* o);
 
   /**
    * Converts from numpy type_num to a string representation
@@ -73,10 +86,12 @@ namespace bob { namespace python {
   template <> int ctype_to_num<std::complex<long double>>();
 #endif
 
+#ifdef __APPLE__
   // support for common C types which can be declared differently
   // depending on the hosting platform
   template <> int ctype_to_num<long>();
   template <> int ctype_to_num<unsigned long>();
+#endif
 
   /**
    * @brief Extraction API for **simple** types.
