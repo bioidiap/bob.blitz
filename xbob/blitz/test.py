@@ -7,8 +7,8 @@
 """
 
 import numpy
-import array
 import nose
+from . import __test_array__ as array
 
 def test_u8d1_from_scratch():
 

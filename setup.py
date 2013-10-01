@@ -99,7 +99,7 @@ setup(
 
     cmdclass = {'build_ext': build_ext},
     ext_modules = [
-      Extension("xbob.blitz.array",
+      Extension("xbob.blitz.__test_array__",
         [
           "xbob/blitz/array.pyx",
           "xbob/blitz/bob_python.cpp"
