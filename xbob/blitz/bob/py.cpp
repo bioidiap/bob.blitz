@@ -5,7 +5,10 @@
  * @brief Implements some constructions exported to all modules
  */
 
-#include <bob/python.h>
+#ifdef NO_IMPORT_ARRAY
+#undef NO_IMPORT_ARRAY
+#include <bob/py.h>
+#endif
 
 #if PY_VERSION_HEX >= 0x03000000
 static void* wrap_import_array() {
@@ -113,7 +116,7 @@ namespace bob { namespace python {
         }
 #endif
       default:
-        PyErr_Format(&PyExc_NotImplementedError, "no support for converting type number %d to string", typenum);
+        PyErr_Format(PyExc_NotImplementedError, "no support for converting type number %d to string", typenum);
         return 0;
     }
   }

@@ -44,7 +44,7 @@ cdef extern from "<blitz/array.h>" namespace "blitz":
     int extent(int) nogil except +
     int stride(int) nogil except +
 
-cdef extern from "<bob_python.h>" namespace "bob::python":
+cdef extern from "<bob/py.h>" namespace "bob::python":
 
   void bob_import_array()
 

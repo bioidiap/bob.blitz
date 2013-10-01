@@ -102,7 +102,7 @@ setup(
       Extension("xbob.blitz.__test_array__",
         [
           "xbob/blitz/array.pyx",
-          "xbob/blitz/bob_python.cpp"
+          "xbob/blitz/bob/py.cpp"
           ],
         include_dirs=include_dirs,
         language="c++",
