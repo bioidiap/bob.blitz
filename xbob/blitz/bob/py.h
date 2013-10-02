@@ -121,8 +121,6 @@ namespace bob { namespace python {
       return retval;
     }
 
-    PyArray_Descr* dtype = PyArray_DescrFromType(type_num);
-
     // create a zero-dimensional array on the expected type
     PyArrayObject* zerodim =
       reinterpret_cast<PyArrayObject*>(PyArray_SimpleNew(0, 0, type_num));

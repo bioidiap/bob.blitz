@@ -83,12 +83,9 @@ if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
 import platform
 extra_compile_args=[
   '-O0', '-g',
-  '-Wno-parentheses',
-  '-Wno-unused-variable',
-  '-Wno-#warnings',
   ]
 if platform.system() == 'Darwin':
-  extra_compile_args += ['-std=c++11', '-stdlib=libc++']
+  extra_compile_args += ['-std=c++11', '-stdlib=libc++', '-Wno-#warnings']
 else:
   extra_compile_args += ['-std=c++11']
 
@@ -128,14 +125,7 @@ setup(
           ],
         include_dirs=include_dirs,
         language="c++",
-        extra_compile_args=[
-          '-O0', '-g',
-          '-std=c++11',
-          '-stdlib=libc++',
-          '-Wno-parentheses',
-          '-Wno-unused-variable',
-          '-Wno-#warnings',
-          ],
+        extra_compile_args=extra_compile_args,
         define_macros=define_macros,
         )
       ],
