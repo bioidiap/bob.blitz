@@ -66,8 +66,12 @@ import os
 package_dir = os.path.dirname(os.path.realpath(__file__))
 package_dir = os.path.join(package_dir, 'xbob', 'blitz')
 blitz_config = pkgconfig('blitz')
-include_dirs = blitz_config.get('include_dirs', []) + \
-    [numpy.get_include(), package_dir]
+include_dirs = [package_dir]
+
+# Add system include directories
+extra_compile_args = []
+system_includes = blitz_config.get('include_dirs', []) + [numpy.get_include()]
+for k in system_includes: extra_compile_args += ['-isystem', k]
 
 # NumPy API macros necessary?
 define_macros=[
@@ -81,9 +85,7 @@ if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
 
 # Compilation options
 import platform
-extra_compile_args=[
-  '-O0', '-g',
-  ]
+extra_compile_args += ['-O0', '-g']
 if platform.system() == 'Darwin':
   extra_compile_args += ['-std=c++11', '-stdlib=libc++', '-Wno-#warnings']
 else:
