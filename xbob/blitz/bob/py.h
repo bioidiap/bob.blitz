@@ -9,12 +9,15 @@
 #ifndef BOB_PYTHON_H
 #define BOB_PYTHON_H
 
+extern "C" {
 #include <Python.h>
+#include <numpy/arrayobject.h>
+}
+
 #include <complex>
 #include <blitz/array.h>
 #include <stdint.h>
 #include <stdexcept>
-#include <numpy/arrayobject.h>
 #include <typeinfo>
 #include <memory>
 
@@ -33,13 +36,18 @@ namespace bob { namespace python {
    * Returns a std::shared_ptr that wraps a PyObject and will Py_XDECREF'it
    * when gone.
    */
-  std::shared_ptr<PyObject> new_reference(PyObject* o);
+  std::shared_ptr<PyObject> handle(PyObject* o);
 
   /**
    * Returns a std::shared_ptr that wraps a PyObject and will NOT Py_XDECREF'it
    * when gone.
    */
   std::shared_ptr<PyObject> borrowed(PyObject* o);
+
+  /**
+   * Safely creates a new reference to an existing PyObject
+   */
+  PyObject* new_reference(std::shared_ptr<PyObject> o);
 
   /**
    * Converts from numpy type_num to a string representation

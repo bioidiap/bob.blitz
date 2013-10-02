@@ -5,7 +5,6 @@
 
 from setuptools import setup, find_packages, dist
 from distutils.extension import Extension
-from Cython.Distutils import build_ext
 import subprocess
 import numpy
 
@@ -70,6 +69,29 @@ blitz_config = pkgconfig('blitz')
 include_dirs = blitz_config.get('include_dirs', []) + \
     [numpy.get_include(), package_dir]
 
+# NumPy API macros necessary?
+define_macros=[
+    ("PY_ARRAY_UNIQUE_SYMBOL", "BOB_NUMPY_ARRAY_API"),
+    ("NO_IMPORT_ARRAY", "1"),
+    ]
+import numpy
+from distutils.version import StrictVersion
+if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
+  define_macros.append(("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"))
+
+# Compilation options
+import platform
+extra_compile_args=[
+  '-O0', '-g',
+  '-Wno-parentheses',
+  '-Wno-unused-variable',
+  '-Wno-#warnings',
+  ]
+if platform.system() == 'Darwin':
+  extra_compile_args += ['-std=c++11', '-stdlib=libc++']
+else:
+  extra_compile_args += ['-std=c++11']
+
 # The only thing we do in this file is to call the setup() function with all
 # parameters that define our package.
 setup(
@@ -101,23 +123,20 @@ setup(
     ext_modules = [
       Extension("xbob.blitz.array2",
         [
+          "xbob/blitz/bob/py.cpp",
           "xbob/blitz/array2.cpp",
-          "xbob/blitz/bob/py.cpp"
           ],
         include_dirs=include_dirs,
         language="c++",
         extra_compile_args=[
-          '-g',
+          '-O0', '-g',
           '-std=c++11',
+          '-stdlib=libc++',
           '-Wno-parentheses',
           '-Wno-unused-variable',
           '-Wno-#warnings',
           ],
-        define_macros=[
-          ("PY_ARRAY_UNIQUE_SYMBOL", "BOB_NUMPY_ARRAY_API"),
-          ("NO_IMPORT_ARRAY", "1"),
-          #("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"),
-          ]
+        define_macros=define_macros,
         )
       ],
 
@@ -129,7 +148,6 @@ setup(
       'Intended Audience :: Developers',
       'License :: OSI Approved :: GNU General Public License v3 (GPLv3)',
       'Natural Language :: English',
-      'Programming Language :: Cython',
       'Programming Language :: Python',
       'Programming Language :: Python :: 3',
       'Topic :: Software Development :: Libraries :: Python Modules',

@@ -35,12 +35,21 @@ namespace bob { namespace python {
     wrap_import_array();
   }
 
-  std::shared_ptr<PyObject> new_reference(PyObject* o) {
-    return std::shared_ptr<PyObject>(o, &pyobject_deleter);
+  std::shared_ptr<PyObject> handle(PyObject* o) {
+    return std::shared_ptr<PyObject>(o, &pyobject_delete);
   }
 
   std::shared_ptr<PyObject> borrowed(PyObject* o) {
     return std::shared_ptr<PyObject>(o, &pyobject_keep);
+  }
+
+  PyObject* new_reference(std::shared_ptr<PyObject> o) {
+    PyObject* retval = o.get();
+    if (retval) {
+      Py_INCREF(retval);
+      return retval;
+    }
+    return retval;
   }
 
   const char* num_to_str(int typenum) {
