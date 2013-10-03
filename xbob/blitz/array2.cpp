@@ -37,6 +37,13 @@ static PyMemberDef Array_members[] = {
  * Deallocates memory for an Array object
  */
 static void Array_dealloc(Array* self) {
+
+  //forces premature deallocation as free() will not respect C++ destruction
+  self->bzarr.reset();
+  self->shape.reset();
+  self->dtype.reset();
+
+  //calls free() on the PyObject itself
   self->ob_type->tp_free((PyObject*)self);
 }
 
@@ -51,6 +58,14 @@ static PyObject* Array_new(PyTypeObject* type, PyObject *args, PyObject* kwds) {
   return reinterpret_cast<PyObject*>(self);
 }
 
+/** tests code for allocation
+template<typename T, int N>
+void delete_array(blitz::Array<T,N>* o) {
+  std::cout << "deallocating array" << std::endl;
+  delete o;
+}
+**/
+
 /**
  * Creates a new underlying Array object
  */
@@ -59,6 +74,13 @@ std::shared_ptr<void> allocate_array3(Py_ssize_t* shape) {
   blitz::TinyVector<int,N> tv_shape;
   for (int i=0; i<N; ++i) tv_shape(i) = shape[i];
   auto retval = std::make_shared<blitz::Array<T,N>>(tv_shape);
+
+  /** some test code
+  std::cout << "allocating array" << std::endl;
+  std::shared_ptr<blitz::Array<T,N>> retval(new blitz::Array<T,N>(tv_shape),
+      &delete_array<T,N>);
+  **/
+
   return retval;
 }
 

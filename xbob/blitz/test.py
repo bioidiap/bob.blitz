@@ -177,14 +177,19 @@ def test_s64d2_shallow_array():
   nose.tools.eq_(bz[1,1], nd[1,1])
   nose.tools.eq_(nd.base, bz)
   del bz
+  assert nd.flags.behaved
   assert nd.flags.c_contiguous
+  assert nd.flags.writeable
   nose.tools.eq_(nd.flags.owndata, False)
-  nose.tools.eq_(nd.flags.writeable, False)
+
   nose.tools.eq_(nd.dtype, numpy.dtype('int64'))
   nose.tools.eq_(nd[0,0], 1)
   nose.tools.eq_(nd[0,1], 2)
   nose.tools.eq_(nd[1,0], 3)
   nose.tools.eq_(nd[1,1], -1)
+
+  nd[1,0] = 32
+  nose.tools.eq_(nd.base[1,0], nd[1,0])
 
   # tests blitz::Array<> out lives attached ndarray
   bz = nd.base
@@ -192,5 +197,16 @@ def test_s64d2_shallow_array():
   nose.tools.eq_(bz.shape, (2,2))
   nose.tools.eq_(bz[0,0], 1)
   nose.tools.eq_(bz[0,1], 2)
-  nose.tools.eq_(bz[1,0], 3)
+  nose.tools.eq_(bz[1,0], 32)
   nose.tools.eq_(bz[1,1], -1)
+
+@nose.tools.raises(ValueError)
+def test_s64d2_cannot_resize_shallow():
+  
+  bz = array.Array((2,2), dtype='int64')
+  bz[0,0] = 1
+  bz[0,1] = 2
+  bz[1,0] = 3
+  bz[1,1] = -1
+  nd = bz.as_shallow_ndarray()
+  nd.resize(3,3)
