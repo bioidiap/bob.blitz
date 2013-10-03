@@ -361,6 +361,57 @@ namespace bob { namespace python {
     }
 
   /**
+   * @brief Creates a **readonly** shallow copy of the ndarray.
+   *
+   * The newly allocated array is a classical Pythonic **new** reference. The
+   * client taking the object must call Py_XDECREF when done.
+   *
+   * This function returns NULL if an error has occurred, following the
+   * standard python protocol.
+   */
+  template <typename T, int N>
+    PyObject* ndarray_shallow(blitz::Array<T,N>& a) {
+
+      int type_num = ctype_to_num<T>();
+      if (PyErr_Occurred()) return 0;
+
+      // TODO: checks that the array is well-behaved
+      if(!a.isStorageContiguous()) {
+        PyErr_SetString(PyExc_RuntimeError, "blitz::Array<> is not C-contiguous and cannot be mapped into a read-only numpy.ndarray");
+        return 0;
+      }
+      
+      for(int i=0; i<a.rank(); ++i) {
+        if(!(a.isRankStoredAscending(i) && a.ordering(i)==a.rank()-1-i)) {
+          PyErr_Format(PyExc_RuntimeError, "dimension %d of blitz::Array<> is not stored in ascending order and cannot be mapped into a read-only numpy.ndarray", i);
+          return 0;
+        }
+      }
+
+      // maximum supported number of dimensions
+      if (N > 11) {
+        PyErr_Format(PyExc_TypeError, "input blitz::Array<%s,%d> has more dimensions than we can support (max. = 11)", num_to_str(type_num), N);
+        return 0;
+      }
+
+      // copies the shape
+      npy_intp shape[NPY_MAXDIMS];
+      for (int i=0; i<N; ++i) shape[i] = a.extent(i);
+
+      // creates an ndarray from the blitz::Array<>.data()
+      return PyArray_NewFromDescr(&PyArray_Type, 
+          PyArray_DescrFromType(type_num),
+          N, shape, 0, reinterpret_cast<void*>(a.data()),
+#     if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
+          NPY_ARRAY_BEHAVED,
+#     else
+          NPY_BEHAVED,
+#     endif
+          0);
+
+    }
+
+  /**
    * Classes to help Cython integration (only supports templated classes)
    */
   template <typename T> struct CtypeToNum {

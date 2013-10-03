@@ -108,14 +108,13 @@ def test_array_protect_segfault_low():
   bz = array.Array(2, dtype='complex128')
   bz[-3] = 4
 
-@nose.tools.nottest
-def test_u8d1_ndarray_from_blitz():
+def test_u8d1_as_ndarray():
 
   bz = array.Array(2, dtype='uint8')
   bz[0] = 32
   bz[1] = 10
-  nd = bz.ndarray()
-  nose.tools.eq_(nd.shape, (len(bz),))
+  nd = bz.as_ndarray()
+  nose.tools.eq_(nd.shape, bz.shape)
   nose.tools.eq_(bz[0], nd[0])
   nose.tools.eq_(bz[1], nd[1])
   assert nd.flags.owndata
@@ -127,14 +126,13 @@ def test_u8d1_ndarray_from_blitz():
   nose.tools.eq_(nd[0], 32)
   nose.tools.eq_(nd[1], 10)
 
-@nose.tools.nottest
-def test_u64d1_ndarray_from_blitz():
+def test_u64d1_as_ndarray():
 
   bz = array.Array(2, dtype='uint64')
   bz[0] = 2**33
   bz[1] = 2**64 - 1
-  nd = bz.ndarray()
-  nose.tools.eq_(nd.shape, (len(bz),))
+  nd = bz.as_ndarray()
+  nose.tools.eq_(nd.shape, bz.shape)
   nose.tools.eq_(bz[0], nd[0])
   nose.tools.eq_(bz[1], nd[1])
   assert nd.flags.owndata
@@ -146,14 +144,13 @@ def test_u64d1_ndarray_from_blitz():
   nose.tools.eq_(nd[0], 2**33)
   nose.tools.eq_(nd[1], 2**64-1)
 
-@nose.tools.nottest
-def test_u32d1_ndarray_from_blitz():
+def test_u32d1_as_ndarray():
 
   bz = array.Array(2, dtype='uint32')
   bz[0] = 2**32-1
   bz[1] = 0
-  nd = bz.ndarray()
-  nose.tools.eq_(nd.shape, (len(bz),))
+  nd = bz.as_ndarray()
+  nose.tools.eq_(nd.shape, bz.shape)
   nose.tools.eq_(bz[0], nd[0])
   nose.tools.eq_(bz[1], nd[1])
   del bz
@@ -165,9 +162,35 @@ def test_u32d1_ndarray_from_blitz():
   nose.tools.eq_(nd[0], 2**32-1)
   nose.tools.eq_(nd[1], 0)
 
-@nose.tools.nottest
-def test_u32d1_ndarray_from_blitz_2():
+def test_s64d2_shallow_array():
 
-  bz = array.Array(2, dtype='uint32')
-  bz[0] = 2**32-1
-  bz[1] = 0
+  bz = array.Array((2,2), dtype='int64')
+  bz[0,0] = 1
+  bz[0,1] = 2
+  bz[1,0] = 3
+  bz[1,1] = -1
+  nd = bz.as_shallow_ndarray()
+  nose.tools.eq_(nd.shape, bz.shape)
+  nose.tools.eq_(bz[0,0], nd[0,0])
+  nose.tools.eq_(bz[0,1], nd[0,1])
+  nose.tools.eq_(bz[1,0], nd[1,0])
+  nose.tools.eq_(bz[1,1], nd[1,1])
+  nose.tools.eq_(nd.base, bz)
+  del bz
+  assert nd.flags.c_contiguous
+  nose.tools.eq_(nd.flags.owndata, False)
+  nose.tools.eq_(nd.flags.writeable, False)
+  nose.tools.eq_(nd.dtype, numpy.dtype('int64'))
+  nose.tools.eq_(nd[0,0], 1)
+  nose.tools.eq_(nd[0,1], 2)
+  nose.tools.eq_(nd[1,0], 3)
+  nose.tools.eq_(nd[1,1], -1)
+
+  # tests blitz::Array<> out lives attached ndarray
+  bz = nd.base
+  del nd
+  nose.tools.eq_(bz.shape, (2,2))
+  nose.tools.eq_(bz[0,0], 1)
+  nose.tools.eq_(bz[0,1], 2)
+  nose.tools.eq_(bz[1,0], 3)
+  nose.tools.eq_(bz[1,1], -1)

@@ -22,6 +22,16 @@ typedef struct {
 
 static char static_shape_str[] = "shape";
 static char static_dtype_str[] = "dtype";
+static char static_shape_doc[] = "a tuple indicating the shape of this array";
+static char static_dtype_doc[] = "data type for every element in this array";
+
+static PyMemberDef Array_members[] = {
+    {static_shape_str, T_OBJECT_EX, offsetof(Array, shape), READONLY,
+      static_shape_doc},
+    {static_dtype_str, T_OBJECT_EX, offsetof(Array, dtype), READONLY,
+      static_dtype_doc},
+    {NULL}  /* Sentinel */
+};
 
 /**
  * Deallocates memory for an Array object
@@ -499,13 +509,185 @@ static PyMappingMethods Array_mapping = {
     (objobjargproc)Array_setitem,
 };
 
-static char static_shape_doc[] = "a tuple indicating the shape of this array";
-static char static_dtype_doc[] = "data type for every element in this array";
-static PyMemberDef Array_members[] = {
-    {static_shape_str, T_OBJECT_EX, offsetof(Array, shape), READONLY,
-      static_shape_doc},
-    {static_dtype_str, T_OBJECT_EX, offsetof(Array, dtype), READONLY,
-      static_dtype_doc},
+template <typename T>
+PyObject* ndarray_copy_array2(Py_ssize_t ndim, std::shared_ptr<void> bz) {
+  switch (ndim) {
+    case 1:
+      {
+        return bob::python::ndarray_copy(*reinterpret_cast<blitz::Array<T,1>*>(bz.get()));
+      }
+    case 2:
+      {
+        return bob::python::ndarray_copy(*reinterpret_cast<blitz::Array<T,2>*>(bz.get()));
+      }
+    case 3:
+      {
+        return bob::python::ndarray_copy(*reinterpret_cast<blitz::Array<T,3>*>(bz.get()));
+      }
+    case 4:
+      {
+        return bob::python::ndarray_copy(*reinterpret_cast<blitz::Array<T,4>*>(bz.get()));
+      }
+    default:
+      PyErr_Format(PyExc_TypeError, "cannot convert blitz::Array<> to numpy.ndarray with number of dimensions = %" PY_FORMAT_SIZE_T "d", ndim);
+      return 0;
+  }
+}
+
+PyObject* ndarray_copy_array(int typenum, Py_ssize_t ndim, std::shared_ptr<void> bz) {
+  switch (typenum) {
+    case NPY_BOOL: return ndarray_copy_array2<bool>(ndim, bz);
+    case NPY_INT8: return ndarray_copy_array2<int8_t>(ndim, bz);
+    case NPY_INT16: return ndarray_copy_array2<int16_t>(ndim, bz);
+    case NPY_INT32: return ndarray_copy_array2<int32_t>(ndim, bz);
+    case NPY_INT64: return ndarray_copy_array2<int64_t>(ndim, bz);
+    case NPY_UINT8: return ndarray_copy_array2<uint8_t>(ndim, bz);
+    case NPY_UINT16: return ndarray_copy_array2<uint16_t>(ndim, bz);
+    case NPY_UINT32: return ndarray_copy_array2<uint32_t>(ndim, bz);
+    case NPY_UINT64: return ndarray_copy_array2<uint64_t>(ndim, bz);
+    case NPY_FLOAT32: return ndarray_copy_array2<float>(ndim, bz);
+    case NPY_FLOAT64: return ndarray_copy_array2<double>(ndim, bz);
+#ifdef NPY_FLOAT128
+    case NPY_FLOAT128: return ndarray_copy_array2<long double>(ndim, bz);
+#endif
+    case NPY_COMPLEX64: return ndarray_copy_array2<std::complex<float>>(ndim, bz);
+    case NPY_COMPLEX128: return ndarray_copy_array2<std::complex<double>>(ndim, bz);
+#ifdef NPY_COMPLEX256
+    case NPY_COMPLEX256: return ndarray_copy_array2<std::complex<long double>>(ndim, bz);
+#endif
+    default:
+      PyErr_Format(PyExc_TypeError, "cannot convert blitz::Array<> to numpy.ndarray with data type number = %d", typenum);
+      return 0;
+  }
+}
+
+static PyObject* Array_ndarray_copy(Array* self) {
+  Py_ssize_t ndim = PySequence_Fast_GET_SIZE(self->shape.get());
+  int typenum = (reinterpret_cast<PyArray_Descr*>(self->dtype.get()))->type_num;
+  return ndarray_copy_array(typenum, ndim, self->bzarr);
+}
+
+template <typename T>
+PyObject* ndarray_shallow_array2(Py_ssize_t ndim, std::shared_ptr<void> bz) {
+  switch (ndim) {
+    case 1:
+      {
+        return bob::python::ndarray_shallow(*reinterpret_cast<blitz::Array<T,1>*>(bz.get()));
+      }
+    case 2:
+      {
+        return bob::python::ndarray_shallow(*reinterpret_cast<blitz::Array<T,2>*>(bz.get()));
+      }
+    case 3:
+      {
+        return bob::python::ndarray_shallow(*reinterpret_cast<blitz::Array<T,3>*>(bz.get()));
+      }
+    case 4:
+      {
+        return bob::python::ndarray_shallow(*reinterpret_cast<blitz::Array<T,4>*>(bz.get()));
+      }
+    default:
+      PyErr_Format(PyExc_TypeError, "cannot convert blitz::Array<> to numpy.ndarray with number of dimensions = %" PY_FORMAT_SIZE_T "d", ndim);
+      return 0;
+  }
+}
+
+PyObject* ndarray_shallow_array(int typenum, Py_ssize_t ndim, std::shared_ptr<void> bz) {
+  switch (typenum) {
+    case NPY_BOOL: return ndarray_shallow_array2<bool>(ndim, bz);
+    case NPY_INT8: return ndarray_shallow_array2<int8_t>(ndim, bz);
+    case NPY_INT16: return ndarray_shallow_array2<int16_t>(ndim, bz);
+    case NPY_INT32: return ndarray_shallow_array2<int32_t>(ndim, bz);
+    case NPY_INT64: return ndarray_shallow_array2<int64_t>(ndim, bz);
+    case NPY_UINT8: return ndarray_shallow_array2<uint8_t>(ndim, bz);
+    case NPY_UINT16: return ndarray_shallow_array2<uint16_t>(ndim, bz);
+    case NPY_UINT32: return ndarray_shallow_array2<uint32_t>(ndim, bz);
+    case NPY_UINT64: return ndarray_shallow_array2<uint64_t>(ndim, bz);
+    case NPY_FLOAT32: return ndarray_shallow_array2<float>(ndim, bz);
+    case NPY_FLOAT64: return ndarray_shallow_array2<double>(ndim, bz);
+#ifdef NPY_FLOAT128
+    case NPY_FLOAT128: return ndarray_shallow_array2<long double>(ndim, bz);
+#endif
+    case NPY_COMPLEX64: return ndarray_shallow_array2<std::complex<float>>(ndim, bz);
+    case NPY_COMPLEX128: return ndarray_shallow_array2<std::complex<double>>(ndim, bz);
+#ifdef NPY_COMPLEX256
+    case NPY_COMPLEX256: return ndarray_shallow_array2<std::complex<long double>>(ndim, bz);
+#endif
+    default:
+      PyErr_Format(PyExc_TypeError, "cannot convert blitz::Array<> to numpy.ndarray with data type number = %d", typenum);
+      return 0;
+  }
+}
+
+static PyObject* Array_ndarray_shallow(Array* self) {
+ 
+  Py_ssize_t ndim = PySequence_Fast_GET_SIZE(self->shape.get());
+  int typenum = (reinterpret_cast<PyArray_Descr*>(self->dtype.get()))->type_num;
+  
+  PyObject* retval = ndarray_shallow_array(typenum, ndim, self->bzarr);
+  if (!retval) return 0;
+
+  // sets numpy.ndarray base for the new array
+#if NPY_FEATURE_VERSION < NUMPY17_API /* NumPy C-API version >= 1.7 */
+  PyArray_BASE(reinterpret_cast<PyArrayObject*>(retval)) =
+    reinterpret_cast<PyObject*>(self);
+#else
+  if (PyArray_SetBaseObject(reinterpret_cast<PyArrayObject*>(retval),
+      reinterpret_cast<PyObject*>(self)) != 0) {
+    Py_DECREF(retval);
+    return 0;
+  }
+#endif
+  Py_INCREF(reinterpret_cast<PyObject*>(self));
+
+  return retval;
+
+}
+
+/**
+static int Array_ndarray_shallow_able(Array* self) {
+
+  // TODO: checks that the array is well-behaved
+  if(!a.isStorageContiguous()) {
+    PyErr_SetString(PyExc_RuntimeError, "blitz::Array<> is not C-contiguous and cannot be mapped into a read-only numpy.ndarray");
+    return 0;
+  }
+
+  for(int i=0; i<a.rank(); ++i) {
+    if(!(a.isRankStoredAscending(i) && a.ordering(i)==a.rank()-1-i)) {
+      PyErr_Format(PyExc_RuntimeError, "dimension %d of blitz::Array<> is not stored in ascending order and cannot be mapped into a read-only numpy.ndarray", i);
+      return 0;
+    }
+  }
+}
+**/
+
+static char static_private_array_str[] = "__array__";
+static char static_private_array_doc[] = "numpy.ndarray accessor (choses the fastest possible conversion path)";
+static char static_as_ndarray_str[] = "as_ndarray";
+static char static_as_ndarray_doc[] = "returns a copy of the blitz::Array<> as a numpy.ndarray";
+static char static_as_shallow_ndarray_str[] = "as_shallow_ndarray";
+static char static_as_shallow_ndarray_doc[] = "returns a (read-only) shallow copy of the blitz::Array<> as a numpy.ndarray";
+
+static PyMethodDef Array_methods[] = {
+    {
+      static_as_ndarray_str,
+      (PyCFunction)Array_ndarray_copy,
+      METH_NOARGS,
+      static_as_ndarray_doc
+    },
+    {
+      static_as_shallow_ndarray_str,
+      (PyCFunction)Array_ndarray_shallow,
+      METH_NOARGS,
+      static_as_shallow_ndarray_doc
+    },
+    {
+      static_private_array_str,
+      (PyCFunction)Array_ndarray_shallow,
+      METH_NOARGS,
+      static_private_array_doc
+    },
     {NULL}  /* Sentinel */
 };
 
@@ -538,7 +720,7 @@ static PyTypeObject array2_ArrayType = {
     0,		                         /* tp_weaklistoffset */
     0,		                         /* tp_iter */
     0,		                         /* tp_iternext */
-    0,                             /* tp_methods */
+    Array_methods,                 /* tp_methods */
     Array_members,                 /* tp_members */
     0,                             /* tp_getset */
     0,                             /* tp_base */
