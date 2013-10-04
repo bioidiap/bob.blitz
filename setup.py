@@ -64,7 +64,7 @@ def pkgconfig(package):
 
 import os
 package_dir = os.path.dirname(os.path.realpath(__file__))
-package_dir = os.path.join(package_dir, 'xbob', 'blitz')
+package_dir = os.path.join(package_dir, 'blitz')
 blitz_config = pkgconfig('blitz')
 include_dirs = [package_dir]
 
@@ -95,11 +95,11 @@ else:
 # parameters that define our package.
 setup(
 
-    name='xbob.blitz',
+    name='blitz.array',
     version='0.0.1a0',
     description='Bindings for Blitz++ (a C++ array template library)',
 
-    url='http://pypi.python.org/pypi/plytz',
+    url='http://pypi.python.org/pypi/blitz.array',
     license='GPLv3',
     author='Andre Anjos',
     author_email='andre.anjos@idiap.ch',
@@ -114,16 +114,11 @@ setup(
       'numpy',
     ],
 
-    namespace_packages = [
-      'xbob',
-    ],
-
-    #cmdclass = {'build_ext': build_ext},
     ext_modules = [
-      Extension("xbob.blitz.array2",
+      Extension("blitz._array",
         [
-          "xbob/blitz/bob/py.cpp",
-          "xbob/blitz/array2.cpp",
+          "blitz/helper.cpp",
+          "blitz/array.cpp",
           ],
         include_dirs=include_dirs,
         language="c++",
@@ -143,4 +138,6 @@ setup(
       'Programming Language :: Python',
       'Programming Language :: Python :: 3',
       'Topic :: Software Development :: Libraries :: Python Modules',
-      ],)
+      ],
+    
+    )

@@ -2,12 +2,12 @@
 .. Andre Anjos <andre.anjos@idiap.ch>
 .. Thu 29 Aug 2013 16:07:57 CEST
 
-====================================
- Cython/Python bindings for Blitz++
-====================================
+=============================
+ Python bindings for Blitz++
+=============================
 
-This package contains a set of Pythonic and Cythonic bindings to the popular
-Blitz/C++ library.
+This package contains a set of Pythonic bindings to the popular Blitz/C++
+library.
 
 Installation
 ------------

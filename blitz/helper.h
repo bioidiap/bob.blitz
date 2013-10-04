@@ -2,12 +2,12 @@
  * @author Andre Anjos <andre.anjos@idiap.ch>
  * @date Thu 12 Sep 08:16:31 2013
  *
- * @brief Utility classes and functions for conversion between Bob C++
+ * @brief Utility classes and functions for conversion between Blitz C++
  * interface and Python's C-API.
  */
 
-#ifndef BOB_PYTHON_H
-#define BOB_PYTHON_H
+#ifndef BZPY_ARRAY_HELPER_H
+#define BZPY_ARRAY_HELPER_H
 
 extern "C" {
 #include <Python.h>
@@ -25,12 +25,12 @@ extern "C" {
 #define NUMPY16_API 0x00000006
 #define NUMPY14_API 0x00000004
 
-namespace bob { namespace python {
+namespace pybz { namespace detail {
 
   /**
    * @brief Imports the numpy.ndarray infrastructure once
    */
-  void bob_import_array();
+  void numpy_import_array();
 
   /**
    * Returns a std::shared_ptr that wraps a PyObject and will Py_XDECREF'it
@@ -359,6 +359,16 @@ namespace bob { namespace python {
       return retval;
 
     }
+  
+  /**
+   * Creates a copy of the given blitz::Array<> as a Numpy ndarray.
+   * 
+   * @param typenum The numpy type number of the array type
+   * @param ndim The total number of dimensions
+   * @param bz The pre-allocated array
+   */
+  PyObject* ndarray_copy(int typenum, Py_ssize_t ndim, 
+      std::shared_ptr<void> bz); 
 
   /**
    * @brief Creates a **readonly** shallow copy of the ndarray.
@@ -410,46 +420,52 @@ namespace bob { namespace python {
           0);
 
     }
+  
+  /**
+   * Creates a shallow copy of the given blitz::Array<> as a Numpy ndarray.
+   * 
+   * @param typenum The numpy type number of the array type
+   * @param ndim The total number of dimensions
+   * @param bz The pre-allocated array
+   */
+  PyObject* ndarray_shallow(int typenum, Py_ssize_t ndim,
+      std::shared_ptr<void> bz);
 
   /**
-   * Classes to help Cython integration (only supports templated classes)
+   * Allocates a blitz::Array<> with a given (supported) type and return it as
+   * a smart void*.
+   *
+   * @param typenum The numpy type number of the array type
+   * @param ndim The total number of dimensions
+   * @param shape The array shape
    */
-  template <typename T> struct CtypeToNum {
+  std::shared_ptr<void> allocate(int typenum, Py_ssize_t ndim, 
+      Py_ssize_t* shape);
 
-    int call() const { return ctype_to_num<T>(); }
+  /**
+   * Returns, as a PyObject, an item from the array. This will be a copy of the
+   * internal item. If you set it, it won't set the original array.
+   *
+   * @param dtype The data type of the array
+   * @param ndim The number of dimension of the array
+   * @param bz The pre-allocated array
+   * @param pos An array indicating the precise position to fetch
+   */
+  PyObject* getitem(PyArray_Descr* dtype, Py_ssize_t ndim,
+      std::shared_ptr<void> bz, Py_ssize_t* pos);
 
-  };
-
-  template <typename T> struct Extract {
-
-    T call(PyObject* o) const { return extract<T>(o); }
-
-  };
-
-  template <typename T, int N> struct ShallowBlitzArray {
-
-    blitz::Array<T,N> call(PyObject* o, bool readwrite) const {
-      return shallow_blitz_array<T,N>(o);
-    }
-
-  };
-
-  template <typename T, int N> struct ReadonlyBlitzArray {
-
-    blitz::Array<T,N> call(PyObject* o) const {
-      return readonly_blitz_array<T,N>(o);
-    }
-
-  };
-
-  template <typename T, int N> struct NumpyArrayCopy {
-
-    PyObject* call(const blitz::Array<T,N>& a) const {
-      return ndarray_copy(a);
-    }
-
-  };
-
+  /**
+   * Sets an given position on the array using any Python or numpy scalar.
+   *
+   * @param dtype The data type of the array
+   * @param ndim The number of dimension of the array
+   * @param bz The pre-allocated array
+   * @param pos An array indicating the precise position to fetch
+   * @param value The Python scalar to set the value to
+   */
+  int setitem(PyArray_Descr* dtype, Py_ssize_t ndim, std::shared_ptr<void> bz,
+      Py_ssize_t* pos, PyObject* value);
+ 
 }}
 
-#endif /* BOB_PYTHON_H */
+#endif /* BZPY_ARRAY_HELPER_H */

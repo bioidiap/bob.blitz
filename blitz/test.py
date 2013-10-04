@@ -3,26 +3,26 @@
 # Andre Anjos <andre.anjos@idiap.ch>
 # Fri 20 Sep 14:45:01 2013
 
-"""Tests for bob::python glue methods
+"""Tests for blitz.array glue methods
 """
 
 import numpy
 import nose
-from . import array2 as array
+from ._array import array as bzarray
 
 def test_array_from_scratch():
 
-  bz = array.Array(10, dtype='uint8')
+  bz = bzarray(10, dtype='uint8')
   nose.tools.eq_(bz.shape, (10,))
   nose.tools.eq_(len(bz), 10)
   nose.tools.eq_(bz.dtype, numpy.uint8)
 
-  bz = array.Array((20000,), dtype='bool')
+  bz = bzarray((20000,), dtype='bool')
   nose.tools.eq_(bz.shape, (20000,))
   nose.tools.eq_(len(bz), 20000)
   nose.tools.eq_(bz.dtype, numpy.bool_)
 
-  bz = array.Array((3,3), dtype='uint32')
+  bz = bzarray((3,3), dtype='uint32')
   nose.tools.eq_(bz.shape, (3,3))
   nose.tools.eq_(len(bz), 9)
   nose.tools.eq_(bz.dtype, numpy.uint32)
@@ -30,17 +30,17 @@ def test_array_from_scratch():
 @nose.tools.raises(OverflowError)
 def test_array_negative_size():
 
-  bz = array.Array(-2, dtype='uint8')
+  bz = bzarray(-2, dtype='uint8')
 
 @nose.tools.raises(OverflowError)
 def test_array_zero_size():
 
-  bz = array.Array(0, dtype='uint8')
+  bz = bzarray(0, dtype='uint8')
   nose.tools.eq_(len(bz), 0)
 
 def test_array_assign_and_read_u8():
 
-  bz = array.Array(2, dtype='uint8')
+  bz = bzarray(2, dtype='uint8')
 
   # assign a value to each position, check back
   bz[0] = 3
@@ -52,7 +52,7 @@ def test_array_assign_and_read_u8():
 
 def test_array_assign_and_read_u32():
 
-  bz = array.Array(2, dtype='uint32')
+  bz = bzarray(2, dtype='uint32')
 
   # assign a value to each position, check back
   bz[0] = 3
@@ -64,7 +64,7 @@ def test_array_assign_and_read_u32():
 
 def test_array_assign_and_read_u32d2():
 
-  bz = array.Array((2,2), dtype='uint32')
+  bz = bzarray((2,2), dtype='uint32')
 
   # assign a value to each position, check back
   bz[0,0] = 3
@@ -82,7 +82,7 @@ def test_array_assign_and_read_u32d2():
 
 def test_array_assign_and_read_c128d2():
 
-  bz = array.Array((2,2), dtype='complex128')
+  bz = bzarray((2,2), dtype='complex128')
   bz[0,0] = complex(3, 4.2)
   bz[0,1] = complex(1.5, 2)
   bz[1,0] = complex(33, 4)
@@ -99,18 +99,18 @@ def test_array_assign_and_read_c128d2():
 @nose.tools.raises(IndexError)
 def test_array_protect_segfault_high():
 
-  bz = array.Array(2, dtype='complex64')
+  bz = bzarray(2, dtype='complex64')
   bz[3] = 4
 
 @nose.tools.raises(IndexError)
 def test_array_protect_segfault_low():
 
-  bz = array.Array(2, dtype='complex128')
+  bz = bzarray(2, dtype='complex128')
   bz[-3] = 4
 
 def test_u8d1_as_ndarray():
 
-  bz = array.Array(2, dtype='uint8')
+  bz = bzarray(2, dtype='uint8')
   bz[0] = 32
   bz[1] = 10
   nd = bz.as_ndarray()
@@ -128,7 +128,7 @@ def test_u8d1_as_ndarray():
 
 def test_u64d1_as_ndarray():
 
-  bz = array.Array(2, dtype='uint64')
+  bz = bzarray(2, dtype='uint64')
   bz[0] = 2**33
   bz[1] = 2**64 - 1
   nd = bz.as_ndarray()
@@ -146,7 +146,7 @@ def test_u64d1_as_ndarray():
 
 def test_u32d1_as_ndarray():
 
-  bz = array.Array(2, dtype='uint32')
+  bz = bzarray(2, dtype='uint32')
   bz[0] = 2**32-1
   bz[1] = 0
   nd = bz.as_ndarray()
@@ -164,7 +164,7 @@ def test_u32d1_as_ndarray():
 
 def test_s64d2_shallow_array():
 
-  bz = array.Array((2,2), dtype='int64')
+  bz = bzarray((2,2), dtype='int64')
   bz[0,0] = 1
   bz[0,1] = 2
   bz[1,0] = 3
@@ -203,7 +203,7 @@ def test_s64d2_shallow_array():
 @nose.tools.raises(ValueError)
 def test_s64d2_cannot_resize_shallow():
   
-  bz = array.Array((2,2), dtype='int64')
+  bz = bzarray((2,2), dtype='int64')
   bz[0,0] = 1
   bz[0,1] = 2
   bz[1,0] = 3
