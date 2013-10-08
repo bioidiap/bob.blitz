@@ -7,7 +7,7 @@
 
 #ifdef NO_IMPORT_ARRAY
 #undef NO_IMPORT_ARRAY
-#include <helper.h>
+#include <blitz.array/helper.h>
 #endif
 
 #if PY_VERSION_HEX >= 0x03000000

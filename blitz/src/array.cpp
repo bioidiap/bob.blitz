@@ -5,7 +5,7 @@
  * @brief Pure python bindings for Blitz Arrays
  */
 
-#include <helper.h>
+#include <blitz.array/helper.h>
 #include <structmember.h>
 
 #define ARRAY_MAXDIMS 4

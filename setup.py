@@ -64,7 +64,7 @@ def pkgconfig(package):
 
 import os
 package_dir = os.path.dirname(os.path.realpath(__file__))
-package_dir = os.path.join(package_dir, 'blitz')
+package_dir = os.path.join(package_dir, 'blitz', 'include')
 blitz_config = pkgconfig('blitz')
 include_dirs = [package_dir]
 
@@ -117,8 +117,8 @@ setup(
     ext_modules = [
       Extension("blitz._array",
         [
-          "blitz/helper.cpp",
-          "blitz/array.cpp",
+          "blitz/src/helper.cpp",
+          "blitz/src/array.cpp",
           ],
         include_dirs=include_dirs,
         language="c++",
