@@ -207,10 +207,6 @@ PyObject* ndarray_shallow_inner(Py_ssize_t ndim, std::shared_ptr<void> bz) {
 
 namespace pybz { namespace detail {
 
-  void numpy_import_array() {
-    wrap_import_array();
-  }
-
   std::shared_ptr<PyObject> handle(PyObject* o) {
     return std::shared_ptr<PyObject>(o, &pyobject_delete);
   }

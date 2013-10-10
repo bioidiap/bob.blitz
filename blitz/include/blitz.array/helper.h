@@ -20,11 +20,6 @@
 namespace pybz { namespace detail {
 
   /**
-   * @brief Imports the numpy.ndarray infrastructure once
-   */
-  void numpy_import_array();
-
-  /**
    * Returns a std::shared_ptr that wraps a PyObject and will Py_XDECREF'it
    * when gone.
    */
