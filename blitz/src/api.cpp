@@ -10,18 +10,6 @@
 #include <blitz.array/helper.h>
 #endif
 
-#if PY_VERSION_HEX >= 0x03000000
-static void* wrap_import_array() {
-  import_array();
-  return 0;
-}
-#else
-static void wrap_import_array() {
-  import_array();
-  return;
-}
-#endif
-
 static void pyobject_delete(PyObject* o) {
   Py_XDECREF(o);
 }
@@ -326,67 +314,6 @@ namespace pybz { namespace detail {
         return 0;
     }
   }
-
-  template <> int ctype_to_num<bool>() 
-  { return NPY_BOOL; }
-
-  template <> int ctype_to_num<int8_t>() 
-  { return NPY_INT8; }
-
-  template <> int ctype_to_num<uint8_t>() 
-  { return NPY_UINT8; }
-
-  template <> int ctype_to_num<int16_t>() 
-  { return NPY_INT16; }
-
-  template <> int ctype_to_num<uint16_t>() 
-  { return NPY_UINT16; }
-
-  template <> int ctype_to_num<int32_t>() 
-  { return NPY_INT32; }
-  
-  template <> int ctype_to_num<uint32_t>() 
-  { return NPY_UINT32; }
-
-  template <> int ctype_to_num<int64_t>() 
-  { return NPY_INT64; }
-
-  template <> int ctype_to_num<uint64_t>() 
-  { return NPY_UINT64; }
-
-  template <> int ctype_to_num<float>() 
-  { return NPY_FLOAT32; }
-
-  template <> int ctype_to_num<double>() 
-  { return NPY_FLOAT64; }
-
-#ifdef NPY_FLOAT128
-  template <> int ctype_to_num<long double>() 
-  { return NPY_FLOAT128; }
-#endif
-
-  template <> int ctype_to_num<std::complex<float>>() 
-  { return NPY_COMPLEX64; }
-
-  template <> int ctype_to_num<std::complex<double>>() 
-  { return NPY_COMPLEX128; }
-
-#ifdef NPY_COMPLEX256
-  template <> int ctype_to_num<std::complex<long double>>() 
-  { return NPY_COMPLEX256; }
-#endif
-
-#ifdef __APPLE__
-  template <> int ctype_to_num<long>() {
-    if (sizeof(long) == 4) return NPY_INT32;
-    return NPY_INT64;
-  }
-
-  template <> int ctype_to_num<unsigned long>() {
-    if (sizeof(unsigned long) == 4) return NPY_UINT32;
-    return NPY_UINT64;
-  }
-#endif
 
   std::shared_ptr<void> allocate(int typenum, Py_ssize_t ndim,
       Py_ssize_t* shape) {
