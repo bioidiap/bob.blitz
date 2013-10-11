@@ -9,6 +9,7 @@
 import numpy
 import nose
 from . import array as bzarray
+from . import as_blitz
 
 def test_array_from_scratch():
 
@@ -129,6 +130,7 @@ def test_u8d1_as_ndarray():
   nose.tools.eq_(nd.shape, bz.shape)
   nose.tools.eq_(bz[0], nd[0])
   nose.tools.eq_(bz[1], nd[1])
+  nose.tools.eq_(nd.base, None)
   assert nd.flags.owndata
   assert nd.flags.behaved
   assert nd.flags.c_contiguous
@@ -147,6 +149,7 @@ def test_u64d1_as_ndarray():
   nose.tools.eq_(nd.shape, bz.shape)
   nose.tools.eq_(bz[0], nd[0])
   nose.tools.eq_(bz[1], nd[1])
+  nose.tools.eq_(nd.base, None)
   assert nd.flags.owndata
   assert nd.flags.behaved
   assert nd.flags.c_contiguous
@@ -165,6 +168,7 @@ def test_u32d1_as_ndarray():
   nose.tools.eq_(nd.shape, bz.shape)
   nose.tools.eq_(bz[0], nd[0])
   nose.tools.eq_(bz[1], nd[1])
+  nose.tools.eq_(nd.base, None)
   del bz
   assert nd.flags.owndata
   assert nd.flags.behaved
@@ -212,6 +216,16 @@ def test_s64d2_shallow_array():
   nose.tools.eq_(bz[1,0], 32)
   nose.tools.eq_(bz[1,1], -1)
 
+def test_s64d2_indirect_array():
+
+  bz = bzarray((2,2), dtype='int64')
+  bz[0,0] = 1
+  bz[0,1] = 2
+  bz[1,0] = 3
+  bz[1,1] = -1
+  nd = numpy.array(bz, copy=False)
+  nose.tools.eq_(nd.base, bz)
+
 @nose.tools.raises(ValueError)
 def test_s64d2_cannot_resize_shallow():
   
@@ -222,3 +236,15 @@ def test_s64d2_cannot_resize_shallow():
   bz[1,1] = -1
   nd = bz.as_shallow_ndarray()
   nd.resize(3,3)
+
+def test_from_ndarray_shallow():
+
+  nd = numpy.array([1, 2, 3, -1]).reshape(2,2)
+  bz = as_blitz(nd)
+
+  # checks we actually have a shallow copy
+  nose.tools.eq_(id(bz.base), id(nd))
+
+  # checks that the memory is actually bound
+  nd[1,0] = -18
+  nose.tools.eq_(nd[1,0], bz[1,0])

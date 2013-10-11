@@ -168,19 +168,19 @@ static char static_as_shallow_ndarray_doc[] = "returns a shallow copy of the bli
 static PyMethodDef PyBlitzArray_methods[] = {
     {
       static_as_ndarray_str,
-      (PyCFunction)PyBlitzArray_AsNumpyNDArrayCopy,
+      (PyCFunction)PyBlitzArray_AsNumpyArrayCopy,
       METH_NOARGS,
       static_as_ndarray_doc
     },
     {
       static_as_shallow_ndarray_str,
-      (PyCFunction)PyBlitzArray_AsShallowNumpyNDArray,
+      (PyCFunction)PyBlitzArray_AsShallowNumpyArray,
       METH_NOARGS,
       static_as_shallow_ndarray_doc
     },
     {
       static_private_array_str,
-      (PyCFunction)PyBlitzArray_AsAnyNumpyNDArray,
+      (PyCFunction)PyBlitzArray_AsAnyNumpyArray,
       METH_NOARGS,
       static_private_array_doc
     },
@@ -210,7 +210,7 @@ static PyGetSetDef PyBlitzArray_getseters[] = {
 
 /* Stringification */
 static PyObject* PyBlitzArray_str(PyBlitzArrayObject* o) {
-  PyObject* nd = PyBlitzArray_AsAnyNumpyNDArray(o);
+  PyObject* nd = PyBlitzArray_AsAnyNumpyArray(o);
   if (!nd) {
     PyErr_Print();
     PyErr_SetString(PyExc_RuntimeError, "could not convert blitz::Array<> into numpy ndarray for str() method call");
@@ -225,6 +225,20 @@ static PyObject* PyBlitzArray_str(PyBlitzArrayObject* o) {
 static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
   return PyString_FromFormat("<blitz.array(%s,%" PY_FORMAT_SIZE_T "d) %" PY_FORMAT_SIZE_T "d elements>", PyBlitzArray_TypenumAsString(o->type_num), o->ndim, PyBlitzArray_len(o));
 }
+
+/* Members */
+static char static_base_str[] = "base";
+static char static_base_doc[] = "Base object containing the memory this blitz::Array<> is pointing to";
+static PyMemberDef PyBlitzArray_members[] = {
+    {
+      static_base_str,
+      T_OBJECT_EX,
+      offsetof(PyBlitzArrayObject, base),
+      READONLY,
+      static_base_doc,
+    },
+    {NULL}  /* Sentinel */
+};
 
 PyTypeObject PyBlitzArray_Type = {
     PyObject_HEAD_INIT(NULL)
@@ -256,7 +270,7 @@ PyTypeObject PyBlitzArray_Type = {
     0,		                                      /* tp_iter */
     0,		                                      /* tp_iternext */
     PyBlitzArray_methods,                       /* tp_methods */
-    0,                                          /* tp_members */
+    PyBlitzArray_members,                       /* tp_members */
     PyBlitzArray_getseters,                     /* tp_getset */
     0,                                          /* tp_base */
     0,                                          /* tp_dict */
@@ -268,7 +282,30 @@ PyTypeObject PyBlitzArray_Type = {
     PyBlitzArray_New,                           /* tp_new */
 };
 
+static char static_o_str[] = "o";
+PyObject* PyBlitzArray_as_blitz(PyObject* self, PyObject* args,
+    PyObject* kwds) {
+
+  /* Parses input arguments in a single shot */
+  static char* kwlist[] = {static_o_str, NULL};
+
+  PyObject* arr = 0;
+  if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist, &PyArray_Converter, &arr)) return 0;
+
+  PyObject* retval = PyBlitzArray_ShallowFromNumpyArray(arr);
+  Py_DECREF(arr);
+  return retval;
+}
+
+static char static_as_blitz_str[] = "as_blitz";
+static char static_as_blitz_doc[] = "converts into a blitz.array";
 static PyMethodDef array_methods[] = {
+    {
+      static_as_blitz_str,
+      (PyCFunction)PyBlitzArray_as_blitz,
+      METH_VARARGS|METH_KEYWORDS,
+      static_as_blitz_doc
+    },
     {NULL}  /* Sentinel */
 };
 

@@ -162,14 +162,15 @@ template <typename T> T PyBlitzArray_AsCScalar(PyObject* o) {
  * Python error stack. You must check `PyErr_Occurred()` after a call to this
  * function to make sure things are OK and act accordingly. For example:
  *
- * auto z = shallow_blitz_array<uint8_t,4>(obj);
+ * auto z = PyBlitzArray_ShallowFromNumpyArray<uint8_t,4>(obj);
  * if (PyErr_Occurred()) return 0; ///< propagate exception
  *
  * Notice that the lifetime of the blitz::Array<> extracted with this
  * procedure is bound to the lifetime of the source numpy ndarray. You'd have
  * to copy it to create an independent object.
  */
-template <typename T, int N> blitz::Array<T,N> PyBlitzArray_AsShallowBlitzArray
+template <typename T, int N> 
+blitz::Array<T,N> PyBlitzArray_ShallowFromNumpyArray
 (PyObject* o, bool readwrite) {
 
   int type_num = PyBlitzArray_CToTypenum<T>();
@@ -179,19 +180,21 @@ template <typename T, int N> blitz::Array<T,N> PyBlitzArray_AsShallowBlitzArray
     return retval;
   }
 
-  PyArray_Descr* req_dtype = PyArray_DescrFromType(type_num); ///< borrowed
-
   // has to be an ndarray
   if (!PyArray_Check(o)) {
-    PyErr_Format(PyExc_TypeError, "object is not of type numpy.ndarray and cannot be wrapped as shallow blitz::Array<%s,%d>", type_num, N);
+    PyErr_Format(PyExc_TypeError, "object is not of type numpy.ndarray and cannot be wrapped as shallow blitz::Array<%s,%d>", PyBlitzArray_TypenumAsString(type_num), N);
     blitz::Array<T,N> retval;
     return retval;
   }
 
   PyArrayObject* ao = reinterpret_cast<PyArrayObject*>(o);
 
+  PyArray_Descr* req_dtype = PyArray_DescrFromType(type_num); ///< new ref
+  int equivtypes = PyArray_EquivTypes(PyArray_DESCR(ao), req_dtype);
+  Py_DECREF(req_dtype);
+
   // checks that the data type matches
-  if (!PyArray_EquivTypes(PyArray_DESCR(ao), req_dtype)) {
+  if (!equivtypes) {
     PyErr_Format(PyExc_TypeError, "numpy.ndarray has data type `%c%d' and cannot be wrapped as shallow blitz::Array<%s,%d>", PyArray_DESCR(ao)->kind, PyArray_DESCR(ao)->elsize, PyBlitzArray_TypenumAsString(type_num), N);
     blitz::Array<T,N> retval;
     return retval;
@@ -223,7 +226,7 @@ template <typename T, int N> blitz::Array<T,N> PyBlitzArray_AsShallowBlitzArray
   blitz::TinyVector<int,N> stride;
   for (int i=0; i<N; ++i) {
     shape[i] = PyArray_DIMS(ao)[i];
-    stride[i] = PyArray_STRIDES(ao)[i];
+    stride[i] = PyArray_STRIDES(ao)[i]/PyArray_DESCR(ao)->elsize;
   }
   return blitz::Array<T,N>(static_cast<T*>(PyArray_DATA(ao)),
       shape, stride, blitz::neverDeleteData);
@@ -251,12 +254,12 @@ template <typename T, int N> blitz::Array<T,N> PyBlitzArray_AsShallowBlitzArray
  * In case of errors, a Python exception will be set. You must check it
  * properly:
  *
- * auto z = readonly_blitz_array<uint8_t,4>(obj);
+ * auto z = PyBlitzArray_AsAnyBlitzArray<uint8_t,4>(obj);
  * if (PyErr_Occurred()) return 0; ///< propagate exception
  *
  * Notice that the lifetime of the blitz::Array<> extracted with this
- * procedure is bound to the lifetime of the source numpy ndarray. You'd have
- * to copy it to create an independent object.
+ * procedure <b>may be</b> bound to the lifetime of the source numpy ndarray.
+ * You'd have to copy it to create a surely independent object.
  *
  * Also notice this procedure will copy the data twice, if the input data is
  * not already on the right format for a blitz::Array<> shallow wrap to take
@@ -264,10 +267,10 @@ template <typename T, int N> blitz::Array<T,N> PyBlitzArray_AsShallowBlitzArray
  * read-only arrays. We hope this is not a common condition when users want
  * to convert read-only arrays.
  */
-template <typename T, int N> blitz::Array<T,N> PyBlitzArray_AsAnyBlitzArray
+template <typename T, int N> blitz::Array<T,N> PyBlitzArray_FromAny
 (PyObject* o) {
 
-  blitz::Array<T,N> shallow = PyBlitzArray_AsShallowBlitzArray<T,N>(o, false);
+  blitz::Array<T,N> shallow = PyBlitzArray_ShallowFromNumpyArray<T,N>(o, false);
   if (!PyErr_Occurred()) return shallow;
 
   // if you get to this point, than shallow conversion did not work
@@ -281,7 +284,7 @@ template <typename T, int N> blitz::Array<T,N> PyBlitzArray_AsAnyBlitzArray
 
   PyArray_Descr* req_dtype = PyArray_DescrFromType(type_num); ///< borrowed
 
-  // transforms the data and wraps with an auto-deletable object
+  // transforms the data into a PyArrayObject*
   PyObject* newref = PyArray_FromAny(o, req_dtype, N, N,
 #     if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
       NPY_ARRAY_CARRAY_RO,
@@ -290,14 +293,16 @@ template <typename T, int N> blitz::Array<T,N> PyBlitzArray_AsAnyBlitzArray
 #     endif
       0);
 
+  Py_DECREF(req_dtype);
+
   if (!newref) {
     // propagates exception
     blitz::Array<T,N> retval;
     return retval;
   }
 
-  // wrap the new array with a shallow skin
-  blitz::Array<T,N> bz_shallow = PyBlitzArray_AsShallowBlitzArray<T,N>(newref, false);
+  // wrap the new contiguous array with a shallow skin
+  blitz::Array<T,N> bz_shallow = PyBlitzArray_ShallowFromNumpyArray<T,N>(newref, false);
   if (!PyErr_Occurred()) {
     Py_DECREF(newref);
     blitz::Array<T,N> retval;
@@ -322,14 +327,14 @@ template <typename T, int N> blitz::Array<T,N> PyBlitzArray_AsAnyBlitzArray
  * standard python protocol.
  */
 template <typename T, int N>
-PyObject* PyBlitzArray_AsNumpyNDArrayCopy(const blitz::Array<T,N>& a) {
+PyObject* PyBlitzArray_AsNumpyArrayCopy(const blitz::Array<T,N>& a) {
 
   int type_num = PyBlitzArray_CToTypenum<T>();
   if (PyErr_Occurred()) return 0;
 
   // maximum supported number of dimensions
-  if (N > 11) {
-    PyErr_Format(PyExc_TypeError, "input blitz::Array<%s,%d> has more dimensions than we can support (max. = 11)", PyBlitzArray_TypenumAsString(type_num), N);
+  if (N > BLITZ_ARRAY_MAXDIMS) {
+    PyErr_Format(PyExc_TypeError, "input blitz::Array<%s,%d> has more dimensions than we can support (max. = %d)", PyBlitzArray_TypenumAsString(type_num), N, BLITZ_ARRAY_MAXDIMS);
     return 0;
   }
 
@@ -356,7 +361,7 @@ PyObject* PyBlitzArray_AsNumpyNDArrayCopy(const blitz::Array<T,N>& a) {
 }
 
 /**
- * @brief Creates a **readonly** shallow copy of the ndarray.
+ * @brief Creates a read-write shallow copy of the ndarray.
  *
  * The newly allocated array is a classical Pythonic **new** reference. The
  * client taking the object must call Py_XDECREF when done.
@@ -365,7 +370,7 @@ PyObject* PyBlitzArray_AsNumpyNDArrayCopy(const blitz::Array<T,N>& a) {
  * standard python protocol.
  */
 template <typename T, int N>
-PyObject* PyBlitzArray_AsShallowNumpyNDArray(blitz::Array<T,N>& a) {
+PyObject* PyBlitzArray_AsShallowNumpyArray(blitz::Array<T,N>& a) {
 
   int type_num = PyBlitzArray_CToTypenum<T>();
   if (PyErr_Occurred()) return 0;
@@ -384,8 +389,8 @@ PyObject* PyBlitzArray_AsShallowNumpyNDArray(blitz::Array<T,N>& a) {
   }
 
   // maximum supported number of dimensions
-  if (N > 11) {
-    PyErr_Format(PyExc_TypeError, "input blitz::Array<%s,%d> has more dimensions than we can support (max. = 11)", PyBlitzArray_TypenumAsString(type_num), N);
+  if (N > BLITZ_ARRAY_MAXDIMS) {
+    PyErr_Format(PyExc_TypeError, "input blitz::Array<%s,%d> has more dimensions than we can support (max. = %d)", PyBlitzArray_TypenumAsString(type_num), N, BLITZ_ARRAY_MAXDIMS);
     return 0;
   }
 
@@ -403,4 +408,37 @@ PyObject* PyBlitzArray_AsShallowNumpyNDArray(blitz::Array<T,N>& a) {
       NPY_BEHAVED,
 #     endif
       0);
+}
+
+/**
+ * @brief Creates a shallow or copy of the blitz::Array<> in the fastest
+ * possible way. Leverages from PyBlitzArray_AsShallowNumpyArray and
+ * PyBlitzArray_AsNumpyArrayCopy as much as possible.
+ *
+ * The newly allocated array is a classical Pythonic **new** reference. The
+ * client taking the object must call Py_XDECREF when done.
+ *
+ * This function returns NULL if an error has occurred, following the
+ * standard python protocol.
+ */
+template <typename T, int N>
+PyObject* PyBlitzArray_AsAnyNumpyArray(blitz::Array<T,N>& a) {
+  PyObject* retval = PyBlitzArray_AsShallowBlitzArray(a);
+  if (retval) return retval;
+  return PyBlitzArray_AsNumpyArrayCopy(a);
+}
+
+/**
+ * @brief Tells if a shallow wrapping on this blitz::Array<> would succeed
+ */
+template <typename T, int N> int PyBlitzArray_IsBehaved(blitz::Array<T,N>& a) {
+  if(!a.isStorageContiguous()) return 0;
+
+  for(int i=0; i<a.rank(); ++i) {
+    if(!(a.isRankStoredAscending(i) && a.ordering(i)==a.rank()-1-i))
+      return 0;
+  }
+
+  //if you get to this point, nothing else to-do rather than return true
+  return 1;
 }

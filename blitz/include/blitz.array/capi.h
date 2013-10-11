@@ -35,6 +35,9 @@ typedef struct {
   Py_ssize_t ndim; ///< number of dimensions of `bzarr'
   Py_ssize_t shape[BLITZ_ARRAY_MAXDIMS]; ///< shape of `bzarr'
 
+  /* Base pointer, if the memory of this object is coming from elsewhere */
+  PyObject* base;
+
 } PyBlitzArrayObject;
 
 /* C-API of some Numpy versions we may support */
@@ -49,17 +52,17 @@ typedef struct {
 #define PyBlitzArray_Type_NUM 0
 #define PyBlitzArray_Type_TYPE PyTypeObject
 
-#define PyBlitzArray_AsNumpyNDArrayCopy_NUM 1
-#define PyBlitzArray_AsNumpyNDArrayCopy_RET PyObject*
-#define PyBlitzArray_AsNumpyNDArrayCopy_PROTO (PyBlitzArrayObject* o)
+#define PyBlitzArray_AsNumpyArrayCopy_NUM 1
+#define PyBlitzArray_AsNumpyArrayCopy_RET PyObject*
+#define PyBlitzArray_AsNumpyArrayCopy_PROTO (PyBlitzArrayObject* o)
 
 #define PyBlitzArray_TypenumAsString_NUM 2
 #define PyBlitzArray_TypenumAsString_RET const char*
 #define PyBlitzArray_TypenumAsString_PROTO (int typenum)
 
-#define PyBlitzArray_AsShallowNumpyNDArray_NUM 3
-#define PyBlitzArray_AsShallowNumpyNDArray_RET PyObject*
-#define PyBlitzArray_AsShallowNumpyNDArray_PROTO (PyBlitzArrayObject* o)
+#define PyBlitzArray_AsShallowNumpyArray_NUM 3
+#define PyBlitzArray_AsShallowNumpyArray_RET PyObject*
+#define PyBlitzArray_AsShallowNumpyArray_PROTO (PyBlitzArrayObject* o)
 
 #define PyBlitzArray_SimpleNew_NUM 4
 #define PyBlitzArray_SimpleNew_RET PyObject*
@@ -109,12 +112,24 @@ typedef struct {
 #define PyBlitzArray_TypenumConverter_RET int
 #define PyBlitzArray_TypenumConverter_PROTO (PyObject* o, int** type_num)
 
-#define PyBlitzArray_AsAnyNumpyNDArray_NUM 16
-#define PyBlitzArray_AsAnyNumpyNDArray_RET PyObject*
-#define PyBlitzArray_AsAnyNumpyNDArray_PROTO (PyBlitzArrayObject* o)
+#define PyBlitzArray_AsAnyNumpyArray_NUM 16
+#define PyBlitzArray_AsAnyNumpyArray_RET PyObject*
+#define PyBlitzArray_AsAnyNumpyArray_PROTO (PyBlitzArrayObject* o)
+
+#define PyBlitzArray_IsBehaved_NUM 17
+#define PyBlitzArray_IsBehaved_RET int
+#define PyBlitzArray_IsBehaved_PROTO (PyBlitzArrayObject* o)
+
+#define PyBlitzArray_NumpyArrayIsBehaved_NUM 18
+#define PyBlitzArray_NumpyArrayIsBehaved_RET int
+#define PyBlitzArray_NumpyArrayIsBehaved_PROTO (PyBlitzArrayObject* o)
+
+#define PyBlitzArray_ShallowFromNumpyArray_NUM 19
+#define PyBlitzArray_ShallowFromNumpyArray_RET PyObject*
+#define PyBlitzArray_ShallowFromNumpyArray_PROTO (PyObject* o)
 
 /* Total number of C API pointers */
-#define PyBlitzArray_API_pointers 17
+#define PyBlitzArray_API_pointers 20
 
 #ifdef BLITZ_ARRAY_MODULE
 
@@ -133,7 +148,7 @@ typedef struct {
    * @param ndim The total number of dimensions
    * @param bz The pre-allocated array
    */
-  PyBlitzArray_AsNumpyNDArrayCopy_RET PyBlitzArray_AsNumpyNDArrayCopy PyBlitzArray_AsNumpyNDArrayCopy_PROTO;
+  PyBlitzArray_AsNumpyArrayCopy_RET PyBlitzArray_AsNumpyArrayCopy PyBlitzArray_AsNumpyArrayCopy_PROTO;
 
   /**
    * Converts from numpy type_num to a string representation
@@ -147,7 +162,7 @@ typedef struct {
    * @param ndim The total number of dimensions
    * @param bz The pre-allocated array
    */
-  PyBlitzArray_AsShallowNumpyNDArray_RET PyBlitzArray_AsShallowNumpyNDArray PyBlitzArray_AsShallowNumpyNDArray_PROTO;
+  PyBlitzArray_AsShallowNumpyArray_RET PyBlitzArray_AsShallowNumpyArray PyBlitzArray_AsShallowNumpyArray_PROTO;
 
   /**
    * Allocates a blitz::Array<> with a given (supported) type and return it as
@@ -263,7 +278,31 @@ typedef struct {
    * 
    * @param o The blitz::Array<> to efficiently copy
    */
-  PyBlitzArray_AsAnyNumpyNDArray_RET PyBlitzArray_AsAnyNumpyNDArray PyBlitzArray_AsAnyNumpyNDArray_PROTO;
+  PyBlitzArray_AsAnyNumpyArray_RET PyBlitzArray_AsAnyNumpyArray PyBlitzArray_AsAnyNumpyArray_PROTO;
+
+  /**
+   * Tells if the given blitz::Array<> can be successfuly wrapped in a shallow
+   * numpy.ndarray.
+   * 
+   * @param o The blitz::Array<> to check
+   */
+  PyBlitzArray_IsBehaved_RET PyBlitzArray_IsBehaved PyBlitzArray_IsBehaved_PROTO;
+
+  /**
+   * Tells if the given numpy.ndarray can be successfuly wrapped in a shallow
+   * blitz.array or in a C++ blitz::Array<> (any will work).
+   * 
+   * @param o The numpy ndarray to check
+   */
+  PyBlitzArray_NumpyArrayIsBehaved_RET PyBlitzArray_NumpyArrayIsBehaved PyBlitzArray_NumpyArrayIsBehaved_PROTO;
+
+  /**
+   * Creates a new PyBlitzArrayObject from a Numpy ndarray object in a shallow
+   * manner.
+   * 
+   * @param o The numpy ndarray to shallow copy
+   */
+  PyBlitzArray_ShallowFromNumpyArray_RET PyBlitzArray_ShallowFromNumpyArray PyBlitzArray_ShallowFromNumpyArray_PROTO;
 
 #else
 
@@ -274,13 +313,13 @@ typedef struct {
 #define PyBlitzArray_Type (*(PyBlitzArray_Type_TYPE *)PyBlitzArray_API[PyBlitzArray_Type_NUM]
 
 #define PyBlitzArray_System \
-  (*(PyBlitzArray_AsNumpyNDArrayCopy_RET (*)PyBlitzArray_AsNumpyNDArrayCopy_PROTO) PyBlitzArray_API[PyBlitzArray_AsNumpyNDArrayCopy_NUM])
+  (*(PyBlitzArray_AsNumpyArrayCopy_RET (*)PyBlitzArray_AsNumpyArrayCopy_PROTO) PyBlitzArray_API[PyBlitzArray_AsNumpyArrayCopy_NUM])
 
 #define PyBlitzArray_TypenumAsString \
   (*(PyBlitzArray_TypenumAsString_RET (*)PyBlitzArray_TypenumAsString_PROTO) PyBlitzArray_API[PyBlitzArray_TypenumAsString_NUM])
 
-#define PyBlitzArray_AsShallowNumpyNDArray \
-  (*(PyBlitzArray_AsShallowNumpyNDArray_RET (*)PyBlitzArray_AsShallowNumpyNDArray_PROTO) PyBlitzArray_API[PyBlitzArray_AsShallowNumpyNDArray_NUM])
+#define PyBlitzArray_AsShallowNumpyArray \
+  (*(PyBlitzArray_AsShallowNumpyArray_RET (*)PyBlitzArray_AsShallowNumpyArray_PROTO) PyBlitzArray_API[PyBlitzArray_AsShallowNumpyArray_NUM])
 
 #define PyBlitzArray_SimpleNew \
   (*(PyBlitzArray_SimpleNew_RET (*)PyBlitzArray_SimpleNew_PROTO) PyBlitzArray_API[PyBlitzArray_SimpleNew_NUM])
@@ -318,8 +357,17 @@ typedef struct {
 #define PyBlitzArray_TypenumConverter \
   (*(PyBlitzArray_TypenumConverter_RET (*)PyBlitzArray_TypenumConverter_PROTO) PyBlitzArray_API[PyBlitzArray_TypenumConverter_NUM])
 
-#define PyBlitzArray_AsAnyNumpyNDArray \
-  (*(PyBlitzArray_AsAnyNumpyNDArray_RET (*)PyBlitzArray_AsAnyNumpyNDArray_PROTO) PyBlitzArray_API[PyBlitzArray_AsAnyNumpyNDArray_NUM])
+#define PyBlitzArray_AsAnyNumpyArray \
+  (*(PyBlitzArray_AsAnyNumpyArray_RET (*)PyBlitzArray_AsAnyNumpyArray_PROTO) PyBlitzArray_API[PyBlitzArray_AsAnyNumpyArray_NUM])
+
+#define PyBlitzArray_IsBehaved \
+  (*(PyBlitzArray_IsBehaved_RET (*)PyBlitzArray_IsBehaved_PROTO) PyBlitzArray_API[PyBlitzArray_IsBehaved_NUM])
+
+#define PyBlitzArray_NumpyArrayIsBehaved \
+  (*(PyBlitzArray_NumpyArrayIsBehaved_RET (*)PyBlitzArray_NumpyArrayIsBehaved_PROTO) PyBlitzArray_API[PyBlitzArray_NumpyArrayIsBehaved_NUM])
+
+#define PyBlitzArray_ShallowFromNumpyArray \
+  (*(PyBlitzArray_ShallowFromNumpyArray_RET (*)PyBlitzArray_ShallowFromNumpyArray_PROTO) PyBlitzArray_API[PyBlitzArray_ShallowFromNumpyArray_NUM])
 
   /**
    * Returns -1 on error, 0 on success. PyCapsule_Import will set an exception
