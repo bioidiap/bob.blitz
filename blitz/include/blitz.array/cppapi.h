@@ -1,185 +1,19 @@
 /**
  * @author Andre Anjos <andre.anjos@idiap.ch>
- * @date Tue  8 Oct 08:19:28 2013 
+ * @date Thu 10 Oct 16:02:58 2013 
  *
- * @brief Defines the blitz.array C-API
- *
- * This module allows somebody else, externally to this package, to include the
- * blitz.array C-API functionality on their own package. Because the API is
- * compiled with a Python module (named `blitz.array`), we need to dig it out
- * from there and bind it to the following C-API members. We do this using a
- * PyCObject/PyCapsule module as explained in: 
- * http://docs.python.org/2/extending/extending.html#using-capsules.
+ * @brief These are C++ extensions in the form of templates that are extras for
+ * transforming C++ objects into our Pythonic blitz::Array<> layer.
  */
 
-#ifndef PY_BLITZARRAY_API_H
-#define PY_BLITZARRAY_API_H
-
-extern "C" {
-
-#include <Python.h>
-#include <numpy/arrayobject.h>
+#include <blitz.array/capi.h>
 
 #include <complex>
 #include <blitz/array.h>
 #include <stdint.h>
 #include <stdexcept>
 #include <typeinfo>
-
-  /*******************
-   * C API functions *
-   *******************/
-
-#define PyBlitzArray_AsNumpyNDArrayCopy_NUM 0
-#define PyBlitzArray_AsNumpyNDArrayCopy_RET PyObject*
-#define PyBlitzArray_AsNumpyNDArrayCopy_PROTO (int typenum, Py_ssize_t ndim, std::shared_ptr<void> bz)
-
-#define PyBlitzArray_TypenumAsString_NUM 1
-#define PyBlitzArray_TypenumAsString_RET const char*
-#define PyBlitzArray_TypenumAsString_PROTO (int typenum)
-
-#define PyBlitzArray_AsShallowNumpyNDArray_NUM 2
-#define PyBlitzArray_AsShallowNumpyNDArray_RET PyObject*
-#define PyBlitzArray_AsShallowNumpyNDArray_PROTO (int typenum, Py_ssize_t ndim, std::shared_ptr<void> bz)
-
-#define PyBlitzArray_SimpleNew_NUM 3
-#define PyBlitzArray_SimpleNew_RET std::shared_ptr<void>
-#define PyBlitzArray_SimpleNew_PROTO (int typenum, Py_ssize_t ndim, Py_ssize_t* shape)
-
-#define PyBlitzArray_GetItem_NUM 4
-#define PyBlitzArray_GetItem_RET PyObject*
-#define PyBlitzArray_GetItem_PROTO (PyArray_Descr* dtype, Py_ssize_t ndim, std::shared_ptr<void> bz, Py_ssize_t* pos)
-
-#define PyBlitzArray_SetItem_NUM 5
-#define PyBlitzArray_SetItem_RET PyObject*
-#define PyBlitzArray_SetItem_PROTO (PyArray_Descr* dtype, Py_ssize_t ndim, std::shared_ptr<void> bz, Py_ssize_t* pos)
-
-  /* Total number of C API pointers */
-#define PyBlitzArray_API_pointers 6
-
-#ifdef BLITZ_ARRAY_MODULE
-
-  /* This section is used when compiling `blitz.array' itself */
-
-  /**
-   * Creates a copy of the given blitz::Array<> as a Numpy ndarray.
-   * 
-   * @param typenum The numpy type number of the array type
-   * @param ndim The total number of dimensions
-   * @param bz The pre-allocated array
-   */
-  static PyBlitzArray_AsNumpyNDArrayCopy_RET PyBlitzArray_AsNumpyNDArrayCopy PyBlitzArray_AsNumpyNDArrayCopy_PROTO;
-
-  /**
-   * Converts from numpy type_num to a string representation
-   */
-  static PyBlitzArray_TypenumAsString_RET PyBlitzArray_TypenumAsString PyBlitzArray_TypenumAsString_PROTO;
-
-  /**
-   * Creates a shallow copy of the given blitz::Array<> as a Numpy ndarray.
-   * 
-   * @param typenum The numpy type number of the array type
-   * @param ndim The total number of dimensions
-   * @param bz The pre-allocated array
-   */
-  static PyBlitzArray_AsShallowNumpyNDArray_RET PyBlitzArray_AsShallowNumpyNDArray PyBlitzArray_AsShallowNumpyNDArray_PROTO;
-
-  /**
-   * Allocates a blitz::Array<> with a given (supported) type and return it as
-   * a smart void*.
-   *
-   * @param typenum The numpy type number of the array type
-   * @param ndim The total number of dimensions
-   * @param shape The array shape
-   */
-  static PyBlitzArray_SimpleNew_RET PyBlitzArray_SimpleNew PyBlitzArray_SimpleNew_PROTO;
-
-  /**
-   * Returns, as a PyObject, an item from the array. This will be a copy of the
-   * internal item. If you set it, it won't set the original array.
-   *
-   * @param dtype The data type of the array
-   * @param ndim The number of dimension of the array
-   * @param bz The pre-allocated array
-   * @param pos An array indicating the precise position to fetch
-   */
-  static PyBlitzArray_GetItem_RET PyBlitzArray_GetItem PyBlitzArray_GetItem_PROTO;
-
-  /**
-   * Sets an given position on the array using any Python or numpy scalar.
-   *
-   * @param dtype The data type of the array
-   * @param ndim The number of dimension of the array
-   * @param bz The pre-allocated array
-   * @param pos An array indicating the precise position to fetch
-   * @param value The Python scalar to set the value to
-   */
-  static PyBlitzArray_SetItem_RET PyBlitzArray_SetItem PyBlitzArray_SetItem_PROTO;
-
-#else
-
-  /* This section is used in modules that use `blitz.array's' C-API */
-
-  static void **PyBlitzArray_API;
-
-#define PyBlitzArray_System \
-  (*(PyBlitzArray_AsNumpyNDArrayCopy_RET (*)PyBlitzArray_AsNumpyNDArrayCopy_PROTO) PyBlitzArray_API[PyBlitzArray_AsNumpyNDArrayCopy_NUM])
-
-#define PyBlitzArray_TypenumAsString \
-  (*(PyBlitzArray_TypenumAsString_RET (*)PyBlitzArray_TypenumAsString_PROTO) PyBlitzArray_API[PyBlitzArray_TypenumAsString_NUM])
-
-#define PyBlitzArray_AsShallowNumpyNDArray \
-  (*(PyBlitzArray_AsShallowNumpyNDArray_RET (*)PyBlitzArray_AsShallowNumpyNDArray_PROTO) PyBlitzArray_API[PyBlitzArray_AsShallowNumpyNDArray_NUM])
-
-#define PyBlitzArray_SimpleNew \
-  (*(PyBlitzArray_SimpleNew_RET (*)PyBlitzArray_SimpleNew_PROTO) PyBlitzArray_API[PyBlitzArray_SimpleNew_NUM])
-
-#define PyBlitzArray_GetItem \
-  (*(PyBlitzArray_GetItem_RET (*)PyBlitzArray_GetItem_PROTO) PyBlitzArray_API[PyBlitzArray_GetItem_NUM])
-
-#define PyBlitzArray_SetItem \
-  (*(PyBlitzArray_SetItem_RET (*)PyBlitzArray_SetItem_PROTO) PyBlitzArray_API[PyBlitzArray_SetItem_NUM])
-
-#if PY_VERSION_HEX >= 0x03000000
-  static void* wrap_import_numpy_capi() {
-    import_array();
-    return 0;
-  }
-#else
-  static void wrap_import_numpy_capi() {
-    import_array();
-    return;
-  }
-#endif
-
-  /**
-   * Returns -1 on error, 0 on success. PyCapsule_Import will set an exception
-   * if there's an error.
-   */
-  static int import_blitz_array(void) {
-
-    // import numpy.ndarray
-    wrap_import_numpy_capi();
-
-    if (PyErr_Occurred()) {
-      // we need numpy.ndarray to properly function
-      PyErr_Print();
-      PyErr_SetString(PyExc_ImportError, "blitz.array failed to import");
-      return -1;
-    }
-
-    // import ourselves
-    PyBlitzArray_API = (void **)PyCapsule_Import("blitz.array", 0);
-    return (PyBlitzArray_API != NULL) ? 0 : -1;
-  }
-
-#endif // BLITZ_ARRAY_MODULE
-
-} // extern "C"
-
-/**
- * C++ Template API
- */
+#include <memory>
 
 /**
  * @brief Converts from C/C++ type to ndarray type_num.
@@ -201,62 +35,62 @@ template <typename T> int PyBlitzArray_CToTypenum() {
   return -1;
 }
 
-static template <> int PyBlitzArray_CToTypenum<bool>() 
+template <> int PyBlitzArray_CToTypenum<bool>() 
 { return NPY_BOOL; }
 
-static template <> int PyBlitzArray_CToTypenum<int8_t>() 
+template <> int PyBlitzArray_CToTypenum<int8_t>() 
 { return NPY_INT8; }
 
-static template <> int PyBlitzArray_CToTypenum<uint8_t>() 
+template <> int PyBlitzArray_CToTypenum<uint8_t>() 
 { return NPY_UINT8; }
 
-static template <> int PyBlitzArray_CToTypenum<int16_t>() 
+template <> int PyBlitzArray_CToTypenum<int16_t>() 
 { return NPY_INT16; }
 
-static template <> int PyBlitzArray_CToTypenum<uint16_t>() 
+template <> int PyBlitzArray_CToTypenum<uint16_t>() 
 { return NPY_UINT16; }
 
-static template <> int PyBlitzArray_CToTypenum<int32_t>() 
+template <> int PyBlitzArray_CToTypenum<int32_t>() 
 { return NPY_INT32; }
 
-static template <> int PyBlitzArray_CToTypenum<uint32_t>() 
+template <> int PyBlitzArray_CToTypenum<uint32_t>() 
 { return NPY_UINT32; }
 
-static template <> int PyBlitzArray_CToTypenum<int64_t>() 
+template <> int PyBlitzArray_CToTypenum<int64_t>() 
 { return NPY_INT64; }
 
-static template <> int PyBlitzArray_CToTypenum<uint64_t>() 
+template <> int PyBlitzArray_CToTypenum<uint64_t>() 
 { return NPY_UINT64; }
 
-static template <> int PyBlitzArray_CToTypenum<float>() 
+template <> int PyBlitzArray_CToTypenum<float>() 
 { return NPY_FLOAT32; }
 
-static template <> int PyBlitzArray_CToTypenum<double>() 
+template <> int PyBlitzArray_CToTypenum<double>() 
 { return NPY_FLOAT64; }
 
 #ifdef NPY_FLOAT128
-static template <> int PyBlitzArray_CToTypenum<long double>() 
+template <> int PyBlitzArray_CToTypenum<long double>() 
 { return NPY_FLOAT128; }
 #endif
 
-static template <> int PyBlitzArray_CToTypenum<std::complex<float>>() 
+template <> int PyBlitzArray_CToTypenum<std::complex<float>>() 
 { return NPY_COMPLEX64; }
 
-static template <> int PyBlitzArray_CToTypenum<std::complex<double>>() 
+template <> int PyBlitzArray_CToTypenum<std::complex<double>>() 
 { return NPY_COMPLEX128; }
 
 #ifdef NPY_COMPLEX256
-static template <> int PyBlitzArray_CToTypenum<std::complex<long double>>() 
+template <> int PyBlitzArray_CToTypenum<std::complex<long double>>() 
 { return NPY_COMPLEX256; }
 #endif
 
 #ifdef __APPLE__
-static template <> int PyBlitzArray_CToTypenum<long>() {
+template <> int PyBlitzArray_CToTypenum<long>() {
   if (sizeof(long) == 4) return NPY_INT32;
   return NPY_INT64;
 }
 
-static template <> int PyBlitzArray_CToTypenum<unsigned long>() {
+template <> int PyBlitzArray_CToTypenum<unsigned long>() {
   if (sizeof(unsigned long) == 4) return NPY_UINT32;
   return NPY_UINT64;
 }
@@ -424,13 +258,13 @@ template <typename T, int N> blitz::Array<T,N> PyBlitzArray_AsShallowBlitzArray
  * procedure is bound to the lifetime of the source numpy ndarray. You'd have
  * to copy it to create an independent object.
  *
- * Als notice this procedure will copy the data twice, if the input data is
+ * Also notice this procedure will copy the data twice, if the input data is
  * not already on the right format for a blitz::Array<> shallow wrap to take
  * place. This is not optimal in all conditions, namely with very large
  * read-only arrays. We hope this is not a common condition when users want
  * to convert read-only arrays.
  */
-template <typename T, int N> blitz::Array<T,N> PyBlitzArray_AsBlitzArray
+template <typename T, int N> blitz::Array<T,N> PyBlitzArray_AsAnyBlitzArray
 (PyObject* o) {
 
   blitz::Array<T,N> shallow = PyBlitzArray_AsShallowBlitzArray<T,N>(o, false);
@@ -571,5 +405,3 @@ PyObject* PyBlitzArray_AsShallowNumpyNDArray(blitz::Array<T,N>& a) {
       0);
 
 }
-  
-#endif /* PY_BLITZARRAY_API_H */

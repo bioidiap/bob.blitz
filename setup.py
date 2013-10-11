@@ -75,8 +75,8 @@ for k in system_includes: extra_compile_args += ['-isystem', k]
 
 # NumPy API macros necessary?
 define_macros=[
-    ("PY_ARRAY_UNIQUE_SYMBOL", "BOB_NUMPY_ARRAY_API"),
-    ("NO_IMPORT_ARRAY", "1"),
+    #("PY_ARRAY_UNIQUE_SYMBOL", "BLITZ_NUMPY_ARRAY_API"),
+    #("NO_IMPORT_ARRAY", "1"),
     ]
 import numpy
 from distutils.version import StrictVersion
@@ -115,9 +115,9 @@ setup(
     ],
 
     ext_modules = [
-      Extension("blitz._array",
+      Extension("blitz.array",
         [
-          "blitz/src/helper.cpp",
+          "blitz/src/api.cpp",
           "blitz/src/array.cpp",
           ],
         include_dirs=include_dirs,
