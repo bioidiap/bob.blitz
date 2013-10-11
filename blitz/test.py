@@ -8,7 +8,7 @@
 
 import numpy
 import nose
-from ._array import array as bzarray
+from . import array as bzarray
 
 def test_array_from_scratch():
 
@@ -27,12 +27,12 @@ def test_array_from_scratch():
   nose.tools.eq_(len(bz), 9)
   nose.tools.eq_(bz.dtype, numpy.uint32)
 
-@nose.tools.raises(OverflowError)
+@nose.tools.raises(ValueError)
 def test_array_negative_size():
 
   bz = bzarray(-2, dtype='uint8')
 
-@nose.tools.raises(OverflowError)
+@nose.tools.raises(ValueError)
 def test_array_zero_size():
 
   bz = bzarray(0, dtype='uint8')
@@ -97,16 +97,28 @@ def test_array_assign_and_read_c128d2():
   nose.tools.eq_(bz[1,1], complex(2,2))
 
 @nose.tools.raises(IndexError)
-def test_array_protect_segfault_high():
+def test_array_protect_segfault_high_get():
 
   bz = bzarray(2, dtype='complex64')
-  bz[3] = 4
+  k = bz[3]
 
 @nose.tools.raises(IndexError)
-def test_array_protect_segfault_low():
+def test_array_protect_segfault_high_set():
+
+  bz = bzarray(2, dtype='complex64')
+  bz[3] = complex(2,3)
+
+@nose.tools.raises(IndexError)
+def test_array_protect_segfault_low_get():
 
   bz = bzarray(2, dtype='complex128')
-  bz[-3] = 4
+  k = bz[-3]
+
+@nose.tools.raises(IndexError)
+def test_array_protect_segfault_low_set():
+
+  bz = bzarray(2, dtype='complex128')
+  bz[-3] = complex(2,3)
 
 def test_u8d1_as_ndarray():
 

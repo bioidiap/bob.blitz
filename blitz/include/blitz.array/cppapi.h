@@ -403,5 +403,4 @@ PyObject* PyBlitzArray_AsShallowNumpyNDArray(blitz::Array<T,N>& a) {
       NPY_BEHAVED,
 #     endif
       0);
-
 }

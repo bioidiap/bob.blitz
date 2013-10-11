@@ -5,19 +5,16 @@
  * @brief Pure python bindings for Blitz Arrays
  */
 
-#define BLITZ_ARRAY_MODULE
-
 #ifdef NO_IMPORT_ARRAY
-#  undef NO_IMPORT_ARRAY
+#undef NO_IMPORT_ARRAY
 #endif
-
+#define BLITZ_ARRAY_MODULE
 #include <blitz.array/capi.h>
+
 #include <structmember.h>
 
 static char static_shape_str[] = "shape";
-static char static_shape_doc[] = "a tuple indicating the shape of this array";
 static char static_dtype_str[] = "dtype";
-static char static_dtype_doc[] = "the numpy.dtype equivalent for every element in this array";
 
 /**
  * Formal initialization of an Array object
@@ -31,14 +28,22 @@ static int PyBlitzArray_init(PyBlitzArrayObject* self, PyObject *args,
   PyBlitzArrayObject shape;
   PyBlitzArrayObject* shape_p = &shape;
   int type_num = -1;
-  int* type_num_p;
+  int* type_num_p = &type_num;
 
   if (!PyArg_ParseTupleAndKeywords(
         args, kwds, "O&O&", kwlist,
-        &PyBlitzArray_ShapeConverter, &shape_p,
+        &PyBlitzArray_IndexConverter, &shape_p,
         &PyBlitzArray_TypenumConverter, &type_num_p)
       )
     return -1; ///< FAILURE
+
+  /* Checks if none of the shape positions are zero */
+  for (Py_ssize_t i=0; i<shape.ndim; ++i) {
+    if (shape.shape[i] == 0) {
+      PyErr_Format(PyExc_ValueError, "shape values should not be 0, but one was found at position %" PY_FORMAT_SIZE_T "d of input sequence", i);
+      return -1; ///< FAILURE
+    }
+  }
 
   PyBlitzArrayObject* tmp = reinterpret_cast<PyBlitzArrayObject*>(PyBlitzArray_SimpleNew(type_num, shape.ndim, shape.shape));
   if (!tmp) return -1;
@@ -85,7 +90,7 @@ static PyObject* PyBlitzArray_getitem(PyBlitzArrayObject* self,
     // if you get to this point, then the input tuple has the same size
     PyBlitzArrayObject shape;
     PyBlitzArrayObject* shape_p = &shape;
-    if (!PyBlitzArray_ShapeConverter(item, &shape_p)) return 0;
+    if (!PyBlitzArray_IndexConverter(item, &shape_p)) return 0;
     return PyBlitzArray_GetItem(self, shape.shape);
 
   }
@@ -120,7 +125,7 @@ static int PyBlitzArray_setitem(PyBlitzArrayObject* self, PyObject* item,
     // if you get to this point, then the input tuple has the same size
     PyBlitzArrayObject shape;
     PyBlitzArrayObject* shape_p = &shape;
-    if (!PyBlitzArray_ShapeConverter(item, &shape_p)) return 0;
+    if (!PyBlitzArray_IndexConverter(item, &shape_p)) return 0;
     return PyBlitzArray_SetItem(self, shape.shape, value);
 
   }
@@ -183,23 +188,43 @@ static PyMethodDef PyBlitzArray_methods[] = {
 };
 
 /* Property API */
+static char static_shape_doc[] = "a tuple indicating the shape of this array";
+static char static_dtype_doc[] = "the numpy.dtype equivalent for every element in this array";
 static PyGetSetDef PyBlitzArray_getseters[] = {
     {
       static_dtype_str, 
-      (getter)PyBlitzArray_PYSHAPE,
+      (getter)PyBlitzArray_DTYPE,
       0,
       static_dtype_doc,
-      0
+      0,
     },
     {
       static_shape_str,
-      (getter)PyBlitzArray_DTYPE,
+      (getter)PyBlitzArray_PYSHAPE,
       0,
       static_shape_doc,
-      NULL
+      0,
     },
     {NULL}  /* Sentinel */
 };
+
+/* Stringification */
+static PyObject* PyBlitzArray_str(PyBlitzArrayObject* o) {
+  PyObject* nd = PyBlitzArray_AsAnyNumpyNDArray(o);
+  if (!nd) {
+    PyErr_Print();
+    PyErr_SetString(PyExc_RuntimeError, "could not convert blitz::Array<> into numpy ndarray for str() method call");
+    return 0;
+  }
+  PyObject* retval = PyObject_Str(nd); 
+  Py_DECREF(nd);
+  return retval;
+}
+
+/* Representation */
+static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
+  return PyString_FromFormat("<blitz.array(%s,%" PY_FORMAT_SIZE_T "d) %" PY_FORMAT_SIZE_T "d elements>", PyBlitzArray_TypenumAsString(o->type_num), o->ndim, PyBlitzArray_len(o));
+}
 
 PyTypeObject PyBlitzArray_Type = {
     PyObject_HEAD_INIT(NULL)
@@ -212,13 +237,13 @@ PyTypeObject PyBlitzArray_Type = {
     0,                                          /*tp_getattr*/
     0,                                          /*tp_setattr*/
     0,                                          /*tp_compare*/
-    0,                                          /*tp_repr*/
+    (reprfunc)PyBlitzArray_repr,                /*tp_repr*/
     0,                                          /*tp_as_number*/
     0,                                          /*tp_as_sequence*/
     &PyBlitzArray_mapping,                      /*tp_as_mapping*/
     0,                                          /*tp_hash */
     0,                                          /*tp_call*/
-    0,                                          /*tp_str*/
+    (reprfunc)PyBlitzArray_str,                 /*tp_str*/
     0,                                          /*tp_getattro*/
     0,                                          /*tp_setattro*/
     0,                                          /*tp_as_buffer*/
@@ -247,18 +272,6 @@ static PyMethodDef array_methods[] = {
     {NULL}  /* Sentinel */
 };
 
-#if PY_VERSION_HEX >= 0x03000000
-  static void* wrap_import_numpy_capi() {
-    import_array();
-    return 0;
-  }
-#else
-  static void wrap_import_numpy_capi() {
-    import_array();
-    return;
-  }
-#endif
-
 #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
@@ -266,22 +279,22 @@ PyMODINIT_FUNC init_array(void)
 {
   PyObject* m;
 
-  /* makes sure we import numpy */
-  wrap_import_numpy_capi();
-
   if (PyErr_Occurred()) {
     // we need numpy.ndarray to properly function
     PyErr_Print();
-    PyErr_SetString(PyExc_ImportError, "blitz.array failed to import following NumPy import failure");
+    PyErr_SetString(PyExc_ImportError, "blitz._array failed to import following NumPy import failure");
     return;
   }
 
   PyBlitzArray_Type.tp_new = PyType_GenericNew;
   if (PyType_Ready(&PyBlitzArray_Type) < 0) return;
 
-  m = Py_InitModule3("array", array_methods,
+  m = Py_InitModule3("_array", array_methods,
       "blitz::Array<> definition and generic functions");
 
   Py_INCREF(&PyBlitzArray_Type);
   PyModule_AddObject(m, "array", (PyObject *)&PyBlitzArray_Type);
+
+  /* imports the NumPy C-API as well */
+  import_array();
 }

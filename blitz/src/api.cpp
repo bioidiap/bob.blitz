@@ -149,7 +149,7 @@ PyObject* allocate_inner(int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
       return allocate_innest<T,4>(type_num, ndim, shape);
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot allocate blitz::Array<%s,%" PY_FORMAT_SIZE_T "d>: this number of dimensions exceeds the supported number of %d", PyBlitzArray_TypenumAsString(type_num), ndim, BLITZ_ARRAY_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot allocate blitz::Array<%s,%" PY_FORMAT_SIZE_T "d>: this number of dimensions is outside the range of supported dimensions [1,%d]", PyBlitzArray_TypenumAsString(type_num), ndim, BLITZ_ARRAY_MAXDIMS);
       return 0;
   }
 
@@ -251,7 +251,7 @@ template<typename T> void deallocate_inner(PyBlitzArrayObject* o) {
       break;
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot deallocate blitz::Array<%s,%" PY_FORMAT_SIZE_T "d>, this number of dimensions exceeds the supported number of %d", PyBlitzArray_TypenumAsString(o->type_num), o->ndim, BLITZ_ARRAY_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot deallocate blitz::Array<%s,%" PY_FORMAT_SIZE_T "d>, this number of dimensions is outside the range of supported dimensions [1,%d]", PyBlitzArray_TypenumAsString(o->type_num), o->ndim, BLITZ_ARRAY_MAXDIMS);
       return;
   }
 
@@ -259,6 +259,12 @@ template<typename T> void deallocate_inner(PyBlitzArrayObject* o) {
 }
 
 void PyBlitzArray_Delete (PyBlitzArrayObject* o) {
+
+  if (!o->bzarr) {
+    //shortcut
+    o->ob_type->tp_free((PyObject*)o);
+    return;
+  }
 
   switch (o->type_num) {
 
@@ -329,9 +335,9 @@ PyObject* getitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos) {
   /* Fix negative indexes and check ranges */
   for (Py_ssize_t i=0; i<o->ndim; ++i) {
     tmp[i] = pos[i];
-    if (tmp[i] < 0 || tmp[i] >= o->shape[i]) tmp[i] += o->shape[i];
+    if (tmp[i] < 0) tmp[i] += o->shape[i];
     if (tmp[i] < 0 || tmp[i] >= o->shape[i]) {
-      PyErr_Format(PyExc_IndexError, "array pos (tmpition %" PY_FORMAT_SIZE_T "d) is out of range: %" PY_FORMAT_SIZE_T "d not in [0,%" PY_FORMAT_SIZE_T "d[", i, pos[i], o->shape[i]);
+      PyErr_Format(PyExc_IndexError, "array pos (position %" PY_FORMAT_SIZE_T "d) is out of range: %" PY_FORMAT_SIZE_T "d not in [0,%" PY_FORMAT_SIZE_T "d[", i, pos[i], o->shape[i]);
       return 0;
     }
   }
@@ -365,7 +371,7 @@ PyObject* getitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos) {
       }
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot index blitz::Array<%s,%" PY_FORMAT_SIZE_T "d>: this number of dimensions exceeds the supported number of %d", PyBlitzArray_TypenumAsString(o->type_num), o->ndim, BLITZ_ARRAY_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot index blitz::Array<%s,%" PY_FORMAT_SIZE_T "d>: this number of dimensions is outside the range of supported dimensions [1,%d]", PyBlitzArray_TypenumAsString(o->type_num), o->ndim, BLITZ_ARRAY_MAXDIMS);
       return 0;
   }
 }
@@ -444,10 +450,10 @@ int setitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
   /* Fix negative indexes and check ranges */
   for (Py_ssize_t i=0; i<o->ndim; ++i) {
     tmp[i] = pos[i];
-    if (tmp[i] < 0 || tmp[i] >= o->shape[i]) tmp[i] += o->shape[i];
+    if (tmp[i] < 0) tmp[i] += o->shape[i];
     if (tmp[i] < 0 || tmp[i] >= o->shape[i]) {
       PyErr_Format(PyExc_IndexError, "array index (tmpition %" PY_FORMAT_SIZE_T "d) is out of range: %" PY_FORMAT_SIZE_T "d not in [0,%" PY_FORMAT_SIZE_T "d[", i, pos[i], o->shape[i]);
-      return 0;
+      return -1;
     }
   }
 
@@ -488,7 +494,7 @@ int setitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
       }
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot set item on blitz::Array<%s,%" PY_FORMAT_SIZE_T "d>: this number of dimensions exceeds the supported number of %d", PyBlitzArray_TypenumAsString(o->type_num), o->ndim, BLITZ_ARRAY_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot set item on blitz::Array<%s,%" PY_FORMAT_SIZE_T "d>: this number of dimensions is outside the range of supported dimensions [1,%d]", PyBlitzArray_TypenumAsString(o->type_num), o->ndim, BLITZ_ARRAY_MAXDIMS);
       return -1;
   }
 
@@ -583,7 +589,7 @@ PyObject* ndarray_copy_inner(PyBlitzArrayObject* o) {
       }
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot create a numpy ndarray copy of blitz::Array<%s,%" PY_FORMAT_SIZE_T "d>: this number of dimensions exceeds the supported number of %d", PyBlitzArray_TypenumAsString(o->type_num), o->ndim, BLITZ_ARRAY_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot create a numpy ndarray copy of blitz::Array<%s,%" PY_FORMAT_SIZE_T "d>: this number of dimensions is outside the range of supported dimensions [1,%d]", PyBlitzArray_TypenumAsString(o->type_num), o->ndim, BLITZ_ARRAY_MAXDIMS);
       return 0;
   }
 
@@ -655,34 +661,47 @@ PyObject* PyBlitzArray_AsNumpyNDArrayCopy(PyBlitzArrayObject* o) {
 template <typename T>
 PyObject* ndarray_shallow_inner(PyBlitzArrayObject* o) {
 
+  PyObject* retval = 0;
+
   switch (o->ndim) {
 
     case 1:
-      {
-        return PyBlitzArray_AsShallowNumpyNDArray(*reinterpret_cast<blitz::Array<T,1>*>(o->bzarr));
-      }
+      retval = PyBlitzArray_AsShallowNumpyNDArray(*reinterpret_cast<blitz::Array<T,1>*>(o->bzarr));
+      break;
 
     case 2:
-      {
-        return PyBlitzArray_AsShallowNumpyNDArray(*reinterpret_cast<blitz::Array<T,2>*>(o->bzarr));
-      }
+      retval = PyBlitzArray_AsShallowNumpyNDArray(*reinterpret_cast<blitz::Array<T,2>*>(o->bzarr));
+      break;
 
     case 3:
-      {
-        return PyBlitzArray_AsShallowNumpyNDArray(*reinterpret_cast<blitz::Array<T,3>*>(o->bzarr));
-      }
+      retval = PyBlitzArray_AsShallowNumpyNDArray(*reinterpret_cast<blitz::Array<T,3>*>(o->bzarr));
+      break;
 
     case 4:
-      {
-        return PyBlitzArray_AsShallowNumpyNDArray(*reinterpret_cast<blitz::Array<T,4>*>(o->bzarr));
-      }
+      retval = PyBlitzArray_AsShallowNumpyNDArray(*reinterpret_cast<blitz::Array<T,4>*>(o->bzarr));
+      break;
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot create a numpy ndarray shallow copy of blitz::Array<%s,%" PY_FORMAT_SIZE_T "d>: this number of dimensions exceeds the supported number of %d", PyBlitzArray_TypenumAsString(o->type_num), o->ndim, BLITZ_ARRAY_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot create a numpy ndarray shallow copy of blitz::Array<%s,%" PY_FORMAT_SIZE_T "d>: this number of dimensions is outside the range of supported dimensions [1,%d]", PyBlitzArray_TypenumAsString(o->type_num), o->ndim, BLITZ_ARRAY_MAXDIMS);
       return 0;
 
   }
 
+  if (!retval) return 0;
+
+  // link this object with the returned numpy ndarray
+
+#if NPY_FEATURE_VERSION < NUMPY17_API /* NumPy C-API version >= 1.7 */
+  PyArray_BASE(reinterpret_cast<PyArrayObject*>(retval)) = reinterpret_cast<PyObject*>(o);
+#else
+  if (PyArray_SetBaseObject(reinterpret_cast<PyArrayObject*>(retval), reinterpret_cast<PyObject*>(o)) != 0) {
+    Py_DECREF(retval);
+    return 0;
+  }
+#endif
+  Py_INCREF(reinterpret_cast<PyObject*>(o));
+
+  return retval;
 }
 
 PyObject* PyBlitzArray_AsShallowNumpyNDArray(PyBlitzArrayObject* o) {
@@ -784,10 +803,10 @@ PyArray_Descr* PyBlitzArray_DTYPE (PyBlitzArrayObject* o) {
   return PyArray_DescrFromType(o->type_num);
 }
 
-int PyBlitzArray_ShapeConverter(PyObject* o, PyBlitzArrayObject** shape) {
+int PyBlitzArray_IndexConverter(PyObject* o, PyBlitzArrayObject** shape) {
 
   if (!o) {
-    PyErr_SetString(PyExc_TypeError, "shape must not be NULL");
+    PyErr_SetString(PyExc_TypeError, "index/shape must not be NULL");
     return 0;
   }
 
@@ -795,22 +814,23 @@ int PyBlitzArray_ShapeConverter(PyObject* o, PyBlitzArrayObject** shape) {
     (*shape)->ndim = 1;
     (*shape)->shape[0] = PyNumber_AsSsize_t(o, PyExc_OverflowError);
     if (PyErr_Occurred()) return 0;
-    if ((*shape)->shape[0] <= 0) {
-      PyErr_Format(PyExc_ValueError, "shape values should be >=0; %" PY_FORMAT_SIZE_T "d is invalid", (*shape)->shape[0]);
+    if ((*shape)->shape[0] < 0) {
+      PyErr_Format(PyExc_ValueError, "index/shape values should be >=0; %" PY_FORMAT_SIZE_T "d is invalid", (*shape)->shape[0]);
       return 0;
     }
+    return 1;
   }
 
   /* The other option is to have it as a sequence */
   if (!PySequence_Check(o)) {
-    PyErr_SetString(PyExc_TypeError, "shape must be a sequence of integers");
+    PyErr_SetString(PyExc_TypeError, "shape/index must be a sequence of integers");
     return 0;
   }
 
   (*shape)->ndim = PySequence_Size(o);
 
   if ((*shape)->ndim == 0 || (*shape)->ndim > BLITZ_ARRAY_MAXDIMS) {
-    PyErr_Format(PyExc_TypeError, "shape must be a sequence with at least 1 and at most %d elements (you passed a sequence with %" PY_FORMAT_SIZE_T "d elements)", BLITZ_ARRAY_MAXDIMS, (*shape)->ndim);
+    PyErr_Format(PyExc_TypeError, "shape/index must be a sequence with at least 1 and at most %d elements (you passed a sequence with %" PY_FORMAT_SIZE_T "d elements)", BLITZ_ARRAY_MAXDIMS, (*shape)->ndim);
     return 0;
   }
 
@@ -818,19 +838,19 @@ int PyBlitzArray_ShapeConverter(PyObject* o, PyBlitzArrayObject** shape) {
     PyObject* item = PySequence_GetItem(o, i);
     if (!item) return 0;
     if (!PyNumber_Check(item)) {
-      PyErr_Format(PyExc_ValueError, "element %" PY_FORMAT_SIZE_T "d from shape sequence should be an number (coercible to integer)", i);
+      PyErr_Format(PyExc_ValueError, "element %" PY_FORMAT_SIZE_T "d from shape/index sequence should be an number (coercible to integer)", i);
       Py_DECREF(item);
       return 0;
     }
     (*shape)->shape[i] = PyNumber_AsSsize_t(item, PyExc_OverflowError);
     if (PyErr_Occurred()) {
       PyErr_Print();
-      PyErr_Format(PyExc_TypeError, "error extracting a size from element %" PY_FORMAT_SIZE_T "d of input shape sequence", i);
+      PyErr_Format(PyExc_TypeError, "error extracting a size from element %" PY_FORMAT_SIZE_T "d of input shape/index sequence", i);
       Py_DECREF(item);
       return 0;
     }
-    if ((*shape)->shape[0] <= 0) {
-      PyErr_Format(PyExc_ValueError, "shape values should be >=0; %" PY_FORMAT_SIZE_T "d is an invalid value at position %" PY_FORMAT_SIZE_T "d of input sequence", (*shape)->shape[0], i);
+    if ((*shape)->shape[0] < 0) {
+      PyErr_Format(PyExc_ValueError, "shape/index values should be >=0; %" PY_FORMAT_SIZE_T "d is an invalid value at position %" PY_FORMAT_SIZE_T "d of input sequence", (*shape)->shape[0], i);
       Py_DECREF(item);
       return 0;
     }
@@ -847,8 +867,8 @@ int PyBlitzArray_TypenumConverter(PyObject* o, int** type_num) {
     return 0;
   }
 
-  PyArray_Descr* dtype;
-  if (!PyArray_DescrConverter2(o, &dtype)) return 0;
+  PyArray_Descr* dtype = 0;
+  if (!PyArray_DescrConverter2(o, &dtype)) return 0; ///< (*dtype) is a new ref
   (**type_num) = dtype->type_num;
   Py_DECREF(dtype);
 

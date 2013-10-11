@@ -101,9 +101,9 @@ typedef struct {
 #define PyBlitzArray_Delete_RET void
 #define PyBlitzArray_Delete_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_ShapeConverter_NUM 14
-#define PyBlitzArray_ShapeConverter_RET int
-#define PyBlitzArray_ShapeConverter_PROTO (PyObject* o, PyBlitzArrayObject** shape)
+#define PyBlitzArray_IndexConverter_NUM 14
+#define PyBlitzArray_IndexConverter_RET int
+#define PyBlitzArray_IndexConverter_PROTO (PyObject* o, PyBlitzArrayObject** shape)
 
 #define PyBlitzArray_TypenumConverter_NUM 15
 #define PyBlitzArray_TypenumConverter_RET int
@@ -209,7 +209,7 @@ typedef struct {
   PyBlitzArray_PYSHAPE_RET PyBlitzArray_PYSHAPE PyBlitzArray_PYSHAPE_PROTO;
 
   /**
-   * Returns a <b>borrowed reference</b> to a numpy C-API PyArray_Descr*
+   * Returns a <b>new reference</b> to a numpy C-API PyArray_Descr*
    * equivalent to the internal type element T.
    *
    * @param o The input PyBlitzArray to be queried
@@ -241,7 +241,7 @@ typedef struct {
    *
    * Returns 0 if an error is detected, 1 on success.
    */
-  PyBlitzArray_ShapeConverter_RET PyBlitzArray_ShapeConverter PyBlitzArray_ShapeConverter_PROTO;
+  PyBlitzArray_IndexConverter_RET PyBlitzArray_IndexConverter PyBlitzArray_IndexConverter_PROTO;
 
   /**
    * Converts any compatible sequence into a Numpy integer type number. This
@@ -312,8 +312,8 @@ typedef struct {
 #define PyBlitzArray_Delete \
   (*(PyBlitzArray_Delete_RET (*)PyBlitzArray_Delete_PROTO) PyBlitzArray_API[PyBlitzArray_Delete_NUM])
 
-#define PyBlitzArray_ShapeConverter \
-  (*(PyBlitzArray_ShapeConverter_RET (*)PyBlitzArray_ShapeConverter_PROTO) PyBlitzArray_API[PyBlitzArray_ShapeConverter_NUM])
+#define PyBlitzArray_IndexConverter \
+  (*(PyBlitzArray_IndexConverter_RET (*)PyBlitzArray_IndexConverter_PROTO) PyBlitzArray_API[PyBlitzArray_IndexConverter_NUM])
 
 #define PyBlitzArray_TypenumConverter \
   (*(PyBlitzArray_TypenumConverter_RET (*)PyBlitzArray_TypenumConverter_PROTO) PyBlitzArray_API[PyBlitzArray_TypenumConverter_NUM])
@@ -330,7 +330,7 @@ typedef struct {
 
     /* New Python API support for library loading */
 
-    PyBlitzArray_API = (void **)PyCapsule_Import("blitz.array", 0);
+    PyBlitzArray_API = (void **)PyCapsule_Import("blitz._array", 0);
     return (PyBlitzArray_API != NULL) ? 0 : -1;
 
 #else
@@ -340,7 +340,7 @@ typedef struct {
     PyObject *c_api_object;
     PyObject *module;
 
-    module = PyImport_ImportModule("blitz.array");
+    module = PyImport_ImportModule("blitz._array");
 
     if (module == NULL) return -1;
 
