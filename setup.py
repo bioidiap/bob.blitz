@@ -95,7 +95,7 @@ else:
 # parameters that define our package.
 setup(
 
-    name='blitz.array',
+    name='blitz',
     version='0.0.1a0',
     description='Bindings for Blitz++ (a C++ array template library)',
 

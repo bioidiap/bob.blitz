@@ -248,3 +248,39 @@ def test_from_ndarray_shallow():
   # checks that the memory is actually bound
   nd[1,0] = -18
   nose.tools.eq_(nd[1,0], bz[1,0])
+
+@nose.tools.raises(TypeError)
+def test_from_ndarray_transposed():
+
+  nd = numpy.array([1, 2, 3, -1]).reshape(2,2).T
+  bz = as_blitz(nd)
+
+@nose.tools.raises(NotImplementedError)
+def test_detects_unsupported_dims():
+
+  nd = numpy.array(range(32)).reshape(2,2,2,2,2)
+  bz = as_blitz(nd)
+
+def test_can_use_long_as_dtype():
+
+  bz = bzarray(2, long)
+  nose.tools.eq_(bz.dtype, numpy.int64)
+  bz[0] = 33L
+  nose.tools.eq_(bz[0].dtype, numpy.int64)
+  nose.tools.eq_(bz[0], 33)
+
+def test_can_use_float128_as_dtype():
+
+  bz = bzarray(2, 'float128')
+  nose.tools.eq_(bz.dtype, numpy.float128)
+  bz[1] = 0.125
+  nose.tools.eq_(bz[1].dtype, numpy.float128)
+  nose.tools.eq_(bz[1], 0.125)
+
+def test_can_use_complex256_as_dtype():
+
+  bz = bzarray(2, 'complex256')
+  nose.tools.eq_(bz.dtype, numpy.complex256)
+  bz[0] = complex(4,4)
+  nose.tools.eq_(bz[0].dtype, numpy.complex256)
+  nose.tools.eq_(bz[0], complex(4,4))

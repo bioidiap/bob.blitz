@@ -31,9 +31,9 @@ typedef struct {
 
   /* Type-specific fields go here. */
   void* bzarr; ///< blitz array container
-  int type_num; ///< numpy type number of elements on `bzarr'
-  Py_ssize_t ndim; ///< number of dimensions of `bzarr'
-  Py_ssize_t shape[BLITZ_ARRAY_MAXDIMS]; ///< shape of `bzarr'
+  int type_num; ///< numpy type number of elements
+  Py_ssize_t ndim; ///< number of dimensions
+  Py_ssize_t shape[BLITZ_ARRAY_MAXDIMS]; ///< shape
 
   /* Base pointer, if the memory of this object is coming from elsewhere */
   PyObject* base;
@@ -141,167 +141,42 @@ typedef struct {
    */
   extern PyBlitzArray_Type_TYPE PyBlitzArray_Type;
 
-  /**
-   * Creates a copy of the given blitz::Array<> as a Numpy ndarray.
-   * 
-   * @param typenum The numpy type number of the array type
-   * @param ndim The total number of dimensions
-   * @param bz The pre-allocated array
-   */
   PyBlitzArray_AsNumpyArrayCopy_RET PyBlitzArray_AsNumpyArrayCopy PyBlitzArray_AsNumpyArrayCopy_PROTO;
 
-  /**
-   * Converts from numpy type_num to a string representation
-   */
   PyBlitzArray_TypenumAsString_RET PyBlitzArray_TypenumAsString PyBlitzArray_TypenumAsString_PROTO;
 
-  /**
-   * Creates a shallow copy of the given blitz::Array<> as a Numpy ndarray.
-   * 
-   * @param typenum The numpy type number of the array type
-   * @param ndim The total number of dimensions
-   * @param bz The pre-allocated array
-   */
   PyBlitzArray_AsShallowNumpyArray_RET PyBlitzArray_AsShallowNumpyArray PyBlitzArray_AsShallowNumpyArray_PROTO;
 
-  /**
-   * Allocates a blitz::Array<> with a given (supported) type and return it as
-   * a smart void*.
-   *
-   * @param typenum The numpy type number of the array type
-   * @param ndim The total number of dimensions
-   * @param shape The array shape
-   */
   PyBlitzArray_SimpleNew_RET PyBlitzArray_SimpleNew PyBlitzArray_SimpleNew_PROTO;
 
-  /**
-   * Returns, as a PyObject, an item from the array. This will be a copy of the
-   * internal item. If you set it, it won't set the original array.
-   *
-   * @param o The PyBlitzArrayObject to be queried
-   * @param pos An array indicating the precise position to fetch. It is
-   * considered to have the same number of entries as the current array shape.
-   */
   PyBlitzArray_GetItem_RET PyBlitzArray_GetItem PyBlitzArray_GetItem_PROTO;
 
-  /**
-   * Sets an given position on the array using any Python or numpy scalar.
-   *
-   * @param o The PyBlitzArrayObject to be set
-   * @param pos An array indicating the precise position to fetch
-   * @param value The Python scalar to set the value to
-   */
   PyBlitzArray_SetItem_RET PyBlitzArray_SetItem PyBlitzArray_SetItem_PROTO;
 
-  /**
-   * Returns the number of dimensions in a given blitz::Array<>
-   *
-   * @param o The input PyBlitzArray to be queried
-   */
   PyBlitzArray_NDIM_RET PyBlitzArray_NDIM PyBlitzArray_NDIM_PROTO;
 
-  /**
-   * Returns integral type number (as defined by the Numpy C-API) of elements
-   * in this blitz::Array<>
-   *
-   * @param o The input PyBlitzArray to be queried
-   */
   PyBlitzArray_TYPE_RET PyBlitzArray_TYPE PyBlitzArray_TYPE_PROTO;
 
-  /**
-   * Returns the C-stype shape for this blitz::Array<> 
-   *
-   * @param o The input PyBlitzArray to be queried
-   */
   PyBlitzArray_SHAPE_RET PyBlitzArray_SHAPE PyBlitzArray_SHAPE_PROTO;
 
-  /**
-   * Returns a <b>new reference</b> to a Python tuple holding a copy of shape
-   * for this blitz::Array<>
-   *
-   * @param o The input PyBlitzArray to be queried
-   */
   PyBlitzArray_PYSHAPE_RET PyBlitzArray_PYSHAPE PyBlitzArray_PYSHAPE_PROTO;
 
-  /**
-   * Returns a <b>new reference</b> to a numpy C-API PyArray_Descr*
-   * equivalent to the internal type element T.
-   *
-   * @param o The input PyBlitzArray to be queried
-   */
   PyBlitzArray_DTYPE_RET PyBlitzArray_DTYPE PyBlitzArray_DTYPE_PROTO;
   
-  /**
-   * Allocates memory and pre-initializes a PyBlitzArrayObject object
-   */
   PyBlitzArray_New_RET PyBlitzArray_New PyBlitzArray_New_PROTO;
 
-  /**
-   * Completely deletes a PyBlitzArrayObject* and associated memory areas.
-   *
-   * @param o The input PyBlitzArray to be deleted
-   */
   PyBlitzArray_Delete_RET PyBlitzArray_Delete PyBlitzArray_Delete_PROTO;
 
-  /**
-   * Converts any compatible sequence into a C-array containing the shape
-   * information. The shape information and number of dimensions is stored on
-   * the previously allocated PyBlitzArrayObject* you should provide. This
-   * method is supposed to be used with PyArg_ParseTupleAndKeywords and
-   * derivatives.
-   *
-   * @param o The input object to be converted into a C-shape
-   * @param shape A preallocated (double) address for storing the shape value,
-   *        on successful conversion
-   *
-   * Returns 0 if an error is detected, 1 on success.
-   */
   PyBlitzArray_IndexConverter_RET PyBlitzArray_IndexConverter PyBlitzArray_IndexConverter_PROTO;
 
-  /**
-   * Converts any compatible sequence into a Numpy integer type number. This
-   * method is supposed to be used with PyArg_ParseTupleAndKeywords and
-   * derivatives.
-   *
-   * @param o The input object to be converted into a C-shape
-   * @param type_num A preallocated (double) address for storing the type on
-   *                 successful conversion.
-   *
-   * Returns 0 if an error is detected, 1 on success.
-   */
   PyBlitzArray_TypenumConverter_RET PyBlitzArray_TypenumConverter PyBlitzArray_TypenumConverter_PROTO;
 
-  /**
-   * Creates a copy of the given blitz::Array<> as a Numpy ndarray in the most
-   * possible efficient way. First try a shallow copy and if that does not
-   * work, go for a full copy.
-   * 
-   * @param o The blitz::Array<> to efficiently copy
-   */
   PyBlitzArray_AsAnyNumpyArray_RET PyBlitzArray_AsAnyNumpyArray PyBlitzArray_AsAnyNumpyArray_PROTO;
 
-  /**
-   * Tells if the given blitz::Array<> can be successfuly wrapped in a shallow
-   * numpy.ndarray.
-   * 
-   * @param o The blitz::Array<> to check
-   */
   PyBlitzArray_IsBehaved_RET PyBlitzArray_IsBehaved PyBlitzArray_IsBehaved_PROTO;
 
-  /**
-   * Tells if the given numpy.ndarray can be successfuly wrapped in a shallow
-   * blitz.array or in a C++ blitz::Array<> (any will work).
-   * 
-   * @param o The numpy ndarray to check
-   */
   PyBlitzArray_NumpyArrayIsBehaved_RET PyBlitzArray_NumpyArrayIsBehaved PyBlitzArray_NumpyArrayIsBehaved_PROTO;
 
-  /**
-   * Creates a new PyBlitzArrayObject from a Numpy ndarray object in a shallow
-   * manner.
-   * 
-   * @param o The numpy ndarray to shallow copy
-   */
   PyBlitzArray_ShallowFromNumpyArray_RET PyBlitzArray_ShallowFromNumpyArray PyBlitzArray_ShallowFromNumpyArray_PROTO;
 
 #else
