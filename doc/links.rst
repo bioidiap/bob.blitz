@@ -20,7 +20,7 @@
 
 .. Place here references to all citations in lower case
 
-.. _blitz++: http://www.oonumerics.org/blitz
+.. _blitz++: http://blitz.sourceforge.net/
 .. _buildout: http://pypi.python.org/pypi/zc.buildout/
 .. _c++: http://www2.research.att.com/~bs/C++.html
 .. _numpy: http://numpy.scipy.org
