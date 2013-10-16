@@ -115,8 +115,8 @@ You can also create an independent (therefore less-efficient) copy:
    True
 
 You can use ``blitz.array`` anywhere a :py:class:`numpy.ndarray` is expected.
-In this case, `numpy`_ checks for the existence of an ``__array__`` method on
-the passed object and if that is available, calls it to get an array
+In this case, :py:mod:`numpy` checks for the existence of an ``__array__``
+method on the passed object and if that is available, calls it to get an array
 representation for the object. For ``blitz.array``, the
 :py:meth:`blitz.array.__array__` method chooses the fastest possible conversion
 path to generate a :py:class:`numpy.ndarray`.
@@ -139,3 +139,6 @@ This section includes information for using the pure Python API of
 
 .. autofunction:: blitz.as_blitz
 
+.. autofunction:: blitz.get_include
+
+.. autofunction:: blitz.get_includes
