@@ -10,10 +10,13 @@ dist.Distribution(dict(setup_requires=['pypkg', 'numpy']))
 import pypkg
 import numpy
 
+# Pkg-config dependencies
+blitz = pypkg.pkgconfig('blitz')
+
+# Local include directory
 import os
 package_dir = os.path.dirname(os.path.realpath(__file__))
 package_dir = os.path.join(package_dir, 'blitz', 'include')
-blitz = pypkg.pkgconfig('blitz')
 include_dirs = [package_dir]
 
 # Add system include directories
@@ -33,7 +36,7 @@ if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
 
 # Compilation options
 import platform
-extra_compile_args += ['-O0', '-g']
+#extra_compile_args += ['-O0', '-g']
 if platform.system() == 'Darwin':
   extra_compile_args += ['-std=c++11', '-stdlib=libc++', '-Wno-#warnings']
 else:
@@ -44,7 +47,7 @@ else:
 setup(
 
     name='blitz.array',
-    version='0.0.1a0',
+    version='0.0.1',
     description='Bindings for Blitz++ (a C++ array template library)',
     url='http://github.com/anjos/blitz.array',
     license='BSD',
