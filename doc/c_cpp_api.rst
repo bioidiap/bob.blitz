@@ -40,10 +40,7 @@ the import function:
 
 .. note::
 
-  The include directories can be discovered using :py:func:`blitz.get_include`.
-  The function :py:func:`blitz:get_includes` will return all include
-  directories, comprising (in this order), of the Blitz++ include directory,
-  the numpy include director and the ``blitz.array`` include directory.
+  The include directory can be discovered using :py:func:`blitz.get_include`.
 
 Array Structure
 ===============

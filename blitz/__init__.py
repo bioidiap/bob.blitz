@@ -12,18 +12,6 @@ def get_include():
 
   return __import__('pkg_resources').resource_filename(__name__, 'include')
 
-def get_includes():
-  """Returns all necessary include directories.
-
-  This method returns, in a Python tuple, all necessary include directories in
-  this order:
-
-  * The ``blitz.array`` include directory
-  * The ``numpy`` include directory (as returned by :py:func:`numpy.get_include`)
-  * The Blitz++ include directory
-  """
-  return [get_include(), __import__('numpy').get_include()]
-
 __version__ = __import__('pkg_resources').require('blitz.array')[0].version
 
 __all__ = ['array', 'as_blitz']
