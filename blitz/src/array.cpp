@@ -461,13 +461,6 @@ PyMODINIT_FUNC init_array(void)
 {
   PyObject* m;
 
-  if (PyErr_Occurred()) {
-    // we need numpy.ndarray to properly function
-    PyErr_Print();
-    PyErr_SetString(PyExc_ImportError, "blitz._array failed to import following NumPy import failure");
-    return;
-  }
-
   PyBlitzArray_Type.tp_new = PyType_GenericNew;
   if (PyType_Ready(&PyBlitzArray_Type) < 0) return;
 
