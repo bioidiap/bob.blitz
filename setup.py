@@ -95,11 +95,10 @@ else:
 # parameters that define our package.
 setup(
 
-    name='blitz',
+    name='blitz.array',
     version='0.0.1a0',
     description='Bindings for Blitz++ (a C++ array template library)',
-
-    url='http://pypi.python.org/pypi/blitz.array',
+    url='http://github.com/anjos/blitz.array',
     license='BSD',
     author='Andre Anjos',
     author_email='andre.anjos@idiap.ch',
