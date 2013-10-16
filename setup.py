@@ -5,72 +5,20 @@
 
 from setuptools import setup, find_packages, dist
 from distutils.extension import Extension
-import subprocess
+
+dist.Distribution(dict(setup_requires=['pypkg', 'numpy']))
+import pypkg
 import numpy
-
-def pkgconfig(package):
-
-  def uniq(seq, idfun=None):
-   # order preserving
-   if idfun is None:
-       def idfun(x): return x
-   seen = {}
-   result = []
-   for item in seq:
-       marker = idfun(item)
-       # in old Python versions:
-       # if seen.has_key(marker)
-       # but in new ones:
-       if marker in seen: continue
-       seen[marker] = 1
-       result.append(item)
-   return result
-
-  flag_map = {
-      '-I': 'include_dirs',
-      '-L': 'library_dirs',
-      '-l': 'libraries',
-      }
-
-  cmd = [
-      'pkg-config',
-      '--libs',
-      '--cflags',
-      package,
-      ]
-
-  proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
-      stderr=subprocess.STDOUT)
-
-  output = proc.communicate()[0]
-  if isinstance(output, bytes) and not isinstance(output, str):
-    output = output.decode('utf8')
-
-  if proc.returncode != 0: return {}
-
-  kw = {}
-
-  for token in output.split():
-    if token[:2] in flag_map:
-      kw.setdefault(flag_map.get(token[:2]), []).append(token[2:])
-
-    else: # throw others to extra_link_args
-      kw.setdefault('extra_compile_args', []).append(token)
-
-  for k, v in kw.items(): # remove duplicated
-      kw[k] = uniq(v)
-
-  return kw
 
 import os
 package_dir = os.path.dirname(os.path.realpath(__file__))
 package_dir = os.path.join(package_dir, 'blitz', 'include')
-blitz_config = pkgconfig('blitz')
+blitz = pypkg.pkgconfig('blitz')
 include_dirs = [package_dir]
 
 # Add system include directories
 extra_compile_args = []
-system_includes = blitz_config.get('include_dirs', []) + [numpy.get_include()]
+system_includes = blitz.include_directories() + [numpy.get_include()]
 for k in system_includes: extra_compile_args += ['-isystem', k]
 
 # NumPy API macros necessary?
@@ -119,10 +67,12 @@ setup(
           "blitz/src/api.cpp",
           "blitz/src/array.cpp",
           ],
-        include_dirs=include_dirs,
-        language="c++",
-        extra_compile_args=extra_compile_args,
         define_macros=define_macros,
+        include_dirs=include_dirs,
+        extra_compile_args=extra_compile_args,
+        library_dirs=blitz.library_directories(),
+        libraries=blitz.libraries(),
+        language="c++",
         )
       ],
 
