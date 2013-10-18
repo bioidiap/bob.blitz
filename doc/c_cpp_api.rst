@@ -48,7 +48,9 @@ Array Structure
 .. c:type:: PyBlitzArrayObject
 
    The basic array structure represents a ``blitz.array`` instance from the
-   C-side of the interpreter:
+   C-side of the interpreter. You should **avoid direct access to
+   the structure components** (it is presented just as an overview on the
+   functionality). Instead, use the accessor methods described below.
 
    .. code-block:: c
 
@@ -58,6 +60,8 @@ Array Structure
         int type_num;
         Py_ssize_t ndim;
         Py_ssize_t shape[BLITZ_ARRAY_MAXDIMS];
+        Py_ssize_t stride[BLITZ_ARRAY_MAXDIMS];
+        int writeable;
         PyObject* base;
 
       } PyBlitzArrayObject;
@@ -73,10 +77,36 @@ Array Structure
       structure. This pointer is cast to the proper type and number of
       dimensions when operations on the data are requested.
 
+   .. c:member:: void* data
+
+      A pointer to the data entry in the ``blitz::Array<>``. This is equivalent
+      to the operation ``blitz::Array<>::data()``.
+
    .. c:member:: int type_num
 
       The numpy type number that is compatible with the elements of this
-      array. It is a C representation of the C++ template parameter ``T``.
+      array. It is a C representation of the C++ template parameter ``T``. Only
+      some types are current supported, namely:
+
+      =============================== ==================== ==================
+         C/C++ type                      Numpy Enum            Notes
+      =============================== ==================== ==================
+       ``bool``                        ``NPY_BOOL``
+       ``uint8_t``                     ``NPY_UINT8``
+       ``uint16_t``                    ``NPY_UINT16``
+       ``uint32_t``                    ``NPY_UINT32``
+       ``uint64_t``                    ``NPY_UINT64``
+       ``int8_t``                      ``NPY_INT8``
+       ``int16_t``                     ``NPY_INT16``
+       ``int32_t``                     ``NPY_INT32``
+       ``int64_t``                     ``NPY_INT64``
+       ``float``                       ``NPY_FLOAT32``
+       ``double``                      ``NPY_FLOAT64``
+       ``long double``                 ``NPY_FLOAT128``     Plat. Dependent
+       ``std::complex<float>``         ``NPY_COMPLEX64``
+       ``std::complex<double>``        ``NPY_COMPLEX128``
+       ``std::complex<long double>``   ``NPY_COMPLEX256``   Plat. Dependent
+      =============================== ==================== ==================
 
    .. c:member:: Py_ssize_t ndim
 
@@ -84,7 +114,18 @@ Array Structure
 
    .. c:member:: Py_ssize_t shape[BLITZ_ARRAY_MAXDIMS]
 
-      The shape of the ``blitz::Array<>`` allocated on ``bzarr``.
+      The shape of the ``blitz::Array<>`` allocated on ``bzarr``, in number of
+      **elements** in each dimension.
+
+   .. c:member:: Py_ssize_t stride[BLITZ_ARRAY_MAXDIMS]
+
+      The strides of the ``blitz::Array<>`` allocated on ``bzarr``, in number
+      of **bytes** to jump to read the next element in each dimensions.
+
+   .. c:member:: int writeable
+
+      Assumes the value of ``1`` (true), if the data is read-write. ``0`` is
+      set otherwise.
 
    .. c:member:: PyObject* base
 
@@ -93,35 +134,99 @@ Array Structure
       pointer is kept on this structure member.
    
 
-Accessor Functions
-==================
+Basic Properties and Checking
+=============================
 
-A set of functions allow for creating, deleting, querying and manipulating the
-above structure.
+.. c:function:: int PyBlitzArray_Check(PyObject* o)
 
-.. c:function:: PyObject* PyBlitzArray_AsNumpyArrayCopy (PyBlitzArrayObject* o)
- 
-   Creates a copy of the given ``blitz.array`` as a ``numpy.ndarray``.
-    
-
-.. c:function:: const char* PyBlitzArray_TypenumAsString (int typenum)
-
-   Converts from numpy type_num to a string representation
+   Checks if the input object ``o`` is a ``PyBlitzArrayObject``. Returns ``1``
+   if it is, and ``0`` otherwise.
 
 
-.. c:function:: PyObject* PyBlitzArray_AsShallowNumpyArray (PyBlitzArrayObject* o)
+.. c:function:: int PyBlitzArray_CheckNumpyBase(PyArrayObject* o)
 
-   Creates a shallow copy of the given ``blitz.array`` as a ``numpy.ndarray``.
+   Checks if the input object ``o`` is a ``PyArrayObject`` (i.e. a
+   :py:class:`numpy.ndarray`), if so, checks if the base of the object is set
+   and that it corresponds to the current ``PyArrayObject`` shape and stride
+   settings. If so, returns ``1``. It returns ``0`` otherwise.
 
 
-.. c:function:: PyObject* PyBlitzArray_SimpleNew (int typenum, Py_ssize_t ndim, Py_ssize_t* shape)
+.. c:function:: int PyBlitzArray_TYPE (PyBlitzArrayObject* o)
 
-   Allocates a new ``blitz.array`` with a given (supported) type and return it
-   as a python object. ``typenum`` should be set to the numpy type number of
-   the array type (e.g. ``NPY_FLOAT64``). ``ndim`` should be set to the total
-   number of dimensions the array should have. ``shape`` should be set to the
-   array shape.
+   Returns integral type number (as defined by the Numpy C-API) of elements
+   in this blitz::Array<>. This is the formal method to query for
+   ``o->type_num``.
    
+
+.. c:function:: PyArray_Descr* PyBlitzArray_PyDTYPE (PyBlitzArrayObject* o)
+
+   Returns a **new reference** to a numpy C-API ``PyArray_Descr*`` equivalent
+   to the internal type element T.
+
+
+.. c:function:: Py_ssize_t PyBlitzArray_NDIM (PyBlitzArrayObject* o)
+
+   Returns the number of dimensions in a given ``blitz.array``. This is the
+   formal way to check for ``o->ndim``.
+
+
+.. c:function:: Py_ssize_t* PyBlitzArray_SHAPE (PyBlitzArrayObject* o)
+
+   Returns the C-stype shape for this blitz::Array<>. This is the formal method
+   to query for ``o->shape``. The shape represents the number of elements in
+   each dimension of the array.
+   
+
+.. c:function:: PyObject* PyBlitzArray_PySHAPE (PyBlitzArrayObject* o)
+
+   Returns a **new reference** to a Python tuple holding a copy of the shape
+   for the given array. The shape represents the number of elements in each
+   dimension of the array.
+   
+
+.. c:function:: Py_ssize_t* PyBlitzArray_STRIDE (PyBlitzArrayObject* o)
+
+   Returns the C-stype stride for this blitz::Array<>. This is the formal
+   method to query for ``o->stride``. The strides in this object are
+   represented in number of bytes and **not** in number of elements considering
+   its ``type_num``. This is compatible with the :py:class:`numpy.ndarray`
+   strategy.
+   
+
+.. c:function:: PyObject* PyBlitzArray_PySTRIDE (PyBlitzArrayObject* o)
+
+   Returns a **new reference** to a Python tuple holding a copy of the strides
+   for the given array. The strides in this object are represented in number of
+   bytes and **not** in number of elements considering its ``type_num``. This
+   is compatible with the :py:class:`numpy.ndarray` strategy.
+   
+
+.. c:function:: int PyBlitzArray_WRITEABLE (PyBlitzArrayObject* o)
+
+   Returns ``1`` if the object is writeable, ``0`` otherwise. This is the
+   formal way to check for ``o->writeable``.
+
+
+.. c:function:: PyObject* PyBlitzArray_PyWRITEABLE (PyBlitzArrayObject* o)
+
+   Returns ``True`` if the object is writeable, ``False`` otherwise.
+
+
+.. c:function:: PyObject* PyBlitzArray_BASE (PyBlitzArrayObject* o)
+
+   Returns a **borrowed reference** to the base of this object. The return
+   value of this function may be ``NULL``.
+
+
+.. c:function:: PyObject* PyBlitzArray_PyBASE (PyBlitzArrayObject* o)
+
+   Returns a **new reference** to the base of this object. If the internal
+   ``o->base`` is ``NULL``, then returns ``Py_None``. Use this when interfacing
+   with the Python interpreter.
+  
+
+Indexing
+========
 
 .. c:function:: PyObject* PyBlitzArray_GetItem (PyBlitzArrayObject* o, Py_ssize_t* pos)
 
@@ -140,47 +245,92 @@ above structure.
    or numpy scalar to set the value to.
 
 
-.. c:function:: Py_ssize_t PyBlitzArray_NDIM (PyBlitzArrayObject* o)
-
-   Returns the number of dimensions in a given ``blitz.array``.
-
-
-.. c:function:: int PyBlitzArray_TYPE (PyBlitzArrayObject* o)
-
-   Returns integral type number (as defined by the Numpy C-API) of elements
-   in this blitz::Array<>
-   
-
-.. c:function:: Py_ssize_t* PyBlitzArray_SHAPE (PyBlitzArrayObject* o)
-
-   Returns the C-stype shape for this blitz::Array<>. This is the formal method
-   to query for ``o->shape``.
-   
-
-.. c:function:: PyObject* PyBlitzArray_PYSHAPE (PyBlitzArrayObject* o)
-
-   Returns a **new reference** to a Python tuple holding a copy of the shape
-   for the given array.
-   
-
-.. c:function:: PyArray_Descr* PyBlitzArray_DTYPE (PyBlitzArrayObject* o)
-
-   Returns a **new reference** to a numpy C-API ``PyArray_Descr*`` equivalent
-   to the internal type element T.
-   
+Construction and Destruction
+============================
 
 .. c:function:: PyObject* PyBlitzArray_New (PyTypeObject* type, PyObject *args, PyObject* kwds)
 
-   Allocates memory and pre-initializes a ``PyBlitzArrayObject*`` object
+   Allocates memory and pre-initializes a ``PyBlitzArrayObject*`` object. This
+   is the base allocator - seldomly used in user code.
    
 
 .. c:function:: void PyBlitzArray_Delete (PyBlitzArrayObject* o)
 
    Completely deletes a ``PyBlitzArrayObject*`` and associated memory areas.
+   This is the base deallocator - seldomly used in user code.
    
 
+.. c:function:: PyObject* PyBlitzArray_SimpleNew (int typenum, Py_ssize_t ndim, Py_ssize_t* shape)
+
+   Allocates a new ``blitz.array`` with a given (supported) type and return it
+   as a python object. ``typenum`` should be set to the numpy type number of
+   the array type (e.g. ``NPY_FLOAT64``). ``ndim`` should be set to the total
+   number of dimensions the array should have. ``shape`` should be set to the
+   array shape.
+
+   
+.. c:function:: PyObject* PyBlitzArray_SimpleNewFromData (int type_num, Py_ssize_t ndim, Py_ssize_t* shape, Py_ssize_t* stride, void* data, int writeable)
+
+   Allocates a new ``blitz.array`` with a given (supported) type and return it
+   as a python object. ``typenum`` should be set to the numpy type number of
+   the array type (e.g. ``NPY_FLOAT64``). ``ndim`` should be set to the total
+   number of dimensions the array should have. ``shape`` should be set to the
+   array shape. ``stride`` should be set to the array stride in the numpy style
+   (in number of bits). ``data`` should be a pointer to the begin of the data
+   area. ``writeable`` indicates if the resulting array should be writeble (set
+   it to ``1``), or read-only (set it to ``0``).
+
+   
+To/From Numpy Converters
+========================
+
+.. c:function:: PyObject* PyBlitzArray_AsNumpyArray (PyBlitzArrayObject* o)
+
+   Creates a **shallow** copy of the given ``blitz.array`` as a
+   ``numpy.ndarray``.
+    
+
+.. c:function:: PyObject* PyBlitzArray_FromNumpyArray (PyObject* o)
+
+   Creates a new ``blitz.array`` from a ``numpy.ndarray`` object in a shallow
+   manner.
+
+
+Converter Functions for PyArg_Parse* family
+===========================================
+
+.. c:function:: int PyBlitzArray_Converter(PyObject* o, PyBlitzArrayObject** a) 
+
+   This function is meant to be used with :c:func:`PyArg_ParseTupleAndKeywords`
+   family of functions in the Python C-API. It converts an arbitrary input
+   object into a ``PyBlitzArrayObject`` that can be used as input into another
+   function.
+
+   You should use this converter when you don't need to write-back into the
+   input array. As any other standard Python converter, it returns a **new**
+   reference to a ``PyBlitzArrayObject``.
+
+   It works efficiently if the input array is already a ``PyBlitzArrayObject``
+   or if it is a ``PyArrayObject`` (i.e., a :py:class:``numpy.ndarray``), with
+   a matching base which is a ``PyBlitzArrayObject``. Otherwise, it creates a
+   new ``PyBlitzArrayObject`` by first creating a ``PyArrayObject`` and then
+   shallow wrapping it with a ``PyBlitzArrayObject``.
+
+.. c:function:: int PyBlitzArray_OutputConverter(PyObject* o, PyBlitzArrayObject** a)
+
+   This function is meant to be used with :c:func:`PyArg_ParseTupleAndKeywords`
+   family of functions in the Python C-API. It converts an arbitrary input
+   object into a ``PyBlitzArrayObject`` that can be used as input/output or
+   output into another function.
+
+   You should use this converter when you need to write-back into the input
+   array. The input type should be promptly convertible to a
+   :py:class:`numpy.ndarray` as with :c:func:`PyArray_OutputConverter`. As any
+   other standard Python converter, it returns a **new** reference to a
+   ``PyBlitzArrayObject*``.
+
 .. c:function:: int PyBlitzArray_IndexConverter (PyObject* o, PyBlitzArrayObject** shape)
- 
+
    Converts any compatible sequence into a C-array containing the shape
    information. The shape information and number of dimensions is stored on
    the previously allocated ``PyBlitzArrayObject*`` you should provide. This
@@ -215,33 +365,15 @@ above structure.
       conversion.
    
    Returns 0 if an error is detected, 1 on success.
-  
-
-.. c:function:: PyObject* PyBlitzArray_AsAnyNumpyArray (PyBlitzArrayObject* o)
-
-   
-   Creates a copy of the given ``blitz.array`` as a ``numpy.ndarray`` in the
-   most possible efficient way. First try a shallow copy and if that does not
-   work, go for a full copy.
-
-
-.. c:function:: int PyBlitzArray_IsBehaved (PyBlitzArrayObject* o)
 
   
-   Tells if the given ``blitz.array`` can be successfuly wrapped in a shallow
-   ``numpy.ndarray``.
-  
+Other Utilities
+===============
 
-.. c:function:: int PyBlitzArray_NumpyArrayIsBehaved (PyBlitzArrayObject* o)
+.. c:function:: const char* PyBlitzArray_TypenumAsString (int typenum)
 
-   Tells if the given ``numpy.ndarray`` can be successfuly wrapped in a shallow
-   ``blitz.array`` (or in a C++ blitz::Array<>) (any will work).
+   Converts from numpy type_num to a string representation
 
-
-.. c:function:: PyObject* PyBlitzArray_ShallowFromNumpyArray (PyObject* o)
-
-   Creates a new ``blitz.array`` from a ``numpy.ndarray`` object in a shallow
-   manner.
 
 C++ API
 -------
@@ -252,7 +384,33 @@ type. To use the C++ API you must include the header file
 ``<blitz.array/cppapi.h>`` and ``import_blitz_array()`` on your module, as
 explained on the C-API section of this document.
 
-.. cpp:function:: int PyBlitzArray_CToTypenum<T>()
+Basic Properties and Checking
+=============================
+
+.. cpp:function:: int PyBlitzArrayCxx_IsBehaved<T,N>(blitz::Array<T,N>& a)
+
+   Tells if a ``blitz::Array<>`` is memory contiguous and C-style.
+
+
+Construction and Destruction
+============================
+
+.. cpp:function:: PyObject* PyBlitzArrayCxx_NewFromConstArray<T,N>(const blitz::Array<T,N>& a)
+
+   Builds a new read-only ``PyBlitzArrayObject`` from an existing Blitz++
+   array, without copying the data. Returns a new reference.
+
+
+.. cpp:function:: PyObject* PyBlitzArrayCxx_NewFromArray<T,N>(blitz::Array<T,N>& a)
+
+   Builds a new writeable ``PyBlitzArrayObject`` from an existing Blitz++
+   array, without copying the data. Returns a new reference.
+
+
+Other Utilities
+===============
+
+.. cpp:function:: int PyBlitzArrayCxx_CToTypenum<T>()
 
    Converts from C/C++ type to ndarray type_num.
    
@@ -264,11 +422,11 @@ explained on the C-API section of this document.
 
    .. code-block:: c++
    
-      int typenum = PyBlitzArray_CToTypenum<my_weird_type>(obj);
+      int typenum = PyBlitzArrayCxx_CToTypenum<my_weird_type>(obj);
       if (PyErr_Occurred()) return 0; ///< propagate exception
 
 
-.. cpp:function:: T PyBlitzArray_AsCScalar<T>(PyObject* o)
+.. cpp:function:: T PyBlitzArrayCxx_AsCScalar<T>(PyObject* o)
 
    Extraction API for **simple** types.
    
@@ -284,104 +442,3 @@ explained on the C-API section of this document.
       if (PyErr_Occurred()) return 0; ///< propagate exception
  
 
-.. cpp:function:: blitz::Array<T,N> PyBlitzArray_ShallowFromNumpyArray<T,N>(PyObject* o, bool readwrite)
-
-   Wraps the input numpy ndarray with a blitz::Array<> skin.
-   
-   You should use this kind of conversion when you either want the ultimate
-   speed (as no data copy is involved on this procedure) or when you'd like
-   the resulting blitz::Array<> to be writeable, so that you can pass this as
-   an input argument to a function and get the results written to the
-   original numpy ndarray memory.
-   
-   Blitz++ is a little more inflexible than numpy ndarrays are, so there are
-   limitations in this conversion. For example, normally we can't wrap
-   non-contiguous memory areas. In such cases, an exception is set on the
-   Python error stack. You must check ``PyErr_Occurred()`` after a call to this
-   function to make sure things are OK and act accordingly. For example:
-
-   .. code-block:: c++
-   
-      auto z = PyBlitzArray_ShallowFromNumpyArray<uint8_t,4>(obj);
-      if (PyErr_Occurred()) return 0; ///< propagate exception
-   
-   Notice that the lifetime of the ``blitz::Array<>`` extracted with this
-   procedure is bound to the lifetime of the source numpy ndarray. You'd have
-   to copy it to create an independent object.
-   
-
-.. cpp:function:: blitz::Array<T,N> PyBlitzArray_FromAny<T,N>(PyObject* o)
-
-   Wraps the input numpy ndarray with a ``blitz::Array<>`` skin, even if it has
-   to copy the input data.
-   
-   You should use this kind of conversion when you only care about finally
-   retrieving a ``blitz::Array<>`` of the desired type and shape so as to pass
-   it as a const (read-only) input parameter to your C++ method.
-   
-   At first, we will try a shallow conversion using
-   ``PyBlitzArray_AsShallowNumpyArray()`` declared above. If that does not
-   work, then we will try a brute force conversion using
-   ``PyBlitzArray_AsNumpyArrayCopy()``.  This opens the possibility of, for
-   example, converting from objects that support the iteration, buffer, array
-   or memory view protocols in python.
-   
-   Notice that, in this case, the output ``blitz::Array<>`` may or may not be
-   bound to the input object. Because you don't know what the outcome is, it is
-   recommend you copy the output if you want to preserve it beyond the scope of
-   the conversion.
-   
-   In case of errors, a Python exception will be set. You must check it
-   properly:
-
-   .. code-block:: c++
-   
-      auto z = PyBlitzArray_AsAnyBlitzArray<uint8_t,4>(obj);
-      if (PyErr_Occurred()) return 0; ///< propagate exception
-   
-   Also notice this procedure will copy the data twice, if the input data is
-   not already on the right format for a ``blitz::Array<>`` shallow wrap to
-   take place. This is not optimal in all conditions, namely with very large
-   read-only arrays. We hope this is not a common condition when users want to
-   convert read-only arrays.
-
-   
-.. cpp:function:: PyObject* PyBlitzArray_AsNumpyArrayCopy<T,N>(const blitz::Array<T,N>& a)
-
-   Copies the contents of the input ``blitz::Array<>`` into a newly allocated
-   numpy ndarray.
-   
-   The newly allocated array is a classical Pythonic **new** reference. The
-   client taking the object must call ``Py_DECREF()`` when done.
-   
-   This function returns ``0`` (null) if an error has occurred, following the
-   standard python protocol.
-  
-
-.. cpp:function:: PyObject* PyBlitzArray_AsShallowNumpyArray<T,N>(blitz::Array<T,N>& a)
-
-   Creates a read-write shallow copy of the ndarray.
-   
-   The newly allocated array is a classical Pythonic **new** reference. The
-   client taking the object must call ``Py_DECREF()`` when done.
-   
-   This function returns ``0`` (null) if an error has occurred, following the
-   standard python protocol.
-  
-
-.. cpp:function:: PyObject* PyBlitzArray_AsAnyNumpyArray<T,N>(blitz::Array<T,N>& a)
-
-   Creates a shallow or copy of the ``blitz::Array<>`` in the fastest possible
-   way. Leverages from ``PyBlitzArray_AsShallowNumpyArray`` and
-   ``PyBlitzArray_AsNumpyArrayCopy`` as much as possible.
-   
-   The newly allocated array is a classical Pythonic **new** reference. The
-   client taking the object must call ``Py_DECREF()`` when done.
-   
-   This function returns ``0`` (null) if an error has occurred, following the
-   standard python protocol.
- 
-
-.. cpp:function:: int PyBlitzArray_IsBehaved<T,N>(blitz::Array<T,N>& a)
-
-   Tells if a shallow wrapping on this ``blitz::Array<>`` would succeed.

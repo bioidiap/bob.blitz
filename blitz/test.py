@@ -126,7 +126,7 @@ def test_u8d1_as_ndarray():
   bz = bzarray(2, dtype='uint8')
   bz[0] = 32
   bz[1] = 10
-  nd = bz.as_ndarray()
+  nd = numpy.array(bz)
   nose.tools.eq_(nd.shape, bz.shape)
   nose.tools.eq_(bz[0], nd[0])
   nose.tools.eq_(bz[1], nd[1])
@@ -145,7 +145,7 @@ def test_u64d1_as_ndarray():
   bz = bzarray(2, dtype='uint64')
   bz[0] = 2**33
   bz[1] = 2**64 - 1
-  nd = bz.as_ndarray()
+  nd = numpy.array(bz)
   nose.tools.eq_(nd.shape, bz.shape)
   nose.tools.eq_(bz[0], nd[0])
   nose.tools.eq_(bz[1], nd[1])
@@ -164,7 +164,7 @@ def test_u32d1_as_ndarray():
   bz = bzarray(2, dtype='uint32')
   bz[0] = 2**32-1
   bz[1] = 0
-  nd = bz.as_ndarray()
+  nd = numpy.array(bz)
   nose.tools.eq_(nd.shape, bz.shape)
   nose.tools.eq_(bz[0], nd[0])
   nose.tools.eq_(bz[1], nd[1])
@@ -185,7 +185,7 @@ def test_s64d2_shallow_array():
   bz[0,1] = 2
   bz[1,0] = 3
   bz[1,1] = -1
-  nd = bz.as_shallow_ndarray()
+  nd = bz.as_ndarray()
   nose.tools.eq_(nd.shape, bz.shape)
   nose.tools.eq_(bz[0,0], nd[0,0])
   nose.tools.eq_(bz[0,1], nd[0,1])
@@ -234,7 +234,7 @@ def test_s64d2_cannot_resize_shallow():
   bz[0,1] = 2
   bz[1,0] = 3
   bz[1,1] = -1
-  nd = bz.as_shallow_ndarray()
+  nd = bz.as_ndarray()
   nd.resize(3,3)
 
 def test_from_ndarray_shallow():
@@ -249,13 +249,13 @@ def test_from_ndarray_shallow():
   nd[1,0] = -18
   nose.tools.eq_(nd[1,0], bz[1,0])
 
-@nose.tools.raises(TypeError)
+@nose.tools.raises(ValueError)
 def test_from_ndarray_transposed():
 
   nd = numpy.array([1, 2, 3, -1]).reshape(2,2).T
   bz = as_blitz(nd)
 
-@nose.tools.raises(NotImplementedError)
+@nose.tools.raises(ValueError)
 def test_detects_unsupported_dims():
 
   nd = numpy.array(range(32)).reshape(2,2,2,2,2)
@@ -284,3 +284,17 @@ def test_can_use_complex256_as_dtype():
   bz[0] = complex(4,4)
   nose.tools.eq_(bz[0].dtype, numpy.complex256)
   nose.tools.eq_(bz[0], complex(4,4))
+
+def test_re_wrapping_bzarray():
+
+  bz = bzarray((2,2), int)
+  nd = bz.as_ndarray()
+  bz2 = as_blitz(nd)
+  nose.tools.eq_(id(bz), id(bz2))
+
+def test_re_wrapping_ndarray():
+
+  nd = numpy.ndarray((2,2), int)
+  bz = as_blitz(nd)
+  nd2 = bz.as_ndarray()
+  nose.tools.eq_(id(nd), id(nd2))

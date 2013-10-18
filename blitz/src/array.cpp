@@ -19,7 +19,7 @@ PyDoc_STRVAR(s_array_str, "array");
 /**
  * Formal initialization of an Array object
  */
-static int PyBlitzArray_init(PyBlitzArrayObject* self, PyObject *args,
+static int PyBlitzArray__init__(PyBlitzArrayObject* self, PyObject *args,
     PyObject* kwds) {
 
   /* Parses input arguments in a single shot */
@@ -141,83 +141,39 @@ static PyMappingMethods PyBlitzArray_mapping = {
     (objobjargproc)PyBlitzArray_setitem,
 };
 
+PyDoc_STRVAR(s_as_ndarray_str, "as_ndarray");
 PyDoc_STRVAR(s_private_array_str, "__array__");
 PyDoc_STRVAR(s_private_array__doc__,
 "x.__array__() -> numpy.ndarray\n\
 \n\
-numpy.ndarray accessor (choses the fastest possible conversion path)"
-);
-
-PyDoc_STRVAR(s_as_ndarray_str, "as_ndarray");
-PyDoc_STRVAR(s_as_ndarray__doc__,
-"x.as_ndarray() -> numpy.ndarray\n\
-\n\
-Returns a deep copy as a numpy.ndarray\n\
-\n\
-This method returns a complete, independent copy of the internal\n\
-data as a new :py:class:`numpy.ndarray` of the same data type and\n\
-shape. This method should succeed as long as the data type and shape\n\
-of current array are supported by the bridge.\n\
-"
-);
-
-PyDoc_STRVAR(s_as_shallow_ndarray_str, "as_shallow_ndarray");
-PyDoc_STRVAR(s_as_shallow_ndarray__doc__,
-"x.as_shallow_ndarray() -> numpy.ndarray\n\
-\n\
-If possible, returns a shallow copy as a :py:class:`numpy.ndarray`\n\
-\n\
-If this method succeeds, returns a shallow, efficient wrap of the\n\
-the internal data. In this case, the ``base`` pointer of the\n\
-returned ndarray keeps a pointer to this array to indicate the data\n\
-origin. The resulting ndarray object will be read-writeable if this\n\
-array also is. Any operation applied to the resulting ndarray will\n\
-be reflect on this blitz.array.\n\
-\n\
-This method will succeed only if the current array type and rank are\n\
-supported by our bridge (see array documentation). A\n\
-:py:class:`TypeError` is raised otherwise.\n\
-"
+numpy.ndarray accessor (shallow wraps blitz.array as numpy.ndarray)"
 );
 
 static PyMethodDef PyBlitzArray_methods[] = {
     {
       s_as_ndarray_str,
-      (PyCFunction)PyBlitzArray_AsNumpyArrayCopy,
+      (PyCFunction)PyBlitzArray_AsNumpyArray,
       METH_NOARGS,
-      s_as_ndarray__doc__
-    },
-    {
-      s_as_shallow_ndarray_str,
-      (PyCFunction)PyBlitzArray_AsShallowNumpyArray,
-      METH_NOARGS,
-      s_as_shallow_ndarray__doc__
+      s_private_array__doc__
     },
     {
       s_private_array_str,
-      (PyCFunction)PyBlitzArray_AsAnyNumpyArray,
+      (PyCFunction)PyBlitzArray_AsNumpyArray,
       METH_NOARGS,
       s_private_array__doc__
     },
     {0}  /* Sentinel */
 };
 
-PyDoc_STRVAR(s_behaved_str, "behaved");
-PyDoc_STRVAR(s_behaved__doc__,
-"``True``, if the array is aligned and memory contiguous.\n\
-``False`` otherwise\n\
-"
-);
-
-static PyObject* PyBlitzArray_BEHAVED(PyBlitzArrayObject* o) {
-  if (PyBlitzArray_IsBehaved(o)) Py_RETURN_TRUE;
-  Py_RETURN_FALSE;
-}
-
 /* Property API */
 PyDoc_STRVAR(s_shape_str, "shape");
 PyDoc_STRVAR(s_shape__doc__,
-"A tuple indicating the shape of this array"
+"A tuple indicating the shape of this array (in **elements**)"
+);
+
+PyDoc_STRVAR(s_stride_str, "stride");
+PyDoc_STRVAR(s_stride__doc__,
+"A tuple indicating the strides of this array (in **bytes**)"
 );
 
 PyDoc_STRVAR(s_dtype_str, "dtype");
@@ -225,26 +181,50 @@ PyDoc_STRVAR(s_dtype__doc__,
 "The :py:class:`numpy.dtype` for every element in this array"
 );
 
+PyDoc_STRVAR(s_writeable_str, "writeable");
+PyDoc_STRVAR(s_writeable__doc__,
+"A flag, indicating if this array is writeable"
+);
+
+PyDoc_STRVAR(s_base_str, "base");
+PyDoc_STRVAR(s_base__doc__,
+"If the memory of this array is borrowed from some other object, this is it"
+);
+
 static PyGetSetDef PyBlitzArray_getseters[] = {
     {
       s_dtype_str, 
-      (getter)PyBlitzArray_DTYPE,
+      (getter)PyBlitzArray_PyDTYPE,
       0,
       s_dtype__doc__,
       0,
     },
     {
       s_shape_str,
-      (getter)PyBlitzArray_PYSHAPE,
+      (getter)PyBlitzArray_PySHAPE,
       0,
       s_shape__doc__,
       0,
     },
     {
-      s_behaved_str,
-      (getter)PyBlitzArray_BEHAVED,
+      s_stride_str,
+      (getter)PyBlitzArray_PySTRIDE,
       0,
-      s_behaved__doc__,
+      s_stride__doc__,
+      0,
+    },
+    {
+      s_writeable_str,
+      (getter)PyBlitzArray_PyWRITEABLE,
+      0,
+      s_writeable__doc__,
+      0,
+    },
+    {
+      s_base_str,
+      (getter)PyBlitzArray_PyBASE,
+      0,
+      s_base__doc__,
       0,
     },
     {0}  /* Sentinel */
@@ -252,7 +232,7 @@ static PyGetSetDef PyBlitzArray_getseters[] = {
 
 /* Stringification */
 static PyObject* PyBlitzArray_str(PyBlitzArrayObject* o) {
-  PyObject* nd = PyBlitzArray_AsAnyNumpyArray(o);
+  PyObject* nd = PyBlitzArray_AsNumpyArray(o);
   if (!nd) {
     PyErr_Print();
     PyErr_SetString(PyExc_RuntimeError, "could not convert array into numpy ndarray for str() method call");
@@ -306,20 +286,8 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
   }
 }
 
-PyDoc_STRVAR(s_base_str, "base");
-PyDoc_STRVAR(s_base__doc__,
-"Base object containing the memory this array is pointing to"
-);
-
 /* Members */
 static PyMemberDef PyBlitzArray_members[] = {
-    {
-      s_base_str,
-      T_OBJECT_EX,
-      offsetof(PyBlitzArrayObject, base),
-      READONLY,
-      s_base__doc__,
-    },
     {0}  /* Sentinel */
 };
 
@@ -407,13 +375,12 @@ PyTypeObject PyBlitzArray_Type = {
     0,                                          /* tp_descr_get */
     0,                                          /* tp_descr_set */
     0,                                          /* tp_dictoffset */
-    (initproc)PyBlitzArray_init,                /* tp_init */
+    (initproc)PyBlitzArray__init__,             /* tp_init */
     0,                                          /* tp_alloc */
     PyBlitzArray_New,                           /* tp_new */
 };
 
-PyObject* PyBlitzArray_as_blitz(PyObject* self, PyObject* args,
-    PyObject* kwds) {
+PyObject* PyBlitzArray_as_blitz(PyObject*, PyObject* args, PyObject* kwds) {
 
   /* Parses input arguments in a single shot */
   static const char* const_kwlist[] = {"o", 0};
@@ -422,7 +389,7 @@ PyObject* PyBlitzArray_as_blitz(PyObject* self, PyObject* args,
   PyObject* arr = 0;
   if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist, &PyArray_Converter, &arr)) return 0;
 
-  PyObject* retval = PyBlitzArray_ShallowFromNumpyArray(arr);
+  PyObject* retval = PyBlitzArray_FromNumpyArray(reinterpret_cast<PyArrayObject*>(arr));
   Py_DECREF(arr);
   return retval;
 }
@@ -431,12 +398,14 @@ PyDoc_STRVAR(s_as_blitz_str, "as_blitz");
 PyDoc_STRVAR(s_as_blitz__doc__,
 "as_blitz(x) -> blitz.array\n\
 \n\
-Converts any compatible python object into a blitz.array\n\
+Converts any compatible python object into a shallow blitz.array\n\
 \n\
 This function works by first converting the input object ``x`` into\n\
 a :py:class:`numpy.ndarray` and then shallow wrapping that ``ndarray``\n\
 into a new :py:class:`blitz.array`. You can access the converted\n\
-``ndarray`` using the returned value's ``base`` attribute.\n\
+``ndarray`` using the returned value's ``base`` attribute. If the\n\
+``ndarray`` cannot be shallow-wrapped, a :py:class:`ValueError` is\n\
+raised.\n\
 \n\
 In the case the input object ``x`` is already a behaved (C-style,\n\
 memory-aligned, contiguous) :py:class:`numpy.ndarray`, then this\n\
@@ -467,8 +436,67 @@ PyMODINIT_FUNC init_array(void)
   m = Py_InitModule3("_array", array_methods,
       "array definition and generic functions");
 
+  /* register the type object to python */
   Py_INCREF(&PyBlitzArray_Type);
   PyModule_AddObject(m, s_array_str, (PyObject *)&PyBlitzArray_Type);
+
+  static void* PyBlitzArray_API[PyBlitzArray_API_pointers];
+
+  /* exhaustive list of C APIs */
+  PyBlitzArray_API[PyBlitzArray_Type_NUM] = (void *)&PyBlitzArray_Type;
+
+  // Basic Properties and Checking
+  PyBlitzArray_API[PyBlitzArray_Check_NUM] = (void *)PyBlitzArray_Check;
+  PyBlitzArray_API[PyBlitzArray_CheckNumpyBase_NUM] = (void *)PyBlitzArray_CheckNumpyBase;
+  PyBlitzArray_API[PyBlitzArray_TYPE_NUM] = (void *)PyBlitzArray_TYPE;
+  PyBlitzArray_API[PyBlitzArray_PyDTYPE_NUM] = (void *)PyBlitzArray_PyDTYPE;
+  PyBlitzArray_API[PyBlitzArray_NDIM_NUM] = (void *)PyBlitzArray_NDIM;
+  PyBlitzArray_API[PyBlitzArray_SHAPE_NUM] = (void *)PyBlitzArray_SHAPE;
+  PyBlitzArray_API[PyBlitzArray_PySHAPE_NUM] = (void *)PyBlitzArray_PySHAPE;
+  PyBlitzArray_API[PyBlitzArray_STRIDE_NUM] = (void *)PyBlitzArray_STRIDE;
+  PyBlitzArray_API[PyBlitzArray_PySTRIDE_NUM] = (void *)PyBlitzArray_PySTRIDE;
+  PyBlitzArray_API[PyBlitzArray_WRITEABLE_NUM] = (void *)PyBlitzArray_WRITEABLE;
+  PyBlitzArray_API[PyBlitzArray_PyWRITEABLE_NUM] = (void *)PyBlitzArray_PyWRITEABLE;
+  PyBlitzArray_API[PyBlitzArray_BASE_NUM] = (void *)PyBlitzArray_BASE;
+  PyBlitzArray_API[PyBlitzArray_PyBASE_NUM] = (void *)PyBlitzArray_PyBASE;
+
+  // Indexing
+  PyBlitzArray_API[PyBlitzArray_GetItem_NUM] = (void *)PyBlitzArray_GetItem;
+  PyBlitzArray_API[PyBlitzArray_SetItem_NUM] = (void *)PyBlitzArray_SetItem;
+
+  // Construction and Destruction
+  PyBlitzArray_API[PyBlitzArray_New_NUM] = (void *)PyBlitzArray_New;
+  PyBlitzArray_API[PyBlitzArray_Delete_NUM] = (void *)PyBlitzArray_Delete;
+  PyBlitzArray_API[PyBlitzArray_SimpleNew_NUM] = (void *)PyBlitzArray_SimpleNew;
+  PyBlitzArray_API[PyBlitzArray_SimpleNewFromData_NUM] = (void *)PyBlitzArray_SimpleNewFromData;
+
+  // From/To NumPy Converters
+  PyBlitzArray_API[PyBlitzArray_AsNumpyArray_NUM] = (void *)PyBlitzArray_AsNumpyArray;
+  PyBlitzArray_API[PyBlitzArray_FromNumpyArray_NUM] = (void *)PyBlitzArray_FromNumpyArray;
+  
+  // Converter Functions for PyArg_Parse* family
+  PyBlitzArray_API[PyBlitzArray_Converter_NUM] = (void *)PyBlitzArray_Converter;
+  PyBlitzArray_API[PyBlitzArray_OutputConverter_NUM] = (void *)PyBlitzArray_OutputConverter;
+  PyBlitzArray_API[PyBlitzArray_IndexConverter_NUM] = (void *)PyBlitzArray_IndexConverter;
+  PyBlitzArray_API[PyBlitzArray_TypenumConverter_NUM] = (void *)PyBlitzArray_TypenumConverter;
+
+  // Utilities
+  PyBlitzArray_API[PyBlitzArray_TypenumAsString_NUM] = (void *)PyBlitzArray_TypenumAsString;
+
+#if PY_VERSION_HEX >= 0x02070000
+
+  /* defines the PyCapsule */
+
+  PyObject* c_api_object = PyCapsule_New((void *)PyBlitzArray_API, 
+      "blitz._array._C_API", 0);
+
+#else
+
+  PyObject* c_api_object = PyCObject_FromVoidPtr((void *)PyBlitzArray_API, 0);
+
+#endif
+
+  if (c_api_object) PyModule_AddObject(m, "_C_API", c_api_object);
 
   /* imports the NumPy C-API as well */
   import_array();

@@ -17,6 +17,6 @@ def get_numpy_api():
 
   return 'BLITZ_NUMPY_ARRAY_API'
 
-__version__ = __import__('pkg_resources').require('blitz.array')[0].version
+__version__ = __import__('pkg_resources').require('blitz')[0].version
 
 __all__ = ['array', 'as_blitz']

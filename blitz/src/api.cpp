@@ -8,6 +8,10 @@
 #define BLITZ_ARRAY_MODULE
 #include <blitz.array/cppapi.h>
 
+/*******************
+ * Non-API Helpers *
+ *******************/
+
 /**
  * Correct for integer types
  */
@@ -63,347 +67,102 @@ static int fix_integer_type_num(int type_num) {
   return type_num;
 }
 
-/**
- * A simple implementation of the function below. It returns type names such as
- * "numpy.uint64" instead of just "uint64". The type name is also associated to
- * an object which may vanish - so, not that safe.
- */
-/**
-const char* PyBlitzArray_TypenumAsString (int type_num) {
-  PyArray_Descr* dtype = PyArray_DescrFromType(type_num); ///< new reference
-  if (!dtype) return 0;
-  const char* retval = dtype->typeobj->tp_name;
-  Py_DECREF(dtype);
+/*********************************
+ * Basic Properties and Checking *
+ *********************************/
+
+int PyBlitzArray_Check(PyObject* o) {
+  if (!o) return 0;
+  return PyObject_IsInstance(o, reinterpret_cast<PyObject*>(&PyBlitzArray_Type));
+}
+
+int PyBlitzArray_CheckNumpyBase(PyArrayObject* o) {
+  if (!PyArray_BASE(o)) return 0;
+
+  if (!PyBlitzArray_Check(PyArray_BASE(o))) return 0;
+
+  PyBlitzArrayObject* bo = reinterpret_cast<PyBlitzArrayObject*>(PyArray_BASE(o));
+
+  if (PyArray_DESCR(o)->type_num != bo->type_num) return 0;
+
+  if (PyArray_NDIM(o) != bo->ndim) return 0;
+
+  for (Py_ssize_t i=0; i<bo->ndim; ++i) 
+    if (bo->shape[i] != PyArray_SHAPE(o)[i]) return 0;
+
+  return 1;
+}
+
+int PyBlitzArray_TYPE (PyBlitzArrayObject* o) {
+  return o->type_num;
+}
+
+PyArray_Descr* PyBlitzArray_PyDTYPE (PyBlitzArrayObject* o) {
+  return PyArray_DescrFromType(o->type_num);
+}
+
+Py_ssize_t PyBlitzArray_NDIM (PyBlitzArrayObject* o) {
+  return o->ndim;
+}
+
+Py_ssize_t* PyBlitzArray_SHAPE (PyBlitzArrayObject* o) {
+  return o->shape;
+}
+
+PyObject* PyBlitzArray_PySHAPE (PyBlitzArrayObject* o) {
+  PyObject* retval = PyTuple_New(o->ndim);
+  if (!retval) return retval;
+  for (Py_ssize_t i = 0; i != o->ndim; ++i) {
+#if PY_VERSION_HEX >= 0x03000000
+    PyTuple_SET_ITEM(retval, i, PyLong_FromSsize_t(o->shape[i]));
+#else
+    PyTuple_SET_ITEM(retval, i, PyInt_FromSsize_t(o->shape[i]));
+#endif
+  }
   return retval;
 }
-*/
 
-const char* PyBlitzArray_TypenumAsString (int type_num) {
+Py_ssize_t* PyBlitzArray_STRIDE (PyBlitzArrayObject* o) {
+  return o->stride;
+}
 
-  type_num = fix_integer_type_num(type_num);
-
-  switch (type_num) {
-
-    case NPY_BOOL:
-      {
-        static char s[] = "bool";
-        return s;
-      }
-    case NPY_UINT8:
-      {
-        static char s[] = "uint8";
-        return s;
-      }
-    case NPY_UINT16:
-      {
-        static char s[] = "uint16";
-        return s;
-      }
-    case NPY_UINT32:
-      {
-        static char s[] = "uint32";
-        return s;
-      }
-    case NPY_UINT64:
-      {
-        static char s[] = "uint64";
-        return s;
-      }
-    case NPY_INT8:
-      {
-        static char s[] = "int8";
-        return s;
-      }
-    case NPY_INT16:
-      {
-        static char s[] = "int16";
-        return s;
-      }
-    case NPY_INT32:
-      {
-        static char s[] = "int32";
-        return s;
-      }
-    case NPY_INT64:
-      {
-        static char s[] = "int64";
-        return s;
-      }
-    case NPY_FLOAT32:
-      {
-        static char s[] = "float32";
-        return s;
-      }
-    case NPY_FLOAT64:
-      {
-        static char s[] = "float64";
-        return s;
-      }
-#ifdef NPY_FLOAT128
-    case NPY_FLOAT128:
-      {
-        static char s[] = "float128";
-        return s;
-      }
+PyObject* PyBlitzArray_PySTRIDE (PyBlitzArrayObject* o) {
+  PyObject* retval = PyTuple_New(o->ndim);
+  if (!retval) return retval;
+  for (Py_ssize_t i = 0; i != o->ndim; ++i) {
+#if PY_VERSION_HEX >= 0x03000000
+    PyTuple_SET_ITEM(retval, i, PyLong_FromSsize_t(o->stride[i]));
+#else
+    PyTuple_SET_ITEM(retval, i, PyInt_FromSsize_t(o->stride[i]));
 #endif
-    case NPY_COMPLEX64:
-      {
-        static char s[] = "complex64";
-        return s;
-      }
-    case NPY_COMPLEX128:
-      {
-        static char s[] = "complex128";
-        return s;
-      }
-#ifdef NPY_COMPLEX256
-    case NPY_COMPLEX256:
-      {
-        static char s[] = "complex256";
-        return s;
-      }
-#endif
-    default:
-      PyErr_Format(PyExc_NotImplementedError, "no support for converting type number %d to string", type_num);
-      return 0;
   }
-
+  return retval;
 }
 
-template<typename T, int N>
-PyObject* allocate_innest(int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
-
-  try {
-
-    blitz::TinyVector<int,N> tv_shape;
-    for (int i=0; i<N; ++i) tv_shape(i) = shape[i];
-    PyBlitzArrayObject* retval = (PyBlitzArrayObject*)PyBlitzArray_New(&PyBlitzArray_Type, 0, 0);
-    retval->bzarr = static_cast<void*>(new blitz::Array<T,N>(tv_shape));
-    retval->type_num = type_num;
-    retval->ndim = ndim;
-    for (Py_ssize_t i=0; i<N; ++i) retval->shape[i] = shape[i];
-    return reinterpret_cast<PyObject*>(retval);
-
-  }
-
-  catch (std::exception& e) {
-    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): %s", ndim, PyBlitzArray_TypenumAsString(type_num), e.what());
-  }
-
-  catch (...) {
-    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s')", ndim, PyBlitzArray_TypenumAsString(type_num));
-  }
-
-  /** some test code
-  std::cout << "allocating array" << std::endl;
-  std::shared_ptr<blitz::Array<T,N>> retval(new blitz::Array<T,N>(tv_shape),
-      &delete_array<T,N>);
-  **/
-
-  return 0;
-
+int PyBlitzArray_WRITEABLE(PyBlitzArrayObject* o) {
+  return o->writeable;
 }
 
-template<typename T>
-PyObject* allocate_inner(int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
-  switch (ndim) {
-
-    case 1:
-      return allocate_innest<T,1>(type_num, ndim, shape);
-
-    case 2:
-      return allocate_innest<T,2>(type_num, ndim, shape);
-
-    case 3:
-      return allocate_innest<T,3>(type_num, ndim, shape);
-
-    case 4:
-      return allocate_innest<T,4>(type_num, ndim, shape);
-
-    default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot allocate blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", ndim, PyBlitzArray_TypenumAsString(type_num), BLITZ_ARRAY_MAXDIMS);
-      return 0;
-  }
-
+PyObject* PyBlitzArray_PyWRITEABLE(PyBlitzArrayObject* o) {
+  if (o->writeable) Py_RETURN_TRUE;
+  Py_RETURN_FALSE;
 }
 
-PyObject* PyBlitzArray_SimpleNew (int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
-
-  type_num = fix_integer_type_num(type_num);
-
-  switch (type_num) {
-
-    case NPY_BOOL:
-      return allocate_inner<bool>(type_num, ndim, shape);
-
-    case NPY_INT8:
-      return allocate_inner<int8_t>(type_num, ndim, shape);
-
-    case NPY_INT16:
-      return allocate_inner<int16_t>(type_num, ndim, shape);
-
-    case NPY_INT32:
-      return allocate_inner<int32_t>(type_num, ndim, shape);
-
-    case NPY_INT64:
-      return allocate_inner<int64_t>(type_num, ndim, shape);
-
-    case NPY_UINT8:
-      return allocate_inner<uint8_t>(type_num, ndim, shape);
-
-    case NPY_UINT16:
-      return allocate_inner<uint16_t>(type_num, ndim, shape);
-
-    case NPY_UINT32:
-      return allocate_inner<uint32_t>(type_num, ndim, shape);
-
-    case NPY_UINT64:
-      return allocate_inner<uint64_t>(type_num, ndim, shape);
-
-    case NPY_FLOAT32:
-      return allocate_inner<float>(type_num, ndim, shape);
-
-    case NPY_FLOAT64:
-      return allocate_inner<double>(type_num, ndim, shape);
-
-#ifdef NPY_FLOAT128
-    case NPY_FLOAT128:
-      return allocate_inner<long double>(type_num, ndim, shape);
-
-#endif
-
-    case NPY_COMPLEX64:
-      return allocate_inner<std::complex<float>>(type_num, ndim, shape);
-
-    case NPY_COMPLEX128:
-      return allocate_inner<std::complex<double>>(type_num, ndim, shape);
-
-#ifdef NPY_COMPLEX256
-    case NPY_COMPLEX256:
-      return allocate_inner<std::complex<long double>>(type_num, ndim, shape);
-
-#endif
-
-    default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot create blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T having an unsupported numpy type number of %d", ndim, type_num);
-      return 0;
-
-  }
-
+PyObject* PyBlitzArray_BASE(PyBlitzArrayObject* o) {
+  return o->base;
 }
 
-PyObject* PyBlitzArray_New(PyTypeObject* type, PyObject*, PyObject*) {
-
-  /* Allocates the python object itself */
-  PyBlitzArrayObject* self = (PyBlitzArrayObject*)type->tp_alloc(type, 0);
-
-  self->bzarr = 0;
-  self->type_num = -1;
-  self->ndim = 0;
-  self->base = Py_None;
-  Py_INCREF(Py_None);
-
-  return reinterpret_cast<PyObject*>(self);
+PyObject* PyBlitzArray_PyBASE(PyBlitzArrayObject* o) {
+  if (o->base) {
+    Py_INCREF(o->base);
+    return o->base;
+  }
+  Py_RETURN_NONE;
 }
 
-template<typename T> void deallocate_inner(PyBlitzArrayObject* o) {
-
-  switch (o->ndim) {
-
-    case 1:
-      delete reinterpret_cast<blitz::Array<T,1>*>(o->bzarr);
-      break;
-
-    case 2:
-      delete reinterpret_cast<blitz::Array<T,2>*>(o->bzarr);
-      break;
-
-    case 3:
-      delete reinterpret_cast<blitz::Array<T,3>*>(o->bzarr);
-      break;
-
-    case 4:
-      delete reinterpret_cast<blitz::Array<T,4>*>(o->bzarr);
-      break;
-
-    default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot deallocate blitz.array(@%" PY_FORMAT_SIZE_T "d,%s>, this number of dimensions is outside the range of supported dimensions [1,%d]", o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BLITZ_ARRAY_MAXDIMS);
-      return;
-  }
-
-  Py_XDECREF(o->base);
-  o->ob_type->tp_free((PyObject*)o);
-}
-
-void PyBlitzArray_Delete (PyBlitzArrayObject* o) {
-
-  if (!o->bzarr) {
-    //shortcut
-    Py_XDECREF(o->base);
-    o->ob_type->tp_free((PyObject*)o);
-    return;
-  }
-
-  switch (o->type_num) {
-
-    case NPY_BOOL:
-      return deallocate_inner<bool>(o);
-
-    case NPY_INT8:
-      return deallocate_inner<int8_t>(o);
-
-    case NPY_INT16:
-      return deallocate_inner<int16_t>(o);
-
-    case NPY_INT32:
-      return deallocate_inner<int32_t>(o);
-
-    case NPY_INT64:
-      return deallocate_inner<int64_t>(o);
-
-    case NPY_UINT8:
-      return deallocate_inner<uint8_t>(o);
-
-    case NPY_UINT16:
-      return deallocate_inner<uint16_t>(o);
-
-    case NPY_UINT32:
-      return deallocate_inner<uint32_t>(o);
-
-    case NPY_UINT64:
-      return deallocate_inner<uint64_t>(o);
-
-    case NPY_FLOAT32:
-      return deallocate_inner<float>(o);
-
-    case NPY_FLOAT64:
-      return deallocate_inner<double>(o);
-
-#ifdef NPY_FLOAT128
-    case NPY_FLOAT128:
-      return deallocate_inner<long double>(o);
-
-#endif
-
-    case NPY_COMPLEX64:
-      return deallocate_inner<std::complex<float>>(o);
-
-    case NPY_COMPLEX128:
-      return deallocate_inner<std::complex<double>>(o);
-
-#ifdef NPY_COMPLEX256
-    case NPY_COMPLEX256:
-      return deallocate_inner<std::complex<long double>>(o);
-
-#endif
-
-    default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot deallocate blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T having an unsupported numpy type number of %d", o->ndim, o->type_num);
-      return;
-
-  }
-
-}
+/************
+ * Indexing *
+ ************/
 
 template <typename T>
 PyObject* getitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos) {
@@ -541,7 +300,7 @@ int setitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
 
     case 1:
       {
-        T c_value = PyBlitzArray_AsCScalar<T>(value);
+        T c_value = PyBlitzArrayCxx_AsCScalar<T>(value);
         if (PyErr_Occurred()) return -1;
         (*reinterpret_cast<blitz::Array<T,1>*>(o->bzarr))((int)tmp[0]) = c_value;
         return 0;
@@ -549,7 +308,7 @@ int setitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
 
     case 2:
       {
-        T c_value = PyBlitzArray_AsCScalar<T>(value);
+        T c_value = PyBlitzArrayCxx_AsCScalar<T>(value);
         if (PyErr_Occurred()) return -1;
         (*reinterpret_cast<blitz::Array<T,2>*>(o->bzarr))((int)tmp[0], (int)tmp[1]) = c_value;
         return 0;
@@ -557,7 +316,7 @@ int setitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
 
     case 3:
       {
-        T c_value = PyBlitzArray_AsCScalar<T>(value);
+        T c_value = PyBlitzArrayCxx_AsCScalar<T>(value);
         if (PyErr_Occurred()) return -1;
         (*reinterpret_cast<blitz::Array<T,3>*>(o->bzarr))((int)tmp[0], (int)tmp[1], (int)tmp[2]) = c_value;
         return 0;
@@ -565,7 +324,7 @@ int setitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
 
     case 4:
       {
-        T c_value = PyBlitzArray_AsCScalar<T>(value);
+        T c_value = PyBlitzArrayCxx_AsCScalar<T>(value);
         if (PyErr_Occurred()) return -1;
         (*reinterpret_cast<blitz::Array<T,4>*>(o->bzarr))((int)tmp[0], (int)tmp[1], (int)tmp[2], (int)tmp[3]) = c_value;
         return 0;
@@ -579,6 +338,11 @@ int setitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
 }
 
 int PyBlitzArray_SetItem(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
+
+  if (!o->writeable) {
+    PyErr_Format(PyExc_RuntimeError, "cannot set item on read-only blitz.array(@%" PY_FORMAT_SIZE_T "d,%s) ", o->ndim, PyBlitzArray_TypenumAsString(o->type_num));
+    return -1;
+  }
 
   switch (o->type_num) {
 
@@ -641,129 +405,412 @@ int PyBlitzArray_SetItem(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value
 
 }
 
-template <typename T>
-PyObject* ndarray_copy_inner(PyBlitzArrayObject* o) {
+/********************************
+ * Construction and Destruction *
+ ********************************/
+
+PyObject* PyBlitzArray_New(PyTypeObject* type, PyObject*, PyObject*) {
+
+  /* Allocates the python object itself */
+  PyBlitzArrayObject* self = (PyBlitzArrayObject*)type->tp_alloc(type, 0);
+
+  self->bzarr = 0;
+  self->data = 0;
+  self->type_num = -1;
+  self->ndim = 0;
+  self->writeable = 0;
+  self->base = 0;
+
+  return reinterpret_cast<PyObject*>(self);
+}
+
+template<typename T> void deallocate_inner(PyBlitzArrayObject* o) {
 
   switch (o->ndim) {
 
     case 1:
-      {
-        return PyBlitzArray_AsNumpyArrayCopy(*reinterpret_cast<blitz::Array<T,1>*>(o->bzarr));
-      }
+      delete reinterpret_cast<blitz::Array<T,1>*>(o->bzarr);
+      break;
 
     case 2:
-      {
-        return PyBlitzArray_AsNumpyArrayCopy(*reinterpret_cast<blitz::Array<T,2>*>(o->bzarr));
-      }
+      delete reinterpret_cast<blitz::Array<T,2>*>(o->bzarr);
+      break;
 
     case 3:
-      {
-        return PyBlitzArray_AsNumpyArrayCopy(*reinterpret_cast<blitz::Array<T,3>*>(o->bzarr));
-      }
+      delete reinterpret_cast<blitz::Array<T,3>*>(o->bzarr);
+      break;
 
     case 4:
-      {
-        return PyBlitzArray_AsNumpyArrayCopy(*reinterpret_cast<blitz::Array<T,4>*>(o->bzarr));
-      }
+      delete reinterpret_cast<blitz::Array<T,4>*>(o->bzarr);
+      break;
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot create a numpy ndarray copy of blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BLITZ_ARRAY_MAXDIMS);
-      return 0;
+      PyErr_Format(PyExc_NotImplementedError, "cannot deallocate blitz.array(@%" PY_FORMAT_SIZE_T "d,%s>, this number of dimensions is outside the range of supported dimensions [1,%d]", o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BLITZ_ARRAY_MAXDIMS);
+      return;
   }
 
+  Py_XDECREF(o->base);
+  o->ob_type->tp_free((PyObject*)o);
 }
 
-PyObject* PyBlitzArray_AsNumpyArrayCopy(PyBlitzArrayObject* o) {
+void PyBlitzArray_Delete (PyBlitzArrayObject* o) {
+
+  if (!o->bzarr) {
+    //shortcut
+    Py_XDECREF(o->base);
+    o->ob_type->tp_free((PyObject*)o);
+    return;
+  }
 
   switch (o->type_num) {
 
     case NPY_BOOL:
-      return ndarray_copy_inner<bool>(o);
+      return deallocate_inner<bool>(o);
 
     case NPY_INT8:
-      return ndarray_copy_inner<int8_t>(o);
+      return deallocate_inner<int8_t>(o);
 
     case NPY_INT16:
-      return ndarray_copy_inner<int16_t>(o);
+      return deallocate_inner<int16_t>(o);
 
     case NPY_INT32:
-      return ndarray_copy_inner<int32_t>(o);
+      return deallocate_inner<int32_t>(o);
 
     case NPY_INT64:
-      return ndarray_copy_inner<int64_t>(o);
+      return deallocate_inner<int64_t>(o);
 
     case NPY_UINT8:
-      return ndarray_copy_inner<uint8_t>(o);
+      return deallocate_inner<uint8_t>(o);
 
     case NPY_UINT16:
-      return ndarray_copy_inner<uint16_t>(o);
+      return deallocate_inner<uint16_t>(o);
 
     case NPY_UINT32:
-      return ndarray_copy_inner<uint32_t>(o);
+      return deallocate_inner<uint32_t>(o);
 
     case NPY_UINT64:
-      return ndarray_copy_inner<uint64_t>(o);
+      return deallocate_inner<uint64_t>(o);
 
     case NPY_FLOAT32:
-      return ndarray_copy_inner<float>(o);
+      return deallocate_inner<float>(o);
 
     case NPY_FLOAT64:
-      return ndarray_copy_inner<double>(o);
+      return deallocate_inner<double>(o);
 
 #ifdef NPY_FLOAT128
     case NPY_FLOAT128:
-      return ndarray_copy_inner<long double>(o);
+      return deallocate_inner<long double>(o);
 
 #endif
 
     case NPY_COMPLEX64:
-      return ndarray_copy_inner<std::complex<float>>(o);
+      return deallocate_inner<std::complex<float>>(o);
 
     case NPY_COMPLEX128:
-      return ndarray_copy_inner<std::complex<double>>(o);
+      return deallocate_inner<std::complex<double>>(o);
 
 #ifdef NPY_COMPLEX256
     case NPY_COMPLEX256:
-      return ndarray_copy_inner<std::complex<long double>>(o);
+      return deallocate_inner<std::complex<long double>>(o);
 
 #endif
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot create a numpy ndarray copy of blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T being a data type with an unsupported numpy type number = %d", o->ndim, o->type_num);
+      PyErr_Format(PyExc_NotImplementedError, "cannot deallocate blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T having an unsupported numpy type number of %d", o->ndim, o->type_num);
+      return;
+
+  }
+
+}
+
+template<typename T, int N>
+PyObject* simplenew_2(int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
+
+  try {
+
+    blitz::TinyVector<int,N> tv_shape;
+    for (int i=0; i<N; ++i) tv_shape(i) = shape[i];
+    PyBlitzArrayObject* retval = (PyBlitzArrayObject*)PyBlitzArray_New(&PyBlitzArray_Type, 0, 0);
+    auto bz = new blitz::Array<T,N>(tv_shape);
+    retval->bzarr = static_cast<void*>(bz);
+    retval->data = bz->data();
+    retval->type_num = type_num;
+    retval->ndim = ndim;
+    for (Py_ssize_t i=0; i<N; ++i) {
+      retval->shape[i] = shape[i];
+      retval->stride[i] = sizeof(T)*bz->stride(i); ///in **bytes**
+    }
+    retval->writeable = 1;
+    return reinterpret_cast<PyObject*>(retval);
+
+  }
+
+  catch (std::exception& e) {
+    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): %s", ndim, PyBlitzArray_TypenumAsString(type_num), e.what());
+  }
+
+  catch (...) {
+    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s')", ndim, PyBlitzArray_TypenumAsString(type_num));
+  }
+
+  /** some test code
+  std::cout << "allocating array" << std::endl;
+  std::shared_ptr<blitz::Array<T,N>> retval(new blitz::Array<T,N>(tv_shape),
+      &delete_array<T,N>);
+  **/
+
+  return 0;
+
+}
+
+template<typename T>
+PyObject* simplenew_1(int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
+  switch (ndim) {
+
+    case 1:
+      return simplenew_2<T,1>(type_num, ndim, shape);
+
+    case 2:
+      return simplenew_2<T,2>(type_num, ndim, shape);
+
+    case 3:
+      return simplenew_2<T,3>(type_num, ndim, shape);
+
+    case 4:
+      return simplenew_2<T,4>(type_num, ndim, shape);
+
+    default:
+      PyErr_Format(PyExc_NotImplementedError, "cannot allocate blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", ndim, PyBlitzArray_TypenumAsString(type_num), BLITZ_ARRAY_MAXDIMS);
+      return 0;
+  }
+
+}
+
+PyObject* PyBlitzArray_SimpleNew (int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
+
+  type_num = fix_integer_type_num(type_num);
+
+  switch (type_num) {
+
+    case NPY_BOOL:
+      return simplenew_1<bool>(type_num, ndim, shape);
+
+    case NPY_INT8:
+      return simplenew_1<int8_t>(type_num, ndim, shape);
+
+    case NPY_INT16:
+      return simplenew_1<int16_t>(type_num, ndim, shape);
+
+    case NPY_INT32:
+      return simplenew_1<int32_t>(type_num, ndim, shape);
+
+    case NPY_INT64:
+      return simplenew_1<int64_t>(type_num, ndim, shape);
+
+    case NPY_UINT8:
+      return simplenew_1<uint8_t>(type_num, ndim, shape);
+
+    case NPY_UINT16:
+      return simplenew_1<uint16_t>(type_num, ndim, shape);
+
+    case NPY_UINT32:
+      return simplenew_1<uint32_t>(type_num, ndim, shape);
+
+    case NPY_UINT64:
+      return simplenew_1<uint64_t>(type_num, ndim, shape);
+
+    case NPY_FLOAT32:
+      return simplenew_1<float>(type_num, ndim, shape);
+
+    case NPY_FLOAT64:
+      return simplenew_1<double>(type_num, ndim, shape);
+
+#ifdef NPY_FLOAT128
+    case NPY_FLOAT128:
+      return simplenew_1<long double>(type_num, ndim, shape);
+
+#endif
+
+    case NPY_COMPLEX64:
+      return simplenew_1<std::complex<float>>(type_num, ndim, shape);
+
+    case NPY_COMPLEX128:
+      return simplenew_1<std::complex<double>>(type_num, ndim, shape);
+
+#ifdef NPY_COMPLEX256
+    case NPY_COMPLEX256:
+      return simplenew_1<std::complex<long double>>(type_num, ndim, shape);
+
+#endif
+
+    default:
+      PyErr_Format(PyExc_NotImplementedError, "cannot create blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T having an unsupported numpy type number of %d", ndim, type_num);
       return 0;
 
   }
 
 }
 
-template <typename T>
-PyObject* ndarray_shallow_inner(PyBlitzArrayObject* o) {
+template<typename T, int N>
+PyObject* simplenewfromdata_2(int type_num, Py_ssize_t ndim,
+    Py_ssize_t* shape, Py_ssize_t* stride, void* data, int writeable) {
 
-  PyObject* retval = 0;
+  try {
 
-  switch (o->ndim) {
+    blitz::TinyVector<int,N> tv_shape;
+    blitz::TinyVector<int,N> tv_stride;
+    for (int i=0; i<N; ++i) {
+      tv_shape(i) = shape[i];
+      tv_stride(i) = stride[i]/sizeof(T); ///< from **bytes**
+    }
+    PyBlitzArrayObject* retval = (PyBlitzArrayObject*)PyBlitzArray_New(&PyBlitzArray_Type, 0, 0);
+    auto bz = new blitz::Array<T,N>(reinterpret_cast<T*>(data), tv_shape, tv_stride, blitz::neverDeleteData);
+    retval->bzarr = static_cast<void*>(bz);
+    retval->data = data;
+    retval->type_num = type_num;
+    retval->ndim = ndim;
+    for (Py_ssize_t i=0; i<N; ++i) {
+      retval->shape[i] = shape[i];
+      retval->stride[i] = stride[i];
+    }
+    retval->writeable = writeable;
+    return reinterpret_cast<PyObject*>(retval);
+
+  }
+
+  catch (std::exception& e) {
+    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): %s", ndim, PyBlitzArray_TypenumAsString(type_num), e.what());
+  }
+
+  catch (...) {
+    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s')", ndim, PyBlitzArray_TypenumAsString(type_num));
+  }
+
+  /** some test code
+  std::cout << "allocating array" << std::endl;
+  std::shared_ptr<blitz::Array<T,N>> retval(new blitz::Array<T,N>(tv_shape),
+      &delete_array<T,N>);
+  **/
+
+  return 0;
+
+}
+
+template<typename T>
+PyObject* simplenewfromdata_1(int type_num, Py_ssize_t ndim,
+    Py_ssize_t* shape, Py_ssize_t* stride, void* data, int writeable) {
+
+  switch (ndim) {
 
     case 1:
-      retval = PyBlitzArray_AsShallowNumpyArray(*reinterpret_cast<blitz::Array<T,1>*>(o->bzarr));
-      break;
+      return simplenewfromdata_2<T,1>(type_num, ndim, shape, stride, data, writeable);
 
     case 2:
-      retval = PyBlitzArray_AsShallowNumpyArray(*reinterpret_cast<blitz::Array<T,2>*>(o->bzarr));
-      break;
+      return simplenewfromdata_2<T,2>(type_num, ndim, shape, stride, data, writeable);
 
     case 3:
-      retval = PyBlitzArray_AsShallowNumpyArray(*reinterpret_cast<blitz::Array<T,3>*>(o->bzarr));
-      break;
+      return simplenewfromdata_2<T,3>(type_num, ndim, shape, stride, data, writeable);
 
     case 4:
-      retval = PyBlitzArray_AsShallowNumpyArray(*reinterpret_cast<blitz::Array<T,4>*>(o->bzarr));
-      break;
+      return simplenewfromdata_2<T,4>(type_num, ndim, shape, stride, data, writeable);
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot create a numpy ndarray shallow copy of blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BLITZ_ARRAY_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot allocate blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", ndim, PyBlitzArray_TypenumAsString(type_num), BLITZ_ARRAY_MAXDIMS);
+      return 0;
+  }
+
+}
+
+PyObject* PyBlitzArray_SimpleNewFromData (int type_num, Py_ssize_t ndim, 
+    Py_ssize_t* shape, Py_ssize_t* stride, void* data, int writeable) {
+
+  type_num = fix_integer_type_num(type_num);
+
+  switch (type_num) {
+
+    case NPY_BOOL:
+      return simplenewfromdata_1<bool>(type_num, ndim, shape, stride, data, writeable);
+
+    case NPY_INT8:
+      return simplenewfromdata_1<int8_t>(type_num, ndim, shape, stride, data, writeable);
+
+    case NPY_INT16:
+      return simplenewfromdata_1<int16_t>(type_num, ndim, shape, stride, data, writeable);
+
+    case NPY_INT32:
+      return simplenewfromdata_1<int32_t>(type_num, ndim, shape, stride, data, writeable);
+
+    case NPY_INT64:
+      return simplenewfromdata_1<int64_t>(type_num, ndim, shape, stride, data, writeable);
+
+    case NPY_UINT8:
+      return simplenewfromdata_1<uint8_t>(type_num, ndim, shape, stride, data, writeable);
+
+    case NPY_UINT16:
+      return simplenewfromdata_1<uint16_t>(type_num, ndim, shape, stride, data, writeable);
+
+    case NPY_UINT32:
+      return simplenewfromdata_1<uint32_t>(type_num, ndim, shape, stride, data, writeable);
+
+    case NPY_UINT64:
+      return simplenewfromdata_1<uint64_t>(type_num, ndim, shape, stride, data, writeable);
+
+    case NPY_FLOAT32:
+      return simplenewfromdata_1<float>(type_num, ndim, shape, stride, data, writeable);
+
+    case NPY_FLOAT64:
+      return simplenewfromdata_1<double>(type_num, ndim, shape, stride, data, writeable);
+
+#ifdef NPY_FLOAT128
+    case NPY_FLOAT128:
+      return simplenewfromdata_1<long double>(type_num, ndim, shape, stride, data, writeable);
+
+#endif
+
+    case NPY_COMPLEX64:
+      return simplenewfromdata_1<std::complex<float>>(type_num, ndim, shape, stride, data, writeable);
+
+    case NPY_COMPLEX128:
+      return simplenewfromdata_1<std::complex<double>>(type_num, ndim, shape, stride, data, writeable);
+
+#ifdef NPY_COMPLEX256
+    case NPY_COMPLEX256:
+      return simplenewfromdata_1<std::complex<long double>>(type_num, ndim, shape, stride, data, writeable);
+
+#endif
+
+    default:
+      PyErr_Format(PyExc_NotImplementedError, "cannot create blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T having an unsupported numpy type number of %d", ndim, type_num);
       return 0;
 
   }
+
+}
+
+/****************************
+ * From/To NumPy Converters *
+ ****************************/
+
+PyObject* PyBlitzArray_AsNumpyArray(PyBlitzArrayObject* o) {
+
+  // if o->base is a numpy array, return it
+  if (o->base && PyArray_Check(o->base)) {
+    Py_INCREF(o->base);
+    return o->base;
+  }
+
+  // creates an ndarray from the blitz::Array<>.data()
+  PyArray_Descr* dtype = PyBlitzArray_PyDTYPE(o);
+  PyObject* retval = PyArray_NewFromDescr(&PyArray_Type, 
+      dtype,
+      o->ndim, o->shape, o->stride, o->data,
+#     if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
+      NPY_ARRAY_BEHAVED,
+#     else
+      NPY_BEHAVED,
+#     endif
+      0);
+  Py_DECREF(dtype);
 
   if (!retval) return 0;
 
@@ -780,113 +827,163 @@ PyObject* ndarray_shallow_inner(PyBlitzArrayObject* o) {
   Py_INCREF(reinterpret_cast<PyObject*>(o));
 
   return retval;
+
 }
 
-PyObject* PyBlitzArray_AsShallowNumpyArray(PyBlitzArrayObject* o) {
+static int ndarray_behaves (PyArrayObject* o) {
 
-  switch (o->type_num) {
+  if (!PyArray_Check(o)) return 0;
 
+  PyArrayObject* ao = reinterpret_cast<PyArrayObject*>(o);
+
+  // checks if the array is C-style, aligned and in contiguous memory
+  if (!PyArray_ISCARRAY_RO(ao)) return 0;
+
+  // checks if the number of dimensions is supported
+  if (PyArray_NDIM(ao) < 1 || PyArray_NDIM(ao) > BLITZ_ARRAY_MAXDIMS) return 0;
+
+  // checks if the type number if supported
+  switch(fix_integer_type_num(PyArray_DTYPE(ao)->type_num)) {
     case NPY_BOOL:
-      return ndarray_shallow_inner<bool>(o);
-
-    case NPY_INT8:
-      return ndarray_shallow_inner<int8_t>(o);
-
-    case NPY_INT16:
-
-      return ndarray_shallow_inner<int16_t>(o);
-    case NPY_INT32:
-
-      return ndarray_shallow_inner<int32_t>(o);
-    case NPY_INT64:
-
-      return ndarray_shallow_inner<int64_t>(o);
     case NPY_UINT8:
-
-      return ndarray_shallow_inner<uint8_t>(o);
-
     case NPY_UINT16:
-      return ndarray_shallow_inner<uint16_t>(o);
-
     case NPY_UINT32:
-      return ndarray_shallow_inner<uint32_t>(o);
-
     case NPY_UINT64:
-      return ndarray_shallow_inner<uint64_t>(o);
-
+    case NPY_INT8:
+    case NPY_INT16:
+    case NPY_INT32:
+    case NPY_INT64:
     case NPY_FLOAT32:
-      return ndarray_shallow_inner<float>(o);
-
     case NPY_FLOAT64:
-      return ndarray_shallow_inner<double>(o);
-
 #ifdef NPY_FLOAT128
     case NPY_FLOAT128:
-      return ndarray_shallow_inner<long double>(o);
 #endif
-
     case NPY_COMPLEX64:
-      return ndarray_shallow_inner<std::complex<float>>(o);
-
     case NPY_COMPLEX128:
-      return ndarray_shallow_inner<std::complex<double>>(o);
-
 #ifdef NPY_COMPLEX256
     case NPY_COMPLEX256:
-      return ndarray_shallow_inner<std::complex<long double>>(o);
+      break;
 #endif
-
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot create a numpy ndarray copy of blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T being a data type with an unsupported numpy type number = %d", o->ndim, o->type_num);
       return 0;
-
   }
 
+  // if you get to this point, you can only return yes
+  return 1;
 }
 
-PyObject* PyBlitzArray_AsAnyNumpyArray(PyBlitzArrayObject* o) {
+PyObject* PyBlitzArray_FromNumpyArray(PyArrayObject* o) {
 
-  PyObject* retval = PyBlitzArray_AsShallowNumpyArray(o);
-  if (retval) return retval;
-  return PyBlitzArray_AsNumpyArrayCopy(o);
+  // is numpy.ndarray wrapped around a blitz.array
+  if (PyBlitzArray_CheckNumpyBase(o)) {
+    Py_INCREF(PyArray_BASE(o));
+    return PyArray_BASE(o);
+  }
 
-}
+  if (!ndarray_behaves(o)) {
+    PyErr_Format(PyExc_ValueError, "cannot convert numpy.ndarray which doesn't behave (memory contiguous, aligned, C-style, <%d dimensions) into a blitz.array", BLITZ_ARRAY_MAXDIMS);
+    return 0;
+  }
 
-Py_ssize_t PyBlitzArray_NDIM (PyBlitzArrayObject* o) {
-  return o->ndim;
-}
+  PyObject* retval = PyBlitzArray_SimpleNewFromData(
+      PyArray_DESCR(o)->type_num,
+      PyArray_NDIM(o),
+      PyArray_DIMS(o),
+      PyArray_STRIDES(o),
+      PyArray_DATA(o),
+#     if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
+      PyArray_FLAGS(o) & NPY_ARRAY_WRITEABLE
+#     else
+      PyArray_FLAGS(o) & NPY_WRITEABLE
+#     endif
+      );
 
-int PyBlitzArray_TYPE (PyBlitzArrayObject* o) {
-  return o->type_num;
-}
-
-Py_ssize_t* PyBlitzArray_SHAPE (PyBlitzArrayObject* o) {
-  return o->shape;
-}
-
-PyObject* PyBlitzArray_PYSHAPE (PyBlitzArrayObject* o) {
-  PyObject* retval = PyTuple_New(o->ndim);
   if (!retval) return retval;
-  for (Py_ssize_t i = 0; i != o->ndim; ++i) {
-#if PY_VERSION_HEX >= 0x03000000
-    PyTuple_SET_ITEM(retval, i, PyLong_FromSsize_t(o->shape[i]));
-#else
-    PyTuple_SET_ITEM(retval, i, PyInt_FromSsize_t(o->shape[i]));
-#endif
-  }
+
+  PyObject* pyo = reinterpret_cast<PyObject*>(o);
+  reinterpret_cast<PyBlitzArrayObject*>(retval)->base = pyo;
+  Py_INCREF(pyo);
   return retval;
+
 }
 
-PyArray_Descr* PyBlitzArray_DTYPE (PyBlitzArrayObject* o) {
-  return PyArray_DescrFromType(o->type_num);
+/***********************************************
+ * Converter Functions for PyArg_Parse* family *
+ ***********************************************/
+
+int PyBlitzArray_Converter(PyObject* o, PyBlitzArrayObject** a) {
+
+  // is already a blitz.array
+  if (PyBlitzArray_Check(o)) {
+    *a = reinterpret_cast<PyBlitzArrayObject*>(o);
+    Py_INCREF(*a);
+    return 1;
+  }
+
+  // is numpy.ndarray wrapped around a blitz.array
+  if (PyArray_Check(o)) {
+    PyArrayObject* arr = reinterpret_cast<PyArrayObject*>(o);
+    if (PyBlitzArray_CheckNumpyBase(arr)) {
+      *a = reinterpret_cast<PyBlitzArrayObject*>(PyArray_BASE(arr));
+      Py_INCREF(*a);
+      return 1;
+    }
+  }
+
+  // run the normal converter
+  PyObject* ao = 0;
+  if (!PyArray_Converter(o, &ao)) {
+    PyErr_Print();
+    PyErr_SetString(PyExc_ValueError, "cannot convert argument to blitz.array - prefix conversion to numpy.ndarray failed");
+    return 0;
+  }
+
+  PyObject* retval = PyBlitzArray_FromNumpyArray(reinterpret_cast<PyArrayObject*>(ao));
+  Py_DECREF(ao);
+
+  *a = reinterpret_cast<PyBlitzArrayObject*>(retval);
+
+  return (*a) ? 1 : 0;
+
+}
+
+int PyBlitzArray_OutputConverter(PyObject* o, PyBlitzArrayObject** a) {
+  
+  // is already a blitz.array
+  if (PyBlitzArray_Check(o)) {
+    *a = reinterpret_cast<PyBlitzArrayObject*>(o);
+    Py_INCREF(o);
+    return 1;
+  }
+
+  // is numpy.ndarray wrapped around a blitz.array
+  if (PyArray_Check(o)) {
+    PyArrayObject* arr = reinterpret_cast<PyArrayObject*>(o);
+    if (PyBlitzArray_CheckNumpyBase(arr)) {
+      *a = reinterpret_cast<PyBlitzArrayObject*>(PyArray_BASE(arr));
+      Py_INCREF(*a);
+      return 1;
+    }
+  }
+
+  // run the numpy output converter, hope it works
+  PyArrayObject* ao = 0;
+  if (!PyArray_OutputConverter(o, &ao)) {
+    PyErr_Print();
+    PyErr_SetString(PyExc_ValueError, "cannot convert argument to blitz.array - prefix conversion to numpy.ndarray failed");
+    return 0;
+  }
+
+  PyObject* retval = PyBlitzArray_FromNumpyArray(ao);
+  Py_DECREF(ao);
+
+  *a = reinterpret_cast<PyBlitzArrayObject*>(retval);
+
+  return (*a) ? 1 : 0;
+
 }
 
 int PyBlitzArray_IndexConverter(PyObject* o, PyBlitzArrayObject** shape) {
-
-  if (!o) {
-    PyErr_SetString(PyExc_TypeError, "index/shape must not be NULL");
-    return 0;
-  }
 
   if (PyNumber_Check(o)) {
     (*shape)->ndim = 1;
@@ -939,12 +1036,6 @@ int PyBlitzArray_IndexConverter(PyObject* o, PyBlitzArrayObject** shape) {
 
 int PyBlitzArray_TypenumConverter(PyObject* o, int** type_num) {
 
-  /* Make sure the dtype is good */
-  if (!o) {
-    PyErr_SetString(PyExc_TypeError, "dtype must not be NULL");
-    return 0;
-  }
-
   PyArray_Descr* dtype = 0;
   if (!PyArray_DescrConverter2(o, &dtype)) return 0; ///< (*dtype) is a new ref
   (**type_num) = dtype->type_num;
@@ -982,267 +1073,113 @@ int PyBlitzArray_TypenumConverter(PyObject* o, int** type_num) {
   return 1;
 }
 
-template <typename T> int behaved_inner(PyBlitzArrayObject* o) {
+/*************
+ * Utilities *
+ *************/
 
-  switch (o->ndim) {
-
-    case 1:
-      return PyBlitzArray_IsBehaved(*reinterpret_cast<blitz::Array<T,1>*>(o->bzarr));
-
-    case 2:
-      return PyBlitzArray_IsBehaved(*reinterpret_cast<blitz::Array<T,2>*>(o->bzarr));
-
-    case 3:
-      return PyBlitzArray_IsBehaved(*reinterpret_cast<blitz::Array<T,3>*>(o->bzarr));
-
-    case 4:
-      return PyBlitzArray_IsBehaved(*reinterpret_cast<blitz::Array<T,4>*>(o->bzarr));
-
-    default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot check behaviour of blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BLITZ_ARRAY_MAXDIMS);
-      return 0;
-
-  }
-
+/**
+ * A simple implementation of the function below. It returns type names such as
+ * "numpy.uint64" instead of just "uint64". The type name is also associated to
+ * an object which may vanish - so, not that safe.
+ */
+/**
+const char* PyBlitzArray_TypenumAsString (int type_num) {
+  PyArray_Descr* dtype = PyArray_DescrFromType(type_num); ///< new reference
+  if (!dtype) return 0;
+  const char* retval = dtype->typeobj->tp_name;
+  Py_DECREF(dtype);
+  return retval;
 }
+*/
 
-int PyBlitzArray_IsBehaved (PyBlitzArrayObject* o) {
+const char* PyBlitzArray_TypenumAsString (int type_num) {
 
-  switch (o->type_num) {
+  type_num = fix_integer_type_num(type_num);
+
+  switch (type_num) {
 
     case NPY_BOOL:
-      return behaved_inner<bool>(o);
-
-    case NPY_INT8:
-      return behaved_inner<int8_t>(o);
-
-    case NPY_INT16:
-
-      return behaved_inner<int16_t>(o);
-    case NPY_INT32:
-
-      return behaved_inner<int32_t>(o);
-    case NPY_INT64:
-
-      return behaved_inner<int64_t>(o);
+      {
+        static char s[] = "bool";
+        return s;
+      }
     case NPY_UINT8:
-
-      return behaved_inner<uint8_t>(o);
-
+      {
+        static char s[] = "uint8";
+        return s;
+      }
     case NPY_UINT16:
-      return behaved_inner<uint16_t>(o);
-
+      {
+        static char s[] = "uint16";
+        return s;
+      }
     case NPY_UINT32:
-      return behaved_inner<uint32_t>(o);
-
+      {
+        static char s[] = "uint32";
+        return s;
+      }
     case NPY_UINT64:
-      return behaved_inner<uint64_t>(o);
-
+      {
+        static char s[] = "uint64";
+        return s;
+      }
+    case NPY_INT8:
+      {
+        static char s[] = "int8";
+        return s;
+      }
+    case NPY_INT16:
+      {
+        static char s[] = "int16";
+        return s;
+      }
+    case NPY_INT32:
+      {
+        static char s[] = "int32";
+        return s;
+      }
+    case NPY_INT64:
+      {
+        static char s[] = "int64";
+        return s;
+      }
     case NPY_FLOAT32:
-      return behaved_inner<float>(o);
-
+      {
+        static char s[] = "float32";
+        return s;
+      }
     case NPY_FLOAT64:
-      return behaved_inner<double>(o);
-
+      {
+        static char s[] = "float64";
+        return s;
+      }
 #ifdef NPY_FLOAT128
     case NPY_FLOAT128:
-      return behaved_inner<long double>(o);
-#endif
-
-    case NPY_COMPLEX64:
-      return behaved_inner<std::complex<float>>(o);
-
-    case NPY_COMPLEX128:
-      return behaved_inner<std::complex<double>>(o);
-
-#ifdef NPY_COMPLEX256
-    case NPY_COMPLEX256:
-      return behaved_inner<std::complex<long double>>(o);
-#endif
-
-    default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot check behaviour of blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T being a data type with an unsupported numpy type number = %d", o->ndim, o->type_num);
-      return 0;
-
-  }
-
-}
-
-int PyBlitzArray_NumpyArrayIsBehaved (PyObject* o) {
-
-  if (!PyArray_Check(o)) return 0;
-
-  PyArrayObject* ao = reinterpret_cast<PyArrayObject*>(o);
-
-  // checks if the array is C-style, aligned and in contiguous memory
-  if (!PyArray_ISCARRAY_RO(ao)) return 0;
-
-  // checks if the number of dimensions is supported
-  if (PyArray_NDIM(ao) < 1 || PyArray_NDIM(ao) > BLITZ_ARRAY_MAXDIMS) return 0;
-
-  // checks if the type number if supported
-  switch(fix_integer_type_num(PyArray_DTYPE(ao)->type_num)) {
-    case NPY_BOOL:
-    case NPY_UINT8:
-    case NPY_UINT16:
-    case NPY_UINT32:
-    case NPY_UINT64:
-    case NPY_INT8:
-    case NPY_INT16:
-    case NPY_INT32:
-    case NPY_INT64:
-    case NPY_FLOAT32:
-    case NPY_FLOAT64:
-#ifdef NPY_FLOAT128
-    case NPY_FLOAT128:
+      {
+        static char s[] = "float128";
+        return s;
+      }
 #endif
     case NPY_COMPLEX64:
+      {
+        static char s[] = "complex64";
+        return s;
+      }
     case NPY_COMPLEX128:
+      {
+        static char s[] = "complex128";
+        return s;
+      }
 #ifdef NPY_COMPLEX256
     case NPY_COMPLEX256:
-      break;
+      {
+        static char s[] = "complex256";
+        return s;
+      }
 #endif
     default:
+      PyErr_Format(PyExc_NotImplementedError, "no support for converting type number %d to string", type_num);
       return 0;
-  }
-
-  // if you get to this point, you can only return yes
-  return 1;
-}
-
-template <typename T, int N>
-PyObject* shallow_numpy_innest(PyArrayObject* o) {
-
-  try {
-
-    blitz::Array<T,N> bz(PyBlitzArray_ShallowFromNumpyArray<T,N>(reinterpret_cast<PyObject*>(o), false));
-    if (PyErr_Occurred()) return 0;
-
-    // instantiate type to be returned
-    PyBlitzArrayObject* retval = (PyBlitzArrayObject*)PyBlitzArray_New(&PyBlitzArray_Type, 0, 0);
-    retval->bzarr = static_cast<void*>(new blitz::Array<T,N>(bz));
-    retval->type_num = PyArray_DESCR(o)->type_num;
-    retval->ndim = PyArray_NDIM(o);
-    for (Py_ssize_t i=0; i<N; ++i) retval->shape[i] = PyArray_SHAPE(o)[i];
-
-    // switch base
-    PyObject* tmp = retval->base;
-    retval->base = reinterpret_cast<PyObject*>(o);
-    Py_INCREF(retval->base);
-    Py_DECREF(tmp);
-
-    return reinterpret_cast<PyObject*>(retval);
-
-  }
-
-  catch (std::exception& e) {
-    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating blitz.array(@%d,'%s'): %s", N, PyBlitzArray_TypenumAsString(PyArray_DESCR(o)->type_num), e.what());
-  }
-
-  catch (...) {
-    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating blitz.array(@%d,'%s')", N, PyBlitzArray_TypenumAsString(PyArray_DESCR(o)->type_num));
-  }
-
-  /** some test code
-  std::cout << "allocating array" << std::endl;
-  std::shared_ptr<blitz::Array<T,N>> retval(new blitz::Array<T,N>(tv_shape),
-      &delete_array<T,N>);
-  **/
-
-  return 0;
-
-}
-
-template <typename T>
-PyObject* shallow_numpy_inner(PyArrayObject* o) {
-
-  switch (PyArray_NDIM(o)) {
-
-    case 1:
-      return shallow_numpy_innest<T,1>(o);
-
-    case 2:
-      return shallow_numpy_innest<T,2>(o);
-
-    case 3:
-      return shallow_numpy_innest<T,3>(o);
-
-    case 4:
-      return shallow_numpy_innest<T,4>(o);
-
-    default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot shallow convert numpy.ndarray to blitz.array(@%d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", PyArray_NDIM(o), PyBlitzArray_TypenumAsString(PyArray_DESCR(o)->type_num), BLITZ_ARRAY_MAXDIMS);
-      return 0;
-
-  }
-
-}
-
-PyObject* PyBlitzArray_ShallowFromNumpyArray(PyObject* o) {
-
-  if (!PyArray_Check(o)) {
-    PyErr_SetString(PyExc_TypeError, "shallow conversion to blitz.array requires a numpy.ndarray");
-    return 0;
-  }
-
-  PyArrayObject* ao = reinterpret_cast<PyArrayObject*>(o);
-
-  switch (fix_integer_type_num(PyArray_DESCR(ao)->type_num)) {
-
-    case NPY_BOOL:
-      return shallow_numpy_inner<bool>(ao);
-
-    case NPY_INT8:
-      return shallow_numpy_inner<int8_t>(ao);
-
-    case NPY_INT16:
-
-      return shallow_numpy_inner<int16_t>(ao);
-    case NPY_INT32:
-
-      return shallow_numpy_inner<int32_t>(ao);
-    case NPY_INT64:
-
-      return shallow_numpy_inner<int64_t>(ao);
-    case NPY_UINT8:
-
-      return shallow_numpy_inner<uint8_t>(ao);
-
-    case NPY_UINT16:
-      return shallow_numpy_inner<uint16_t>(ao);
-
-    case NPY_UINT32:
-      return shallow_numpy_inner<uint32_t>(ao);
-
-    case NPY_UINT64:
-      return shallow_numpy_inner<uint64_t>(ao);
-
-    case NPY_FLOAT32:
-      return shallow_numpy_inner<float>(ao);
-
-    case NPY_FLOAT64:
-      return shallow_numpy_inner<double>(ao);
-
-#ifdef NPY_FLOAT128
-    case NPY_FLOAT128:
-      return shallow_numpy_inner<long double>(ao);
-#endif
-
-    case NPY_COMPLEX64:
-      return shallow_numpy_inner<std::complex<float>>(ao);
-
-    case NPY_COMPLEX128:
-      return shallow_numpy_inner<std::complex<double>>(ao);
-
-#ifdef NPY_COMPLEX256
-    case NPY_COMPLEX256:
-      return shallow_numpy_inner<std::complex<long double>>(ao);
-#endif
-
-    default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot shallow convert numpy.ndarray to blitz.array(@%d,T) with T being a data type with an unsupported numpy type number = %d", PyArray_NDIM(ao), PyArray_DESCR(ao)->type_num);
-      return 0;
-
   }
 
 }
