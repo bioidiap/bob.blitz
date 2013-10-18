@@ -188,3 +188,8 @@ PyObject* PyBlitzArrayCxx_NewFromArray(blitz::Array<T,N>& a) {
   return retval;
 
 }
+
+template<typename T, int N>
+blitz::Array<T,N>* PyBlitzArrayCxx_AsBlitz(PyBlitzArrayObject* o) {
+  return reinterpret_cast<blitz::Array<T,N>*>(o->bzarr);
+}

@@ -417,6 +417,12 @@ Construction and Destruction
 Other Utilities
 ===============
 
+.. cpp:function:: blitz::Array<T,N>* PyBlitzArrayCxx_AsBlitz(PyBlitzArrayObject* o)
+
+   Casts a ``PyBlitzArrayObject`` to a specific ``blitz::Array<>`` type. Notice
+   this is a brute-force cast. You are responsible for checking if that it is
+   correct.
+
 .. cpp:function:: int PyBlitzArrayCxx_CToTypenum<T>()
 
    Converts from C/C++ type to ndarray type_num.
