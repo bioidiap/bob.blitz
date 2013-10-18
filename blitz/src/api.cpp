@@ -1037,9 +1037,8 @@ int PyBlitzArray_IndexConverter(PyObject* o, PyBlitzArrayObject** shape) {
 int PyBlitzArray_TypenumConverter(PyObject* o, int** type_num) {
 
   PyArray_Descr* dtype = 0;
-  if (!PyArray_DescrConverter2(o, &dtype)) return 0; ///< (*dtype) is a new ref
+  if (!PyArray_DescrConverter2(o, &dtype)) return 0; ///< (*dtype) is borrowed
   (**type_num) = dtype->type_num;
-  Py_DECREF(dtype);
 
   switch (fix_integer_type_num(**type_num)) {
     case NPY_BOOL:
