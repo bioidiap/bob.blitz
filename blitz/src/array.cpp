@@ -386,12 +386,11 @@ PyObject* PyBlitzArray_as_blitz(PyObject*, PyObject* args, PyObject* kwds) {
   static const char* const_kwlist[] = {"o", 0};
   static char** kwlist = const_cast<char**>(const_kwlist);
 
-  PyObject* arr = 0;
-  if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist, &PyArray_Converter, &arr)) return 0;
+  PyObject* retval = 0;
+  if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist, &PyBlitzArray_Converter, &retval)) return 0;
 
-  PyObject* retval = PyBlitzArray_FromNumpyArray(reinterpret_cast<PyArrayObject*>(arr));
-  Py_DECREF(arr);
   return retval;
+
 }
 
 PyDoc_STRVAR(s_as_blitz_str, "as_blitz");

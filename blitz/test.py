@@ -239,15 +239,18 @@ def test_s64d2_cannot_resize_shallow():
 
 def test_from_ndarray_shallow():
 
-  nd = numpy.array([1, 2, 3, -1]).reshape(2,2)
+  nd = numpy.array(range(6), 'uint8').reshape(2,3)
   bz = as_blitz(nd)
 
   # checks we actually have a shallow copy
   nose.tools.eq_(id(bz.base), id(nd))
 
   # checks that the memory is actually bound
-  nd[1,0] = -18
-  nose.tools.eq_(nd[1,0], bz[1,0])
+  nd[1,2] = -18
+  nose.tools.eq_(nd[1,2], bz[1,2])
+  nd[0,1] = 42
+  nose.tools.eq_(nd[0,1], bz[0,1])
+
 
 @nose.tools.raises(ValueError)
 def test_from_ndarray_transposed():
