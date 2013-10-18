@@ -277,6 +277,8 @@ typedef struct {
 
   static void **PyBlitzArray_API;
 
+#define PyBlitzArray_Type (*(PyBlitzArray_Type_TYPE *)PyBlitzArray_API[PyBlitzArray_Type_NUM])
+
 /*********************************
  * Basic Properties and Checking *
  *********************************/
@@ -358,6 +360,7 @@ typedef struct {
    * if there's an error.
    */
   static int import_blitz_array(void) {
+
 #if PY_VERSION_HEX >= 0x02070000
 
     /* New Python API support for library loading */

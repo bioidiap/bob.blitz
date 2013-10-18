@@ -673,7 +673,7 @@ PyObject* simplenewfromdata_2(int type_num, Py_ssize_t ndim,
       retval->shape[i] = shape[i];
       retval->stride[i] = stride[i];
     }
-    retval->writeable = writeable;
+    retval->writeable = writeable ? 1 : 0;
     return reinterpret_cast<PyObject*>(retval);
 
   }

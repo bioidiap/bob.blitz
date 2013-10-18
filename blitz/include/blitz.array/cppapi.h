@@ -143,16 +143,17 @@ PyObject* PyBlitzArrayCxx_NewFromConstArray(const blitz::Array<T,N>& a) {
 
   try {
 
-    PyBlitzArrayObject* retval = (PyBlitzArrayObject*)PyBlitzArray_New(&PyBlitzArray_Type, 0, 0);
+    PyTypeObject& tp = PyBlitzArray_Type;
+    PyBlitzArrayObject* retval = (PyBlitzArrayObject*)PyBlitzArray_New(&tp, 0, 0);
     retval->bzarr = static_cast<void*>(new blitz::Array<T,N>(a));
-    retval->data = a.data();
+    retval->data = const_cast<void*>(static_cast<const void*>(a.data()));
     retval->type_num = PyBlitzArrayCxx_CToTypenum<T>();
     retval->ndim = N;
     for (Py_ssize_t i=0; i<N; ++i) {
       retval->shape[i] = a.extent(i);
-      retval->stride[i] = 8*a.stride(i); ///numpy style strides, in bits
+      retval->stride[i] = sizeof(T)*a.stride(i); ///in **bytes**
     }
-    retval->writeable = 1;
+    retval->writeable = 0;
     return reinterpret_cast<PyObject*>(retval);
 
   }
@@ -186,4 +187,9 @@ PyObject* PyBlitzArrayCxx_NewFromArray(blitz::Array<T,N>& a) {
 
   return retval;
 
+}
+
+template<typename T, int N>
+blitz::Array<T,N>& cast(PyBlitzArrayObject* o) {
+  *reinterpret_cast<blitz::Array<T,N>*>(o->bzarr);
 }
