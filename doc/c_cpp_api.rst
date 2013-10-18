@@ -27,6 +27,9 @@ the import function:
 
    #include <blitz.array/capi.h>
 
+   #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
+   #define PyMODINIT_FUNC void
+   #endif
    PyMODINIT_FUNC initclient(void) {
 
      PyObject *m;
@@ -34,7 +37,11 @@ the import function:
      m = Py_InitModule("client", ClientMethods);
      if (m == NULL) return;
 
-     if (import_blitz_array() < 0) return;
+     /* imports the NumPy C-API */
+     import_array();
+
+     /* imports blitz.array C-API */
+     import_blitz_array();
 
    }
 
