@@ -10,8 +10,13 @@ dist.Distribution(dict(setup_requires=['pypkg', 'numpy']))
 import pypkg
 import numpy
 
+# Minimum version requirements for pkg-config packages
+MINIMAL_BLITZ_VERSION_REQUIRED = '0.10'
+
 # Pkg-config dependencies
 blitz = pypkg.pkgconfig('blitz')
+if blitz < MINIMAL_BLITZ_VERSION_REQUIRED:
+  raise RuntimeError("This package requires Blitz++ %s or superior, but you have %s" % (MINIMAL_BLITZ_VERSION_REQUIRED, blitz_pkg.version))
 
 # Local include directory
 import os
@@ -37,7 +42,7 @@ if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
 # Compilation options
 import platform
 if platform.system() == 'Darwin':
-  extra_compile_args += ['-std=c++11', '-stdlib=libc++', '-Wno-#warnings']
+  extra_compile_args += ['-std=c++11', '-Wno-#warnings']
 else:
   extra_compile_args += ['-std=c++11']
 
@@ -73,6 +78,7 @@ setup(
         include_dirs=include_dirs,
         extra_compile_args=extra_compile_args,
         library_dirs=blitz.library_directories(),
+        runtime_library_dirs=blitz.library_directories(),
         libraries=blitz.libraries(),
         language="c++",
         )
