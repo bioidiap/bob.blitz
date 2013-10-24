@@ -87,8 +87,8 @@ int PyBlitzArray_CheckNumpyBase(PyArrayObject* o) {
 
   if (PyArray_NDIM(o) != bo->ndim) return 0;
 
-  for (Py_ssize_t i=0; i<bo->ndim; ++i) 
-    if (bo->shape[i] != PyArray_SHAPE(o)[i]) return 0;
+  for (Py_ssize_t i=0; i<bo->ndim; ++i)
+    if (bo->shape[i] != PyArray_DIMS(o)[i]) return 0;
 
   return 1;
 }
@@ -721,7 +721,7 @@ PyObject* simplenewfromdata_1(int type_num, Py_ssize_t ndim,
 
 }
 
-PyObject* PyBlitzArray_SimpleNewFromData (int type_num, Py_ssize_t ndim, 
+PyObject* PyBlitzArray_SimpleNewFromData (int type_num, Py_ssize_t ndim,
     Py_ssize_t* shape, Py_ssize_t* stride, void* data, int writeable) {
 
   type_num = fix_integer_type_num(type_num);
@@ -801,7 +801,7 @@ PyObject* PyBlitzArray_AsNumpyArray(PyBlitzArrayObject* o) {
 
   // creates an ndarray from the blitz::Array<>.data()
   PyArray_Descr* dtype = PyBlitzArray_PyDTYPE(o);
-  PyObject* retval = PyArray_NewFromDescr(&PyArray_Type, 
+  PyObject* retval = PyArray_NewFromDescr(&PyArray_Type,
       dtype,
       o->ndim, o->shape, o->stride, o->data,
 #     if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
@@ -843,7 +843,7 @@ static int ndarray_behaves (PyArrayObject* o) {
   if (PyArray_NDIM(ao) < 1 || PyArray_NDIM(ao) > BLITZ_ARRAY_MAXDIMS) return 0;
 
   // checks if the type number if supported
-  switch(fix_integer_type_num(PyArray_DTYPE(ao)->type_num)) {
+  switch(fix_integer_type_num(PyArray_DESCR(ao)->type_num)) {
     case NPY_BOOL:
     case NPY_UINT8:
     case NPY_UINT16:
@@ -948,7 +948,7 @@ int PyBlitzArray_Converter(PyObject* o, PyBlitzArrayObject** a) {
 }
 
 int PyBlitzArray_OutputConverter(PyObject* o, PyBlitzArrayObject** a) {
-  
+
   // is already a blitz.array
   if (PyBlitzArray_Check(o)) {
     *a = reinterpret_cast<PyBlitzArrayObject*>(o);
