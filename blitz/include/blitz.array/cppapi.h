@@ -22,62 +22,62 @@ template <typename T> int PyBlitzArrayCxx_CToTypenum() {
   return -1;
 }
 
-template <> int PyBlitzArrayCxx_CToTypenum<bool>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<bool>() 
 { return NPY_BOOL; }
 
-template <> int PyBlitzArrayCxx_CToTypenum<int8_t>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<int8_t>() 
 { return NPY_INT8; }
 
-template <> int PyBlitzArrayCxx_CToTypenum<uint8_t>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<uint8_t>() 
 { return NPY_UINT8; }
 
-template <> int PyBlitzArrayCxx_CToTypenum<int16_t>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<int16_t>() 
 { return NPY_INT16; }
 
-template <> int PyBlitzArrayCxx_CToTypenum<uint16_t>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<uint16_t>() 
 { return NPY_UINT16; }
 
-template <> int PyBlitzArrayCxx_CToTypenum<int32_t>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<int32_t>() 
 { return NPY_INT32; }
 
-template <> int PyBlitzArrayCxx_CToTypenum<uint32_t>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<uint32_t>() 
 { return NPY_UINT32; }
 
-template <> int PyBlitzArrayCxx_CToTypenum<int64_t>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<int64_t>() 
 { return NPY_INT64; }
 
-template <> int PyBlitzArrayCxx_CToTypenum<uint64_t>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<uint64_t>() 
 { return NPY_UINT64; }
 
-template <> int PyBlitzArrayCxx_CToTypenum<float>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<float>() 
 { return NPY_FLOAT32; }
 
-template <> int PyBlitzArrayCxx_CToTypenum<double>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<double>() 
 { return NPY_FLOAT64; }
 
 #ifdef NPY_FLOAT128
-template <> int PyBlitzArrayCxx_CToTypenum<long double>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<long double>() 
 { return NPY_FLOAT128; }
 #endif
 
-template <> int PyBlitzArrayCxx_CToTypenum<std::complex<float>>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<std::complex<float>>() 
 { return NPY_COMPLEX64; }
 
-template <> int PyBlitzArrayCxx_CToTypenum<std::complex<double>>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<std::complex<double>>() 
 { return NPY_COMPLEX128; }
 
 #ifdef NPY_COMPLEX256
-template <> int PyBlitzArrayCxx_CToTypenum<std::complex<long double>>() 
+static template <> int PyBlitzArrayCxx_CToTypenum<std::complex<long double>>() 
 { return NPY_COMPLEX256; }
 #endif
 
 #ifdef __APPLE__
-template <> int PyBlitzArrayCxx_CToTypenum<long>() {
+static template <> int PyBlitzArrayCxx_CToTypenum<long>() {
   if (sizeof(long) == 4) return NPY_INT32;
   return NPY_INT64;
 }
 
-template <> int PyBlitzArrayCxx_CToTypenum<unsigned long>() {
+static template <> int PyBlitzArrayCxx_CToTypenum<unsigned long>() {
   if (sizeof(unsigned long) == 4) return NPY_UINT32;
   return NPY_UINT64;
 }
