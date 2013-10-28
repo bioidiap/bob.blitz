@@ -6,8 +6,8 @@
  * transforming C++ objects into our Pythonic blitz::Array<> layer.
  */
 
-#ifndef PY_BLITZARRAY_CXXAPI_H
-#define PY_BLITZARRAY_CXXAPI_H
+#ifndef PY_BLITZARRAY_CPPAPI_H
+#define PY_BLITZARRAY_CPPAPI_H
 
 #include <blitz.array/capi.h>
 
@@ -197,4 +197,4 @@ blitz::Array<T,N>* PyBlitzArrayCxx_AsBlitz(PyBlitzArrayObject* o) {
   return reinterpret_cast<blitz::Array<T,N>*>(o->bzarr);
 }
 
-#endif /* PY_BLITZARRAY_CXXAPI_H */
+#endif /* PY_BLITZARRAY_CPPAPI_H */
