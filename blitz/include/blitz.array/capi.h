@@ -26,8 +26,8 @@ extern "C" {
 #define BLITZ_ARRAY_MODULE_PREFIX blitz
 #define BLITZ_ARRAY_MODULE_NAME _array
 #define BLITZ_ARRAY_API_VERSION 0x0000
-#define STR(a) #a
-#define XSTR(a) STR(a)
+#define BLITZ_ARRAY_STR_INNER(a) #a
+#define BLITZ_ARRAY_STR(a) BLITZ_ARRAY_STR_INNER(a)
 
 /* Maximum number of dimensions supported at this library */
 #define BLITZ_ARRAY_MAXDIMS 4
@@ -379,7 +379,7 @@ typedef struct {
 
     /* New Python API support for library loading */
 
-    PyBlitzArray_API = (void **)PyCapsule_Import(XSTR(BLITZ_ARRAY_MODULE_PREFIX) "." XSTR(BLITZ_ARRAY_MODULE_NAME) "._C_API", 0);
+    PyBlitzArray_API = (void **)PyCapsule_Import(BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX) "." BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_NAME) "._C_API", 0);
 
     if (!PyBlitzArray_API) return -1;
 
@@ -390,7 +390,7 @@ typedef struct {
     PyObject *c_api_object;
     PyObject *module;
 
-    module = PyImport_ImportModule(XSTR(BLITZ_ARRAY_MODULE_PREFIX) "." XSTR(BLITZ_ARRAY_MODULE_NAME));
+    module = PyImport_ImportModule(BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX) "." BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_NAME));
 
     if (module == NULL) return -1;
 
@@ -414,7 +414,7 @@ typedef struct {
     int imported_version = *(int*)PyBlitzArray_API[PyBlitzArray_APIVersion_NUM];
 
     if (BLITZ_ARRAY_API_VERSION != imported_version) {
-      PyErr_Format(PyExc_RuntimeError, "%s.%s import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", XSTR(BLITZ_ARRAY_MODULE_PREFIX), XSTR(BLITZ_ARRAY_MODULE_NAME), BLITZ_ARRAY_API_VERSION, imported_version);
+      PyErr_Format(PyExc_RuntimeError, "%s.%s import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX), BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_NAME), BLITZ_ARRAY_API_VERSION, imported_version);
       return -1;
     }
 

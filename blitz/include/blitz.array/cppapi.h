@@ -254,7 +254,7 @@ template <typename T, int N>
 PyObject* PyBlitzArrayCxx_NewFromConstArray(const blitz::Array<T,N>& a) {
 
   if (!PyBlitzArrayCxx_IsBehaved(a)) {
-    PyErr_Format(PyExc_ValueError, "cannot convert C++ blitz::Array<%s,%d> which doesn't behave (memory contiguous, aligned, C-style) into a pythonic blitz.array", PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), N);
+    PyErr_Format(PyExc_ValueError, "cannot convert C++ blitz::Array<%s,%d> which doesn't behave (memory contiguous, aligned, C-style) into a pythonic %s.array", PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), N, BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX));
     return 0;
   }
 
@@ -276,11 +276,11 @@ PyObject* PyBlitzArrayCxx_NewFromConstArray(const blitz::Array<T,N>& a) {
   }
 
   catch (std::exception& e) {
-    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): %s", N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), e.what());
+    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating %s.array(@%" PY_FORMAT_SIZE_T "d,'%s'): %s", BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX), N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), e.what());
   }
 
   catch (...) {
-    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s')", N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()));
+    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating %s.array(@%" PY_FORMAT_SIZE_T "d,'%s')", BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX), N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()));
   }
 
   /** some test code
