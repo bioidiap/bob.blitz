@@ -174,7 +174,7 @@ PyObject* getitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos) {
     tmp[i] = pos[i];
     if (tmp[i] < 0) tmp[i] += o->shape[i];
     if (tmp[i] < 0 || tmp[i] >= o->shape[i]) {
-      PyErr_Format(PyExc_IndexError, "blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s') position %" PY_FORMAT_SIZE_T "d is out of range: %" PY_FORMAT_SIZE_T "d not in [0,%" PY_FORMAT_SIZE_T "d[", o->ndim, PyBlitzArray_TypenumAsString(o->type_num), i, pos[i], o->shape[i]);
+      PyErr_Format(PyExc_IndexError, "%s.array(@%" PY_FORMAT_SIZE_T "d,'%s') position %" PY_FORMAT_SIZE_T "d is out of range: %" PY_FORMAT_SIZE_T "d not in [0,%" PY_FORMAT_SIZE_T "d[", XSTR(MODULE_PREFIX), o->ndim, PyBlitzArray_TypenumAsString(o->type_num), i, pos[i], o->shape[i]);
       return 0;
     }
   }
@@ -208,7 +208,7 @@ PyObject* getitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos) {
       }
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot index blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BLITZ_ARRAY_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot index %s.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", XSTR(MODULE_PREFIX), o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BLITZ_ARRAY_MAXDIMS);
       return 0;
   }
 }
@@ -269,7 +269,7 @@ PyObject* PyBlitzArray_GetItem(PyBlitzArrayObject* o, Py_ssize_t* pos) {
 #endif
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot index blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T being a data type with an unsupported numpy type number = %d", o->ndim, o->type_num);
+      PyErr_Format(PyExc_NotImplementedError, "cannot index %s.array(@%" PY_FORMAT_SIZE_T "d,T) with T being a data type with an unsupported numpy type number = %d", XSTR(MODULE_PREFIX), o->ndim, o->type_num);
       return 0;
 
   }
@@ -331,7 +331,7 @@ int setitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
       }
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot set item on blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BLITZ_ARRAY_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot set item on %s.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", XSTR(MODULE_PREFIX), o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BLITZ_ARRAY_MAXDIMS);
       return -1;
   }
 
@@ -340,7 +340,7 @@ int setitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
 int PyBlitzArray_SetItem(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
 
   if (!o->writeable) {
-    PyErr_Format(PyExc_RuntimeError, "cannot set item on read-only blitz.array(@%" PY_FORMAT_SIZE_T "d,%s) ", o->ndim, PyBlitzArray_TypenumAsString(o->type_num));
+    PyErr_Format(PyExc_RuntimeError, "cannot set item on read-only %s.array(@%" PY_FORMAT_SIZE_T "d,%s) ", XSTR(MODULE_PREFIX), o->ndim, PyBlitzArray_TypenumAsString(o->type_num));
     return -1;
   }
 
@@ -398,7 +398,7 @@ int PyBlitzArray_SetItem(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value
 #endif
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot set item on blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T being a data type with an unsupported numpy type number = %d", o->ndim, o->type_num);
+      PyErr_Format(PyExc_NotImplementedError, "cannot set item on %s.array(@%" PY_FORMAT_SIZE_T "d,T) with T being a data type with an unsupported numpy type number = %d", XSTR(MODULE_PREFIX), o->ndim, o->type_num);
       return -1;
 
   }
@@ -445,7 +445,7 @@ template<typename T> void deallocate_inner(PyBlitzArrayObject* o) {
       break;
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot deallocate blitz.array(@%" PY_FORMAT_SIZE_T "d,%s>, this number of dimensions is outside the range of supported dimensions [1,%d]", o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BLITZ_ARRAY_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot deallocate %s.array(@%" PY_FORMAT_SIZE_T "d,%s>, this number of dimensions is outside the range of supported dimensions [1,%d]", XSTR(MODULE_PREFIX), o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BLITZ_ARRAY_MAXDIMS);
       return;
   }
 
@@ -516,7 +516,7 @@ void PyBlitzArray_Delete (PyBlitzArrayObject* o) {
 #endif
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot deallocate blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T having an unsupported numpy type number of %d", o->ndim, o->type_num);
+      PyErr_Format(PyExc_NotImplementedError, "cannot deallocate %s.array(@%" PY_FORMAT_SIZE_T "d,T) with T having an unsupported numpy type number of %d", XSTR(MODULE_PREFIX), o->ndim, o->type_num);
       return;
 
   }
@@ -546,11 +546,11 @@ PyObject* simplenew_2(int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
   }
 
   catch (std::exception& e) {
-    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): %s", ndim, PyBlitzArray_TypenumAsString(type_num), e.what());
+    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating %s.array(@%" PY_FORMAT_SIZE_T "d,'%s'): %s", XSTR(MODULE_PREFIX), ndim, PyBlitzArray_TypenumAsString(type_num), e.what());
   }
 
   catch (...) {
-    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s')", ndim, PyBlitzArray_TypenumAsString(type_num));
+    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating %s.array(@%" PY_FORMAT_SIZE_T "d,'%s')", XSTR(MODULE_PREFIX), ndim, PyBlitzArray_TypenumAsString(type_num));
   }
 
   /** some test code
@@ -580,7 +580,7 @@ PyObject* simplenew_1(int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
       return simplenew_2<T,4>(type_num, ndim, shape);
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot allocate blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", ndim, PyBlitzArray_TypenumAsString(type_num), BLITZ_ARRAY_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot allocate %s.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", XSTR(MODULE_PREFIX), ndim, PyBlitzArray_TypenumAsString(type_num), BLITZ_ARRAY_MAXDIMS);
       return 0;
   }
 
@@ -644,7 +644,7 @@ PyObject* PyBlitzArray_SimpleNew (int type_num, Py_ssize_t ndim, Py_ssize_t* sha
 #endif
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot create blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T having an unsupported numpy type number of %d", ndim, type_num);
+      PyErr_Format(PyExc_NotImplementedError, "cannot create %s.array(@%" PY_FORMAT_SIZE_T "d,T) with T having an unsupported numpy type number of %d", XSTR(MODULE_PREFIX), ndim, type_num);
       return 0;
 
   }
@@ -679,11 +679,11 @@ PyObject* simplenewfromdata_2(int type_num, Py_ssize_t ndim,
   }
 
   catch (std::exception& e) {
-    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): %s", ndim, PyBlitzArray_TypenumAsString(type_num), e.what());
+    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating %s.array(@%" PY_FORMAT_SIZE_T "d,'%s'): %s", XSTR(MODULE_PREFIX), ndim, PyBlitzArray_TypenumAsString(type_num), e.what());
   }
 
   catch (...) {
-    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s')", ndim, PyBlitzArray_TypenumAsString(type_num));
+    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating %s.array(@%" PY_FORMAT_SIZE_T "d,'%s')", XSTR(MODULE_PREFIX), ndim, PyBlitzArray_TypenumAsString(type_num));
   }
 
   /** some test code
@@ -715,7 +715,7 @@ PyObject* simplenewfromdata_1(int type_num, Py_ssize_t ndim,
       return simplenewfromdata_2<T,4>(type_num, ndim, shape, stride, data, writeable);
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot allocate blitz.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", ndim, PyBlitzArray_TypenumAsString(type_num), BLITZ_ARRAY_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot allocate %s.array(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", XSTR(MODULE_PREFIX), ndim, PyBlitzArray_TypenumAsString(type_num), BLITZ_ARRAY_MAXDIMS);
       return 0;
   }
 
@@ -780,7 +780,7 @@ PyObject* PyBlitzArray_SimpleNewFromData (int type_num, Py_ssize_t ndim,
 #endif
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot create blitz.array(@%" PY_FORMAT_SIZE_T "d,T) with T having an unsupported numpy type number of %d", ndim, type_num);
+      PyErr_Format(PyExc_NotImplementedError, "cannot create %s.array(@%" PY_FORMAT_SIZE_T "d,T) with T having an unsupported numpy type number of %d", XSTR(MODULE_PREFIX), ndim, type_num);
       return 0;
 
   }
@@ -881,7 +881,7 @@ PyObject* PyBlitzArray_FromNumpyArray(PyArrayObject* o) {
   }
 
   if (!ndarray_behaves(o)) {
-    PyErr_Format(PyExc_ValueError, "cannot convert numpy.ndarray which doesn't behave (memory contiguous, aligned, C-style, <%d dimensions) into a blitz.array", BLITZ_ARRAY_MAXDIMS);
+    PyErr_Format(PyExc_ValueError, "cannot convert numpy.ndarray which doesn't behave (memory contiguous, aligned, C-style, <%d dimensions) into a %s.array", BLITZ_ARRAY_MAXDIMS, XSTR(MODULE_PREFIX));
     return 0;
   }
 
@@ -934,7 +934,7 @@ int PyBlitzArray_Converter(PyObject* o, PyBlitzArrayObject** a) {
   PyObject* ao = 0;
   if (!PyArray_Converter(o, &ao)) {
     PyErr_Print();
-    PyErr_SetString(PyExc_ValueError, "cannot convert argument to blitz.array - prefix conversion to numpy.ndarray failed");
+    PyErr_Format(PyExc_ValueError, "cannot convert argument to %s.array - prefix conversion to numpy.ndarray failed", XSTR(MODULE_PREFIX));
     return 0;
   }
 
@@ -970,7 +970,7 @@ int PyBlitzArray_OutputConverter(PyObject* o, PyBlitzArrayObject** a) {
   PyArrayObject* ao = 0;
   if (!PyArray_OutputConverter(o, &ao)) {
     PyErr_Print();
-    PyErr_SetString(PyExc_ValueError, "cannot convert argument to blitz.array - prefix conversion to numpy.ndarray failed");
+    PyErr_Format(PyExc_ValueError, "cannot convert argument to %s.array - prefix conversion to numpy.ndarray failed", XSTR(MODULE_PREFIX));
     return 0;
   }
 
@@ -1063,7 +1063,7 @@ int PyBlitzArray_TypenumConverter(PyObject* o, int** type_num) {
 #endif
     default:
     {
-      PyErr_Format(PyExc_NotImplementedError, "no support for using type number %d in blitz.array", (**type_num));
+      PyErr_Format(PyExc_NotImplementedError, "no support for using type number %d in %s.array", (**type_num), XSTR(MODULE_PREFIX));
       return 0;
     }
   }

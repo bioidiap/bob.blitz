@@ -454,4 +454,11 @@ Other Utilities
       auto z = extract<uint8_t>(obj);
       if (PyErr_Occurred()) return 0; ///< propagate exception
  
+.. cpp:function:: PyBlitzArrayCxx_FromCScalar<T>(T v)
 
+   Converts **simple** C types into numpy scalars
+
+   We cover only simple conversions (i.e., standard integers, floats and
+   complex numbers only). If the input object is not convertible to the given
+   type, an exception is set on the Python error stack and ``0`` (``NULL``) is
+   returned. 

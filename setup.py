@@ -14,8 +14,8 @@ import numpy
 MINIMAL_BLITZ_VERSION_REQUIRED = '0.10'
 
 # Pkg-config dependencies
-blitz = pypkg.pkgconfig('blitz')
-if blitz < MINIMAL_BLITZ_VERSION_REQUIRED:
+blitz_pkg = pypkg.pkgconfig('blitz')
+if blitz_pkg < MINIMAL_BLITZ_VERSION_REQUIRED:
   raise RuntimeError("This package requires Blitz++ %s or superior, but you have %s" % (MINIMAL_BLITZ_VERSION_REQUIRED, blitz_pkg.version))
 
 # Local include directory
@@ -26,7 +26,7 @@ include_dirs = [package_dir]
 
 # Add system include directories
 extra_compile_args = []
-system_includes = blitz.include_directories() + [numpy.get_include()]
+system_includes = blitz_pkg.include_directories() + [numpy.get_include()]
 for k in system_includes: extra_compile_args += ['-isystem', k]
 
 # NumPy API macros necessary?
@@ -77,9 +77,9 @@ setup(
         define_macros=define_macros,
         include_dirs=include_dirs,
         extra_compile_args=extra_compile_args,
-        library_dirs=blitz.library_directories(),
-        runtime_library_dirs=blitz.library_directories(),
-        libraries=blitz.libraries(),
+        library_dirs=blitz_pkg.library_directories(),
+        runtime_library_dirs=blitz_pkg.library_directories(),
+        libraries=blitz_pkg.libraries(),
         language="c++",
         )
       ],

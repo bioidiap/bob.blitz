@@ -13,7 +13,6 @@
 
 #include <structmember.h>
 
-PyDoc_STRVAR(s_module_str, "blitz");
 PyDoc_STRVAR(s_array_str, "array");
 
 /**
@@ -96,7 +95,7 @@ static PyObject* PyBlitzArray_getitem(PyBlitzArrayObject* self,
 
   }
 
-  PyErr_Format(PyExc_TypeError, "%s.%s(@%" PY_FORMAT_SIZE_T "d,'%s') indexing requires a single integers (for 1D arrays) or sequences, for any rank size", s_module_str, s_array_str, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
+  PyErr_Format(PyExc_TypeError, "%s.%s(@%" PY_FORMAT_SIZE_T "d,'%s') indexing requires a single integers (for 1D arrays) or sequences, for any rank size", XSTR(BLITZ_ARRAY_MODULE_PREFIX), s_array_str, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
   return 0;
 }
 
@@ -106,7 +105,7 @@ static int PyBlitzArray_setitem(PyBlitzArrayObject* self, PyObject* item,
   if (PyNumber_Check(item)) {
 
     if (self->ndim != 1) {
-      PyErr_Format(PyExc_TypeError, "expected sequence for accessing %s.%s(@%" PY_FORMAT_SIZE_T "d,'%s'", s_module_str, s_array_str, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
+      PyErr_Format(PyExc_TypeError, "expected sequence for accessing %s.%s(@%" PY_FORMAT_SIZE_T "d,'%s'", XSTR(BLITZ_ARRAY_MODULE_PREFIX), s_array_str, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
       return -1;
     }
 
@@ -119,7 +118,7 @@ static int PyBlitzArray_setitem(PyBlitzArrayObject* self, PyObject* item,
   if (PySequence_Check(item)) {
 
     if (self->ndim != PySequence_Fast_GET_SIZE(item)) {
-      PyErr_Format(PyExc_TypeError, "expected sequence of size %" PY_FORMAT_SIZE_T "d for accessing %s.%s(@%" PY_FORMAT_SIZE_T "d,'%s')", PySequence_Fast_GET_SIZE(item), s_module_str, s_array_str, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
+      PyErr_Format(PyExc_TypeError, "expected sequence of size %" PY_FORMAT_SIZE_T "d for accessing %s.%s(@%" PY_FORMAT_SIZE_T "d,'%s')", PySequence_Fast_GET_SIZE(item), XSTR(BLITZ_ARRAY_MODULE_PREFIX), s_array_str, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
       return -1;
     }
 
@@ -131,7 +130,7 @@ static int PyBlitzArray_setitem(PyBlitzArrayObject* self, PyObject* item,
 
   }
 
-  PyErr_Format(PyExc_TypeError, "%s.%s(@%" PY_FORMAT_SIZE_T "d,'%s') assignment requires a single integers (for 1D arrays) or sequences, for any rank size", s_module_str, s_array_str, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
+  PyErr_Format(PyExc_TypeError, "%s.%s(@%" PY_FORMAT_SIZE_T "d,'%s') assignment requires a single integers (for 1D arrays) or sequences, for any rank size", XSTR(BLITZ_ARRAY_MODULE_PREFIX), s_array_str, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
   return -1;
 }
 
@@ -146,7 +145,7 @@ PyDoc_STRVAR(s_private_array_str, "__array__");
 PyDoc_STRVAR(s_private_array__doc__,
 "x.__array__() -> numpy.ndarray\n\
 \n\
-numpy.ndarray accessor (shallow wraps blitz.array as numpy.ndarray)"
+numpy.ndarray accessor (shallow wraps " XSTR(BLITZ_ARRAY_MODULE_PREFIX) ".array as numpy.ndarray)"
 );
 
 static PyMethodDef PyBlitzArray_methods[] = {
@@ -248,20 +247,20 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
   switch (o->ndim) {
     case 1:
       return PyString_FromFormat("%s.%s(%" PY_FORMAT_SIZE_T "d,'%s')",
-          s_module_str, s_array_str,
+          XSTR(BLITZ_ARRAY_MODULE_PREFIX), s_array_str,
           o->shape[0],
           PyBlitzArray_TypenumAsString(o->type_num)
           );
     case 2:
       return PyString_FromFormat("%s.%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')",
-          s_module_str, s_array_str,
+          XSTR(BLITZ_ARRAY_MODULE_PREFIX), s_array_str,
           o->shape[0],
           o->shape[1],
           PyBlitzArray_TypenumAsString(o->type_num)
           );
     case 3:
       return PyString_FromFormat("%s.%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')", 
-          s_module_str, s_array_str,
+          XSTR(BLITZ_ARRAY_MODULE_PREFIX), s_array_str,
           o->shape[0],
           o->shape[1],
           o->shape[2],
@@ -269,7 +268,7 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
           );
     case 4:
       return PyString_FromFormat("%s.%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')", 
-          s_module_str, s_array_str,
+          XSTR(BLITZ_ARRAY_MODULE_PREFIX), s_array_str,
           o->shape[0],
           o->shape[1],
           o->shape[2],
@@ -278,7 +277,7 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
           );
     default:
       return PyString_FromFormat("[unsupported] %s.%s(@%" PY_FORMAT_SIZE_T "d,'%s') %" PY_FORMAT_SIZE_T "d elements>",
-          s_module_str, s_array_str,
+          XSTR(BLITZ_ARRAY_MODULE_PREFIX), s_array_str,
           o->ndim,
           PyBlitzArray_TypenumAsString(o->type_num),
           PyBlitzArray_len(o)
@@ -338,10 +337,12 @@ on its contents. You can also deploy objects of this class wherever\n\
 "
 );
 
+int PyBlitzArray_APIVersion = BLITZ_ARRAY_API_VERSION;
+
 PyTypeObject PyBlitzArray_Type = {
     PyObject_HEAD_INIT(0)
     0,                                          /*ob_size*/
-    "blitz.array",                              /*tp_name*/
+    XSTR(BLITZ_ARRAY_MODULE_PREFIX) ".array",               /*tp_name*/
     sizeof(PyBlitzArrayObject),                 /*tp_basicsize*/
     0,                                          /*tp_itemsize*/
     (destructor)PyBlitzArray_Delete,            /*tp_dealloc*/
@@ -380,6 +381,7 @@ PyTypeObject PyBlitzArray_Type = {
     PyBlitzArray_New,                           /* tp_new */
 };
 
+static 
 PyObject* PyBlitzArray_as_blitz(PyObject*, PyObject* args, PyObject* kwds) {
 
   /* Parses input arguments in a single shot */
@@ -397,18 +399,18 @@ PyDoc_STRVAR(s_as_blitz_str, "as_blitz");
 PyDoc_STRVAR(s_as_blitz__doc__,
 "as_blitz(x) -> blitz.array\n\
 \n\
-Converts any compatible python object into a shallow blitz.array\n\
+Converts any compatible python object into a shallow " XSTR(BLITZ_ARRAY_MODULE_PREFIX) ".array\n\
 \n\
 This function works by first converting the input object ``x`` into\n\
 a :py:class:`numpy.ndarray` and then shallow wrapping that ``ndarray``\n\
-into a new :py:class:`blitz.array`. You can access the converted\n\
+into a new :py:class:`" XSTR(BLITZ_ARRAY_MODULE_PREFIX) ".array`. You can access the converted\n\
 ``ndarray`` using the returned value's ``base`` attribute. If the\n\
 ``ndarray`` cannot be shallow-wrapped, a :py:class:`ValueError` is\n\
 raised.\n\
 \n\
 In the case the input object ``x`` is already a behaved (C-style,\n\
 memory-aligned, contiguous) :py:class:`numpy.ndarray`, then this\n\
-function only shallow wrap's it into a ``blitz.array`` skin.\n\
+function only shallow wrap's it into a ``" XSTR(BLITZ_ARRAY_MODULE_PREFIX) ".array`` skin.\n\
 "
 );
 
@@ -422,17 +424,20 @@ static PyMethodDef array_methods[] = {
     {0}  /* Sentinel */
 };
 
+#define ENTRY_FUNCTION_INNER(a) init ## a
+#define ENTRY_FUNCTION(a) ENTRY_FUNCTION_INNER(a)
+
 #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
 #define PyMODINIT_FUNC void
 #endif
-PyMODINIT_FUNC init_array(void)
+PyMODINIT_FUNC ENTRY_FUNCTION(BLITZ_ARRAY_MODULE_NAME) (void)
 {
   PyObject* m;
 
   PyBlitzArray_Type.tp_new = PyType_GenericNew;
   if (PyType_Ready(&PyBlitzArray_Type) < 0) return;
 
-  m = Py_InitModule3("_array", array_methods,
+  m = Py_InitModule3(XSTR(BLITZ_ARRAY_MODULE_NAME), array_methods,
       "array definition and generic functions");
 
   /* register the type object to python */
@@ -442,9 +447,10 @@ PyMODINIT_FUNC init_array(void)
   static void* PyBlitzArray_API[PyBlitzArray_API_pointers];
 
   /* exhaustive list of C APIs */
-  PyBlitzArray_API[PyBlitzArray_Type_NUM] = (void *)&PyBlitzArray_Type;
+  PyBlitzArray_API[PyBlitzArray_APIVersion_NUM] = (void *)&PyBlitzArray_APIVersion;
 
   // Basic Properties and Checking
+  PyBlitzArray_API[PyBlitzArray_Type_NUM] = (void *)&PyBlitzArray_Type;
   PyBlitzArray_API[PyBlitzArray_Check_NUM] = (void *)PyBlitzArray_Check;
   PyBlitzArray_API[PyBlitzArray_CheckNumpyBase_NUM] = (void *)PyBlitzArray_CheckNumpyBase;
   PyBlitzArray_API[PyBlitzArray_TYPE_NUM] = (void *)PyBlitzArray_TYPE;
@@ -487,7 +493,7 @@ PyMODINIT_FUNC init_array(void)
   /* defines the PyCapsule */
 
   PyObject* c_api_object = PyCapsule_New((void *)PyBlitzArray_API, 
-      "blitz._array._C_API", 0);
+      XSTR(BLITZ_ARRAY_MODULE_PREFIX) "." XSTR(BLITZ_ARRAY_MODULE_NAME) "._C_API", 0);
 
 #else
 

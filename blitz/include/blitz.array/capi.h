@@ -22,6 +22,13 @@ extern "C" {
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
+/* Macros that define versions and important names */
+#define BLITZ_ARRAY_MODULE_PREFIX blitz
+#define BLITZ_ARRAY_MODULE_NAME _array
+#define BLITZ_ARRAY_API_VERSION 0x0000
+#define STR(a) #a
+#define XSTR(a) STR(a)
+
 /* Maximum number of dimensions supported at this library */
 #define BLITZ_ARRAY_MAXDIMS 4
 
@@ -52,62 +59,65 @@ typedef struct {
  * C API functions *
  *******************/
 
-#define PyBlitzArray_Type_NUM 0
-#define PyBlitzArray_Type_TYPE PyTypeObject
+#define PyBlitzArray_APIVersion_NUM 0
+#define PyBlitzArray_APIVersion_TYPE int
 
 /*********************************
  * Basic Properties and Checking *
  *********************************/
 
-#define PyBlitzArray_Check_NUM 1
+#define PyBlitzArray_Type_NUM 1
+#define PyBlitzArray_Type_TYPE PyTypeObject
+
+#define PyBlitzArray_Check_NUM 2
 #define PyBlitzArray_Check_RET int
 #define PyBlitzArray_Check_PROTO (PyObject* o)
 
-#define PyBlitzArray_CheckNumpyBase_NUM 2
+#define PyBlitzArray_CheckNumpyBase_NUM 3
 #define PyBlitzArray_CheckNumpyBase_RET int
 #define PyBlitzArray_CheckNumpyBase_PROTO (PyArrayObject* o)
 
-#define PyBlitzArray_TYPE_NUM 3
+#define PyBlitzArray_TYPE_NUM 4
 #define PyBlitzArray_TYPE_RET int
 #define PyBlitzArray_TYPE_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_PyDTYPE_NUM 4
+#define PyBlitzArray_PyDTYPE_NUM 5
 #define PyBlitzArray_PyDTYPE_RET PyArray_Descr*
 #define PyBlitzArray_PyDTYPE_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_NDIM_NUM 5
+#define PyBlitzArray_NDIM_NUM 6
 #define PyBlitzArray_NDIM_RET Py_ssize_t
 #define PyBlitzArray_NDIM_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_SHAPE_NUM 6
+#define PyBlitzArray_SHAPE_NUM 7
 #define PyBlitzArray_SHAPE_RET Py_ssize_t*
 #define PyBlitzArray_SHAPE_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_PySHAPE_NUM 7
+#define PyBlitzArray_PySHAPE_NUM 8
 #define PyBlitzArray_PySHAPE_RET PyObject*
 #define PyBlitzArray_PySHAPE_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_STRIDE_NUM 8
+#define PyBlitzArray_STRIDE_NUM 9
 #define PyBlitzArray_STRIDE_RET Py_ssize_t*
 #define PyBlitzArray_STRIDE_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_PySTRIDE_NUM 9
+#define PyBlitzArray_PySTRIDE_NUM 10
 #define PyBlitzArray_PySTRIDE_RET PyObject*
 #define PyBlitzArray_PySTRIDE_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_WRITEABLE_NUM 10
+#define PyBlitzArray_WRITEABLE_NUM 11
 #define PyBlitzArray_WRITEABLE_RET int
 #define PyBlitzArray_WRITEABLE_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_PyWRITEABLE_NUM 11
+#define PyBlitzArray_PyWRITEABLE_NUM 12
 #define PyBlitzArray_PyWRITEABLE_RET PyObject*
 #define PyBlitzArray_PyWRITEABLE_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_BASE_NUM 12
+#define PyBlitzArray_BASE_NUM 13
 #define PyBlitzArray_BASE_RET PyObject*
 #define PyBlitzArray_BASE_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_PyBASE_NUM 13
+#define PyBlitzArray_PyBASE_NUM 14
 #define PyBlitzArray_PyBASE_RET PyObject*
 #define PyBlitzArray_PyBASE_PROTO (PyBlitzArrayObject* o)
 
@@ -116,11 +126,11 @@ typedef struct {
  * Indexing *
  ************/
 
-#define PyBlitzArray_GetItem_NUM 14
+#define PyBlitzArray_GetItem_NUM 15
 #define PyBlitzArray_GetItem_RET PyObject*
 #define PyBlitzArray_GetItem_PROTO (PyBlitzArrayObject* o, Py_ssize_t* pos)
 
-#define PyBlitzArray_SetItem_NUM 15
+#define PyBlitzArray_SetItem_NUM 16
 #define PyBlitzArray_SetItem_RET int
 #define PyBlitzArray_SetItem_PROTO (PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value)
 
@@ -129,19 +139,19 @@ typedef struct {
  * Construction and Destruction *
  ********************************/
 
-#define PyBlitzArray_New_NUM 16
+#define PyBlitzArray_New_NUM 17
 #define PyBlitzArray_New_RET PyObject*
 #define PyBlitzArray_New_PROTO (PyTypeObject* type, PyObject *args, PyObject* kwds)
 
-#define PyBlitzArray_Delete_NUM 17
+#define PyBlitzArray_Delete_NUM 18
 #define PyBlitzArray_Delete_RET void
 #define PyBlitzArray_Delete_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_SimpleNew_NUM 18
+#define PyBlitzArray_SimpleNew_NUM 19
 #define PyBlitzArray_SimpleNew_RET PyObject*
 #define PyBlitzArray_SimpleNew_PROTO (int typenum, Py_ssize_t ndim, Py_ssize_t* shape)
 
-#define PyBlitzArray_SimpleNewFromData_NUM 19
+#define PyBlitzArray_SimpleNewFromData_NUM 20
 #define PyBlitzArray_SimpleNewFromData_RET PyObject*
 #define PyBlitzArray_SimpleNewFromData_PROTO (int typenum, Py_ssize_t ndim, Py_ssize_t* shape, Py_ssize_t* stride, void* data, int writeable)
 
@@ -149,11 +159,11 @@ typedef struct {
  * From/To NumPy Converters *
  ****************************/
 
-#define PyBlitzArray_AsNumpyArray_NUM 20
+#define PyBlitzArray_AsNumpyArray_NUM 21
 #define PyBlitzArray_AsNumpyArray_RET PyObject*
 #define PyBlitzArray_AsNumpyArray_PROTO (PyBlitzArrayObject* o)
 
-#define PyBlitzArray_FromNumpyArray_NUM 21
+#define PyBlitzArray_FromNumpyArray_NUM 22
 #define PyBlitzArray_FromNumpyArray_RET PyObject*
 #define PyBlitzArray_FromNumpyArray_PROTO (PyArrayObject* o)
 
@@ -161,19 +171,19 @@ typedef struct {
  * Converter Functions for PyArg_Parse* family *
  ***********************************************/
 
-#define PyBlitzArray_Converter_NUM 22
+#define PyBlitzArray_Converter_NUM 23
 #define PyBlitzArray_Converter_RET int
 #define PyBlitzArray_Converter_PROTO (PyObject* o, PyBlitzArrayObject** a)
 
-#define PyBlitzArray_OutputConverter_NUM 23
+#define PyBlitzArray_OutputConverter_NUM 24
 #define PyBlitzArray_OutputConverter_RET int
 #define PyBlitzArray_OutputConverter_PROTO (PyObject* o, PyBlitzArrayObject** a)
 
-#define PyBlitzArray_IndexConverter_NUM 24
+#define PyBlitzArray_IndexConverter_NUM 25
 #define PyBlitzArray_IndexConverter_RET int
 #define PyBlitzArray_IndexConverter_PROTO (PyObject* o, PyBlitzArrayObject** shape)
 
-#define PyBlitzArray_TypenumConverter_NUM 25
+#define PyBlitzArray_TypenumConverter_NUM 26
 #define PyBlitzArray_TypenumConverter_RET int
 #define PyBlitzArray_TypenumConverter_PROTO (PyObject* o, int** type_num)
 
@@ -181,22 +191,24 @@ typedef struct {
  * Utilities *
  *************/
 
-#define PyBlitzArray_TypenumAsString_NUM 26
+#define PyBlitzArray_TypenumAsString_NUM 27
 #define PyBlitzArray_TypenumAsString_RET const char*
 #define PyBlitzArray_TypenumAsString_PROTO (int typenum)
 
 /* Total number of C API pointers */
-#define PyBlitzArray_API_pointers 27
+#define PyBlitzArray_API_pointers 28
 
 #ifdef BLITZ_ARRAY_MODULE
 
   /* This section is used when compiling `blitz.array' itself */
 
-  extern PyBlitzArray_Type_TYPE PyBlitzArray_Type;
+  extern int PyBlitzArray_APIVersion;
 
   /*********************************
    * Basic Properties and Checking *
    *********************************/
+
+  extern PyBlitzArray_Type_TYPE PyBlitzArray_Type;
 
   PyBlitzArray_Check_RET PyBlitzArray_Check PyBlitzArray_Check_PROTO;
 
@@ -277,11 +289,13 @@ typedef struct {
 
   static void **PyBlitzArray_API;
 
-#define PyBlitzArray_Type (*(PyBlitzArray_Type_TYPE *)PyBlitzArray_API[PyBlitzArray_Type_NUM])
+#define PyBlitzArray_APIVersion (*(PyBlitzArray_APIVersion_TYPE *)PyBlitzArray_API[PyBlitzArray_APIVersion_NUM])
 
 /*********************************
  * Basic Properties and Checking *
  *********************************/
+
+#define PyBlitzArray_Type (*(PyBlitzArray_Type_TYPE *)PyBlitzArray_API[PyBlitzArray_Type_NUM])
 
 #define PyBlitzArray_Check (*(PyBlitzArray_Check_RET (*)PyBlitzArray_Check_PROTO) PyBlitzArray_API[PyBlitzArray_Check_NUM])
 
@@ -365,8 +379,9 @@ typedef struct {
 
     /* New Python API support for library loading */
 
-    PyBlitzArray_API = (void **)PyCapsule_Import("blitz._array._C_API", 0);
-    return (PyBlitzArray_API != NULL) ? 0 : -1;
+    PyBlitzArray_API = (void **)PyCapsule_Import(XSTR(BLITZ_ARRAY_MODULE_PREFIX) "." XSTR(BLITZ_ARRAY_MODULE_NAME) "._C_API", 0);
+
+    if (!PyBlitzArray_API) return -1;
 
 #else
 
@@ -375,7 +390,7 @@ typedef struct {
     PyObject *c_api_object;
     PyObject *module;
 
-    module = PyImport_ImportModule("blitz._array");
+    module = PyImport_ImportModule(XSTR(BLITZ_ARRAY_MODULE_PREFIX) "." XSTR(BLITZ_ARRAY_MODULE_NAME));
 
     if (module == NULL) return -1;
 
@@ -393,9 +408,19 @@ typedef struct {
     Py_DECREF(c_api_object);
     Py_DECREF(module);
 
+#endif
+    
+    /* Checks that the imported version matches the compiled version */
+    int imported_version = *(int*)PyBlitzArray_API[PyBlitzArray_APIVersion_NUM];
+
+    if (BLITZ_ARRAY_API_VERSION != imported_version) {
+      PyErr_Format(PyExc_RuntimeError, "%s.%s import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", XSTR(BLITZ_ARRAY_MODULE_PREFIX), XSTR(BLITZ_ARRAY_MODULE_NAME), BLITZ_ARRAY_API_VERSION, imported_version);
+      return -1;
+    }
+
+    /* If you get to this point, all is good */
     return 0;
 
-#endif
   }
 
 #endif // BLITZ_ARRAY_MODULE
