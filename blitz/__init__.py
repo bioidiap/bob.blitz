@@ -5,7 +5,7 @@
 
 """Blitz++ Array bindings for Python"""
 
-from ._array import array, as_blitz
+from ._array import array, as_blitz, __version__, __api_version__
 
 def get_include():
   """Returns the directory containing the C/C++ API include directives"""
@@ -15,8 +15,7 @@ def get_include():
 def get_numpy_api():
   """Returns the name of the numpy API used for compilation"""
 
-  return 'BLITZ_NUMPY_ARRAY_API'
-
-__version__ = __import__('pkg_resources').require('blitz.array')[0].version
+  from ._array import __numpy_api_name__
+  return __numpy_api_name__
 
 __all__ = ['array', 'as_blitz']

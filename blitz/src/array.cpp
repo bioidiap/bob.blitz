@@ -427,11 +427,7 @@ static PyMethodDef array_methods[] = {
 #define ENTRY_FUNCTION_INNER(a) init ## a
 #define ENTRY_FUNCTION(a) ENTRY_FUNCTION_INNER(a)
 
-#ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-#define PyMODINIT_FUNC void
-#endif
-PyMODINIT_FUNC ENTRY_FUNCTION(BLITZ_ARRAY_MODULE_NAME) (void)
-{
+PyMODINIT_FUNC ENTRY_FUNCTION(BLITZ_ARRAY_MODULE_NAME) (void) {
   PyObject* m;
 
   PyBlitzArray_Type.tp_new = PyType_GenericNew;
@@ -439,6 +435,11 @@ PyMODINIT_FUNC ENTRY_FUNCTION(BLITZ_ARRAY_MODULE_NAME) (void)
 
   m = Py_InitModule3(XSTR(BLITZ_ARRAY_MODULE_NAME), array_methods,
       "array definition and generic functions");
+
+  /* register version numbers and constants */
+  PyModule_AddIntConstant(m, "__api_version__", BLITZ_ARRAY_API_VERSION);
+  PyModule_AddStringConstant(m, "__version__", XSTR(BLITZ_ARRAY_VERSION));
+  PyModule_AddStringConstant(m, "__numpy_api_name__", XSTR(PY_ARRAY_UNIQUE_SYMBOL));
 
   /* register the type object to python */
   Py_INCREF(&PyBlitzArray_Type);
