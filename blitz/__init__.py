@@ -15,7 +15,7 @@ def get_include():
 def get_numpy_api():
   """Returns the name of the numpy API used for compilation"""
 
-  from ._array import __numpy_api_name__
+  from ._library import __numpy_api_name__
   return __numpy_api_name__
 
 __all__ = ['array', 'as_blitz']
