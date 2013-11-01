@@ -75,10 +75,11 @@ setup(
     ],
 
     ext_modules = [
-      Extension("blitz._array",
+      Extension("blitz._library",
         [
-          "blitz/src/api.cpp",
-          "blitz/src/array.cpp",
+          "blitz/api.cpp",
+          "blitz/array.cpp",
+          "blitz/main.cpp",
           ],
         define_macros=define_macros,
         include_dirs=include_dirs,

@@ -24,7 +24,7 @@ extern "C" {
 
 /* Macros that define versions and important names */
 #define BLITZ_ARRAY_MODULE_PREFIX blitz
-#define BLITZ_ARRAY_MODULE_NAME _array
+#define BLITZ_ARRAY_MODULE_NAME _library
 #define BLITZ_ARRAY_API_VERSION 0x0000
 #define BLITZ_ARRAY_STR_INNER(a) #a
 #define BLITZ_ARRAY_STR(a) BLITZ_ARRAY_STR_INNER(a)
