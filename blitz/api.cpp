@@ -416,7 +416,7 @@ PyObject* PyBlitzArray_New(PyTypeObject* type, PyObject*, PyObject*) {
 
   self->bzarr = 0;
   self->data = 0;
-  self->type_num = -1;
+  self->type_num = NPY_NOTYPE;
   self->ndim = 0;
   self->writeable = 0;
   self->base = 0;
