@@ -295,8 +295,6 @@ typedef struct {
 #    define BLITZ_ARRAY_MAKE_API_NAME_INNER(a) BLITZ_ ## a
 #    define BLITZ_ARRAY_MAKE_API_NAME(a) BLITZ_ARRAY_MAKE_API_NAME_INNER(a)
 #    define PyBlitzArray_API BLITZ_ARRAY_MAKE_API_NAME(PY_ARRAY_UNIQUE_SYMBOL)
-#    undef BLITZ_ARRAY_MAKE_API_NAME
-#    undef BLITZ_ARRAY_MAKE_API_NAME_INNER
 #  endif
 
 #  if defined(NO_IMPORT_ARRAY)
@@ -308,10 +306,6 @@ typedef struct {
   static void **PyBlitzArray_API=NULL;
 #    endif
 #  endif
-
-  /* This section is used in modules that use `blitz.array's' C-API */
-
-  static void **PyBlitzArray_API;
 
 #define PyBlitzArray_APIVersion (*(PyBlitzArray_APIVersion_TYPE *)PyBlitzArray_API[PyBlitzArray_APIVersion_NUM])
 
