@@ -23,24 +23,20 @@ at the `Python manual
 Here is a dummy C example showing how to include the header and where to call
 the import function:
 
-.. code-block:: c
+.. code-block:: c++
 
    #include <blitz.array/capi.h>
 
-   #ifndef PyMODINIT_FUNC	/* declarations for DLL import/export */
-   #define PyMODINIT_FUNC void
-   #endif
    PyMODINIT_FUNC initclient(void) {
 
-     PyObject *m;
- 
-     m = Py_InitModule("client", ClientMethods);
-     if (m == NULL) return;
+     PyObject* m Py_InitModule("client", ClientMethods);
 
-     /* imports the NumPy C-API */
+     if (!m) return;
+
+     // imports the NumPy C-API 
      import_array();
 
-     /* imports blitz.array C-API */
+     // imports blitz.array C-API
      import_blitz_array();
 
    }

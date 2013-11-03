@@ -31,7 +31,7 @@ for k in system_includes: extra_compile_args += ['-isystem', k]
 
 # NumPy API macros necessary?
 define_macros=[
-    ("PY_ARRAY_UNIQUE_SYMBOL", "BLITZ_NUMPY_ARRAY_API"),
+    ("PY_ARRAY_UNIQUE_SYMBOL", "BLITZ_ARRAY_NUMPY_C_API"),
     ("NO_IMPORT_ARRAY", "1"),
     ]
 import numpy

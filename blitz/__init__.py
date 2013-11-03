@@ -12,10 +12,4 @@ def get_include():
 
   return __import__('pkg_resources').resource_filename(__name__, 'include')
 
-def get_numpy_api():
-  """Returns the name of the numpy API used for compilation"""
-
-  from ._library import __numpy_api_name__
-  return __numpy_api_name__
-
 __all__ = ['array', 'as_blitz']

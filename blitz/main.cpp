@@ -68,7 +68,6 @@ PyMODINIT_FUNC ENTRY_FUNCTION(BLITZ_ARRAY_MODULE_NAME) (void) {
   /* register version numbers and constants */
   PyModule_AddIntConstant(m, "__api_version__", BLITZ_ARRAY_API_VERSION);
   PyModule_AddStringConstant(m, "__version__", BLITZ_ARRAY_STR(BLITZ_ARRAY_VERSION));
-  PyModule_AddStringConstant(m, "__numpy_api_name__", BLITZ_ARRAY_STR(PY_ARRAY_UNIQUE_SYMBOL));
 
   /* register the type object to python */
   Py_INCREF(&PyBlitzArray_Type);
