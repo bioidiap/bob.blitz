@@ -134,7 +134,6 @@ typedef struct {
 #define PyBlitzArray_SetItem_RET int
 #define PyBlitzArray_SetItem_PROTO (PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value)
 
-
 /********************************
  * Construction and Destruction *
  ********************************/

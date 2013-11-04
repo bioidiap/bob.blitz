@@ -18,70 +18,44 @@
 #include <typeinfo>
 
 template <typename T> int PyBlitzArrayCxx_CToTypenum() {
+  
+  const std::type_info& ttype = typeid(T);
+
+  if (ttype == typeid(bool))          return NPY_BOOL;
+  else if (ttype == typeid(uint8_t))  return NPY_UINT8;
+  else if (ttype == typeid(uint16_t)) return NPY_UINT16;
+  else if (ttype == typeid(uint32_t)) return NPY_UINT32;
+  else if (ttype == typeid(uint64_t)) return NPY_UINT64;
+  else if (ttype == typeid(int8_t))   return NPY_INT8;
+  else if (ttype == typeid(int16_t))  return NPY_INT16;
+  else if (ttype == typeid(int32_t))  return NPY_INT32;
+  else if (ttype == typeid(int64_t))  return NPY_INT64;
+  else if (ttype == typeid(float))    return NPY_FLOAT32;
+  else if (ttype == typeid(double))   return NPY_FLOAT64;
+#ifdef NPY_FLOAT128
+  else if (ttype == typeid(long double)) return NPY_FLOAT128;
+#endif
+  else if (ttype == typeid(std::complex<float>))  return NPY_COMPLEX64;
+  else if (ttype == typeid(std::complex<double>)) return NPY_COMPLEX128;
+#ifdef NPY_COMPLEX256
+  else if (ttype == typeid(std::complex<long double>)) return NPY_COMPLEX256;
+#endif
+#ifdef __APPLE__
+  else if (ttype == typeid(long)) {
+    if (sizeof(long) == 4) return NPY_INT32;
+    else return NPY_INT64;
+  }
+  else if (ttype == typeid(unsigned long)) {
+    if (sizeof(unsigned long) == 4) return NPY_UINT32;
+    else return NPY_UINT64;
+  }
+#endif
+
+  // if you get to this point, the type is not supported
   PyErr_Format(PyExc_NotImplementedError, "c++ type to numpy type_num conversion unsupported for typeid.name() `%s'", typeid(T).name());
   return -1;
+
 }
-
-template <> int PyBlitzArrayCxx_CToTypenum<bool>() 
-{ return NPY_BOOL; }
-
-template <> int PyBlitzArrayCxx_CToTypenum<int8_t>() 
-{ return NPY_INT8; }
-
-template <> int PyBlitzArrayCxx_CToTypenum<uint8_t>() 
-{ return NPY_UINT8; }
-
-template <> int PyBlitzArrayCxx_CToTypenum<int16_t>() 
-{ return NPY_INT16; }
-
-template <> int PyBlitzArrayCxx_CToTypenum<uint16_t>() 
-{ return NPY_UINT16; }
-
-template <> int PyBlitzArrayCxx_CToTypenum<int32_t>() 
-{ return NPY_INT32; }
-
-template <> int PyBlitzArrayCxx_CToTypenum<uint32_t>() 
-{ return NPY_UINT32; }
-
-template <> int PyBlitzArrayCxx_CToTypenum<int64_t>() 
-{ return NPY_INT64; }
-
-template <> int PyBlitzArrayCxx_CToTypenum<uint64_t>() 
-{ return NPY_UINT64; }
-
-template <> int PyBlitzArrayCxx_CToTypenum<float>() 
-{ return NPY_FLOAT32; }
-
-template <> int PyBlitzArrayCxx_CToTypenum<double>() 
-{ return NPY_FLOAT64; }
-
-#ifdef NPY_FLOAT128
-template <> int PyBlitzArrayCxx_CToTypenum<long double>() 
-{ return NPY_FLOAT128; }
-#endif
-
-template <> int PyBlitzArrayCxx_CToTypenum<std::complex<float>>() 
-{ return NPY_COMPLEX64; }
-
-template <> int PyBlitzArrayCxx_CToTypenum<std::complex<double>>() 
-{ return NPY_COMPLEX128; }
-
-#ifdef NPY_COMPLEX256
-template <> int PyBlitzArrayCxx_CToTypenum<std::complex<long double>>() 
-{ return NPY_COMPLEX256; }
-#endif
-
-#ifdef __APPLE__
-template <> int PyBlitzArrayCxx_CToTypenum<long>() {
-  if (sizeof(long) == 4) return NPY_INT32;
-  return NPY_INT64;
-}
-
-template <> int PyBlitzArrayCxx_CToTypenum<unsigned long>() {
-  if (sizeof(unsigned long) == 4) return NPY_UINT32;
-  return NPY_UINT64;
-}
-#endif
 
 template <typename T> T PyBlitzArrayCxx_AsCScalar(PyObject* o) {
 
@@ -123,118 +97,63 @@ template <typename T> T PyBlitzArrayCxx_AsCScalar(PyObject* o) {
 }
 
 template <typename T> PyObject* PyBlitzArrayCxx_FromCScalar(T v) {
-  PyErr_Format(PyExc_NotImplementedError, "c++ value to numpy scalar conversion unsupported for typeid.name() `%s'", typeid(T).name());
-  return 0;
-}
 
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(bool v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_BOOL);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
+  PyArray_Descr* descr = 0;
+  const std::type_info& ttype = typeid(T);
 
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(uint8_t v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_UINT8);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
-
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(uint16_t v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_UINT16);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
-
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(uint32_t v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_UINT32);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
-
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(uint64_t v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_UINT64);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
-
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(int8_t v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_INT8);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
-
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(int16_t v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_INT16);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
-
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(int32_t v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_INT32);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
-
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(int64_t v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_INT64);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
-
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(float v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_FLOAT32);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
-
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(double v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_FLOAT64);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
-
+  if (ttype == typeid(bool)) 
+    descr = PyArray_DescrFromType(NPY_BOOL);
+  else if (ttype == typeid(uint8_t)) 
+    descr = PyArray_DescrFromType(NPY_UINT8);
+  else if (ttype == typeid(uint16_t))
+    descr = PyArray_DescrFromType(NPY_UINT16);
+  else if (ttype == typeid(uint32_t)) 
+    descr = PyArray_DescrFromType(NPY_UINT32);
+  else if (ttype == typeid(uint64_t)) 
+    descr = PyArray_DescrFromType(NPY_UINT64);
+  else if (ttype == typeid(int8_t)) 
+    descr = PyArray_DescrFromType(NPY_INT8);
+  else if (ttype == typeid(int16_t)) 
+    descr = PyArray_DescrFromType(NPY_INT16);
+  else if (ttype == typeid(int32_t)) 
+    descr = PyArray_DescrFromType(NPY_INT32);
+  else if (ttype == typeid(int64_t)) 
+    descr = PyArray_DescrFromType(NPY_INT64);
+  else if (ttype == typeid(float))
+    descr = PyArray_DescrFromType(NPY_FLOAT32);
+  else if (ttype == typeid(double))
+    descr = PyArray_DescrFromType(NPY_FLOAT64);
 #ifdef NPY_FLOAT128
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(long double v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_FLOAT128);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
+  else if (ttype == typeid(long double))
+    descr = PyArray_DescrFromType(NPY_FLOAT128);
 #endif
-
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(std::complex<float> v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_COMPLEX64);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
-
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(std::complex<double> v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_COMPLEX128);
-  PyObject* retval = PyArray_Scalar(&v, descr, 0);
-  Py_DECREF(descr);
-  return retval;
-}
-
+  else if (ttype == typeid(std::complex<float>))
+    descr = PyArray_DescrFromType(NPY_COMPLEX64);
+  else if (ttype == typeid(std::complex<double>))
+    descr = PyArray_DescrFromType(NPY_COMPLEX128);
 #ifdef NPY_COMPLEX256
-template <> PyObject* PyBlitzArrayCxx_FromCScalar(std::complex<long double> v) {
-  PyArray_Descr* descr = PyArray_DescrFromType(NPY_COMPLEX256);
+  else if (ttype == typeid(std::complex<long double>))
+    descr = PyArray_DescrFromType(NPY_COMPLEX256);
+#endif
+#ifdef __APPLE__
+  else if (ttype == typeid(long)) {
+    if (sizeof(long) == 4) descr = PyArray_DescrFromType(NPY_INT32);
+    else descr = PyArray_DescrFromType(NPY_INT64);
+  }
+  else if (ttype == typeid(unsigned long)) {
+    if (sizeof(unsigned long) == 4) descr = PyArray_DescrFromType(NPY_UINT32);
+    else descr = PyArray_DescrFromType(NPY_UINT64);
+  }
+#endif
+  else {
+    PyErr_Format(PyExc_NotImplementedError, "c++ value to numpy scalar conversion unsupported for typeid.name() == `%s'", typeid(T).name());
+    return 0;
+  }
+
   PyObject* retval = PyArray_Scalar(&v, descr, 0);
   Py_DECREF(descr);
   return retval;
 }
-#endif
 
 template <typename T, int N> 
 int PyBlitzArrayCxx_IsBehaved(const blitz::Array<T,N>& a) {
