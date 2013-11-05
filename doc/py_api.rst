@@ -81,25 +81,8 @@ normal python indexing operatiors ``[]``:
    >>> print t
    6.14
 
-You can convert ``blitz.array`` objects into either shallow or deep
-:py:class:`numpy.ndarray` copies using
-:py:meth:`blitz.array.as_shallow_ndarray` or :py:meth:`blitz.array.as_ndarray`
-respectively.
-
-.. doctest:: blitztest
-
-   >>> a = blitz.array(2, complex)
-   >>> a[0] = complex(3,4)
-   >>> a[1] = complex(2,2)
-   >>> npy = a.as_shallow_ndarray()
-   >>> print npy
-   [ 3.+4.j  2.+2.j]
-   >>> id(npy.base) == id(a)
-   True
-   >>> print npy.flags.owndata
-   False
-
-You can also create an independent (therefore less-efficient) copy:
+You can convert ``blitz.array`` objects into either (shallow)
+:py:class:`numpy.ndarray` copies using :py:meth:`blitz.array.as_ndarray`.
 
 .. doctest:: blitztest
 
@@ -109,9 +92,20 @@ You can also create an independent (therefore less-efficient) copy:
    >>> npy = a.as_ndarray()
    >>> print npy
    [ 3.+4.j  2.+2.j]
-   >>> npy.base is None
+   >>> id(npy.base) == id(a)
    True
    >>> print npy.flags.owndata
+   False
+
+You can detach the :py:class:`numpy.ndarray` from the :py:class:`blitz.array`,
+by issuing a standard numpy copy:
+
+.. doctest:: blitztest
+
+   >>> npy_copy = npy.copy()
+   >>> npy_copy.base is None
+   True
+   >>> print npy_copy.flags.owndata
    True
 
 You can use ``blitz.array`` anywhere a :py:class:`numpy.ndarray` is expected.

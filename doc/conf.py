@@ -76,7 +76,7 @@ import time
 copyright = u'%s, Idiap Research Institute' % time.strftime('%Y')
 
 # Grab the setup entry
-distribution = pkg_resources.require('blitz')[0]
+distribution = pkg_resources.require('blitz.array')[0]
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
