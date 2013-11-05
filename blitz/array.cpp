@@ -335,8 +335,6 @@ on its contents. You can also deploy objects of this class wherever\n\
 "
 );
 
-int PyBlitzArray_APIVersion = BLITZ_ARRAY_API_VERSION;
-
 PyTypeObject PyBlitzArray_Type = {
     PyObject_HEAD_INIT(0)
     0,                                          /*ob_size*/

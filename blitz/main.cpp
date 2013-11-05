@@ -53,6 +53,8 @@ static PyMethodDef array_methods[] = {
     {0}  /* Sentinel */
 };
 
+int PyBlitzArray_APIVersion = BLITZ_ARRAY_API_VERSION;
+
 #define ENTRY_FUNCTION_INNER(a) init ## a
 #define ENTRY_FUNCTION(a) ENTRY_FUNCTION_INNER(a)
 
