@@ -23,7 +23,7 @@ Documentation
 You can generate the documentation for this package, after installation, using
 Sphinx::
 
-  $ ./bin/sphinx-build -b html doc sphinx
+  $ sphinx-build -b html doc sphinx
 
 This shall place in the directory ``sphinx``, the current version for the
 documentation of the package.
@@ -33,9 +33,27 @@ Testing
 
 You can run a set of tests using the nose test runner::
 
-  $ ./bin/nosetests -sv
+  $ nosetests -sv blitz
 
 You can run our documentation tests using sphinx itself::
 
-  $ ./bin/sphinx-build -b doctest doc sphinx
+  $ sphinx-build -b doctest doc sphinx
 
+You can test overall test coverage with::
+
+  $ nosetests --with-coverage --cover-package=blitz
+
+The ``coverage`` egg must be installed for this to work properly.
+
+Development
+-----------
+
+To develop this package, install using ``zc.buildout``, using the buildout
+configuration found on the root of the package:
+
+  $ python bootstrap.py
+  ...
+  $ ./bin/buildout
+
+Tweak the options in ``buildout.cfg`` to disable/enable verbosity and debug
+builds.
