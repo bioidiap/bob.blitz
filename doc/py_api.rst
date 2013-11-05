@@ -140,5 +140,3 @@ This section includes information for using the pure Python API of
 .. autofunction:: blitz.as_blitz
 
 .. autofunction:: blitz.get_include
-
-.. autofunction:: blitz.get_includes
