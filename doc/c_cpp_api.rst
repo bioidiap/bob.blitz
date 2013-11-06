@@ -60,6 +60,7 @@ Array Structure
       typedef struct {
         PyObject_HEAD
         void* bzarr;
+        void* data;
         int type_num;
         Py_ssize_t ndim;
         Py_ssize_t shape[BLITZ_ARRAY_MAXDIMS];
