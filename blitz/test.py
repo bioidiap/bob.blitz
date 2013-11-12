@@ -264,7 +264,7 @@ def test_from_ndarray_transposed():
 
 def test_from_3darray_transposed():
 
-  nd = numpy.array(range(8), dtype='uint8').reshape(2,2,2)
+  nd = numpy.random.randint(0, 255, (3,200,300)).astype('uint8')
   bz = as_blitz(nd.transpose(2,0,1))
   for i in range(2):
     for j in range(2):
