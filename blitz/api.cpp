@@ -1004,6 +1004,53 @@ int PyBlitzArray_OutputConverter(PyObject* o, PyBlitzArrayObject** a) {
 
 }
 
+int PyBlitzArray_BehavedConverter(PyObject* o, PyBlitzArrayObject** a) {
+
+  // is already a blitz.array
+  // TODO: Don't we check in these conditions?
+  if (PyBlitzArray_Check(o)) {
+    *a = reinterpret_cast<PyBlitzArrayObject*>(o);
+    Py_INCREF(*a);
+    return 1;
+  }
+
+  // is numpy.ndarray wrapped around a blitz.array
+  if (PyArray_Check(o)) {
+    PyArrayObject* arr = reinterpret_cast<PyArrayObject*>(o);
+    if (PyArray_ISBEHAVED_RO(arr) && PyBlitzArray_CheckNumpyBase(arr)) {
+      *a = reinterpret_cast<PyBlitzArrayObject*>(PyArray_BASE(arr));
+      Py_INCREF(*a);
+      return 1;
+    }
+  }
+
+  // run the normal converter
+  PyObject* ao = 0;
+  if (!PyArray_Converter(o, &ao)) {
+    PyErr_Print();
+    PyErr_Format(PyExc_ValueError, "cannot convert argument to %s - prefix conversion to numpy.ndarray failed", s_array_str);
+    return 0;
+  }
+
+  PyArrayObject* arr = reinterpret_cast<PyArrayObject*>(ao);
+
+  // check if array is behaved
+  if (!PyArray_ISBEHAVED_RO(arr)) { //copies and discard non-behaved
+    PyObject* tmp = PyArray_NewCopy(arr, NPY_ANYORDER);
+    Py_DECREF(ao);
+    ao = tmp;
+    arr = reinterpret_cast<PyArrayObject*>(ao);
+  }
+
+  PyObject* retval = PyBlitzArray_FromNumpyArray(arr);
+  Py_DECREF(ao);
+
+  *a = reinterpret_cast<PyBlitzArrayObject*>(retval);
+
+  return (*a) ? 1 : 0;
+
+}
+
 int PyBlitzArray_IndexConverter(PyObject* o, PyBlitzArrayObject** shape) {
 
   if (PyNumber_Check(o)) {

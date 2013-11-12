@@ -174,15 +174,19 @@ typedef struct {
 #define PyBlitzArray_Converter_RET int
 #define PyBlitzArray_Converter_PROTO (PyObject* o, PyBlitzArrayObject** a)
 
-#define PyBlitzArray_OutputConverter_NUM 24
+#define PyBlitzArray_BehavedConverter_NUM 24
+#define PyBlitzArray_BehavedConverter_RET int
+#define PyBlitzArray_BehavedConverter_PROTO (PyObject* o, PyBlitzArrayObject** a)
+
+#define PyBlitzArray_OutputConverter_NUM 25
 #define PyBlitzArray_OutputConverter_RET int
 #define PyBlitzArray_OutputConverter_PROTO (PyObject* o, PyBlitzArrayObject** a)
 
-#define PyBlitzArray_IndexConverter_NUM 25
+#define PyBlitzArray_IndexConverter_NUM 26
 #define PyBlitzArray_IndexConverter_RET int
 #define PyBlitzArray_IndexConverter_PROTO (PyObject* o, PyBlitzArrayObject** shape)
 
-#define PyBlitzArray_TypenumConverter_NUM 26
+#define PyBlitzArray_TypenumConverter_NUM 27
 #define PyBlitzArray_TypenumConverter_RET int
 #define PyBlitzArray_TypenumConverter_PROTO (PyObject* o, int** type_num)
 
@@ -190,12 +194,12 @@ typedef struct {
  * Utilities *
  *************/
 
-#define PyBlitzArray_TypenumAsString_NUM 27
+#define PyBlitzArray_TypenumAsString_NUM 28
 #define PyBlitzArray_TypenumAsString_RET const char*
 #define PyBlitzArray_TypenumAsString_PROTO (int typenum)
 
 /* Total number of C API pointers */
-#define PyBlitzArray_API_pointers 28
+#define PyBlitzArray_API_pointers 29
 
 #ifdef BLITZ_ARRAY_MODULE
 
@@ -269,6 +273,8 @@ typedef struct {
  ***********************************************/
 
   PyBlitzArray_Converter_RET PyBlitzArray_Converter PyBlitzArray_Converter_PROTO;
+  
+  PyBlitzArray_BehavedConverter_RET PyBlitzArray_BehavedConverter PyBlitzArray_BehavedConverter_PROTO;
   
   PyBlitzArray_OutputConverter_RET PyBlitzArray_OutputConverter PyBlitzArray_OutputConverter_PROTO;
   
@@ -373,6 +379,8 @@ typedef struct {
  ***********************************************/
 
 #define PyBlitzArray_Converter (*(PyBlitzArray_Converter_RET (*)PyBlitzArray_Converter_PROTO) PyBlitzArray_API[PyBlitzArray_Converter_NUM])
+
+#define PyBlitzArray_BehavedConverter (*(PyBlitzArray_BehavedConverter_RET (*)PyBlitzArray_BehavedConverter_PROTO) PyBlitzArray_API[PyBlitzArray_BehavedConverter_NUM])
 
 #define PyBlitzArray_OutputConverter (*(PyBlitzArray_OutputConverter_RET (*)PyBlitzArray_OutputConverter_PROTO) PyBlitzArray_API[PyBlitzArray_OutputConverter_NUM])
 

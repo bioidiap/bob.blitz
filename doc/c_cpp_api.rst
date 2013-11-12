@@ -314,11 +314,23 @@ Converter Functions for PyArg_Parse* family
    input array. As any other standard Python converter, it returns a **new**
    reference to a ``PyBlitzArrayObject``.
 
-   It works efficiently if the input array is already a ``PyBlitzArrayObject``
-   or if it is a ``PyArrayObject`` (i.e., a :py:class:``numpy.ndarray``), with
-   a matching base which is a ``PyBlitzArrayObject``. Otherwise, it creates a
-   new ``PyBlitzArrayObject`` by first creating a ``PyArrayObject`` and then
-   shallow wrapping it with a ``PyBlitzArrayObject``.
+   It works efficiently if the input array is already a
+   :c:type:`PyBlitzArrayObject` or if it is a :c:type:`PyArrayObject` (i.e., a
+   :py:class:``numpy.ndarray``), with a matching base which is a
+   :c:type:`PyBlitzArrayObject`. Otherwise, it creates a new
+   :c:type:`PyBlitzArrayObject` by first creating a :c:type:`PyArrayObject` and
+   then shallow wrapping it with a :c:type:`PyBlitzArrayObject`.
+
+.. c:function:: int PyBlitzArray_BehavedConverter(PyObject* o, PyBlitzArrayObject** a)
+
+   This function operates like :c:func:`PyBlitzArray_Converter`, excepts it
+   guarantees that the returned (underlying) ``blitz::Array<>`` object is
+   wrapped around a well-behaved :py:class:`numpy.ndarray` object (i.e.
+   contiguous, memory-aligned, C-style).
+
+   In the event the input object is already a :c:type:`PyBlitzArrayObject`,
+   then a new reference to it is returned. It does not check, in this
+   particular case, that the input object is well-behaved.
 
 .. c:function:: int PyBlitzArray_OutputConverter(PyObject* o, PyBlitzArrayObject** a)
 
