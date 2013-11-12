@@ -252,11 +252,14 @@ def test_from_ndarray_shallow():
   nose.tools.eq_(nd[0,1], bz[0,1])
 
 
-@nose.tools.raises(ValueError)
 def test_from_ndarray_transposed():
 
   nd = numpy.array([1, 2, 3, -1]).reshape(2,2).T
   bz = as_blitz(nd)
+  assert bz[0,0] == nd[0,0]
+  assert bz[0,1] == nd[0,1]
+  assert bz[1,0] == nd[1,0]
+  assert bz[1,1] == nd[1,1]
 
 @nose.tools.raises(ValueError)
 def test_detects_unsupported_dims():
