@@ -1017,7 +1017,7 @@ int PyBlitzArray_BehavedConverter(PyObject* o, PyBlitzArrayObject** a) {
   // is numpy.ndarray wrapped around a blitz.array
   if (PyArray_Check(o)) {
     PyArrayObject* arr = reinterpret_cast<PyArrayObject*>(o);
-    if (PyArray_ISBEHAVED_RO(arr) && PyBlitzArray_CheckNumpyBase(arr)) {
+    if (PyArray_ISCARRAY_RO(arr) && PyBlitzArray_CheckNumpyBase(arr)) {
       *a = reinterpret_cast<PyBlitzArrayObject*>(PyArray_BASE(arr));
       Py_INCREF(*a);
       return 1;
@@ -1035,7 +1035,7 @@ int PyBlitzArray_BehavedConverter(PyObject* o, PyBlitzArrayObject** a) {
   PyArrayObject* arr = reinterpret_cast<PyArrayObject*>(ao);
 
   // check if array is behaved
-  if (!PyArray_ISBEHAVED_RO(arr)) { //copies and discard non-behaved
+  if (!PyArray_ISCARRAY_RO(arr)) { //copies and discard non-behaved
     PyObject* tmp = PyArray_NewCopy(arr, NPY_ANYORDER);
     Py_DECREF(ao);
     ao = tmp;
