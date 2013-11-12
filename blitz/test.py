@@ -6,8 +6,9 @@
 """Tests for blitz.array glue methods
 """
 
-import numpy
+import sys
 import nose
+import numpy
 from . import array as bzarray
 from . import as_blitz
 
@@ -256,10 +257,19 @@ def test_from_ndarray_transposed():
 
   nd = numpy.array([1, 2, 3, -1]).reshape(2,2).T
   bz = as_blitz(nd)
-  assert bz[0,0] == nd[0,0]
-  assert bz[0,1] == nd[0,1]
-  assert bz[1,0] == nd[1,0]
-  assert bz[1,1] == nd[1,1]
+  nose.tools.eq_(bz[0,0], nd[0,0])
+  nose.tools.eq_(bz[0,1], nd[0,1])
+  nose.tools.eq_(bz[1,0], nd[1,0])
+  nose.tools.eq_(bz[1,1], nd[1,1])
+
+def test_from_3darray_transposed():
+
+  nd = numpy.array(range(8), dtype='uint8').reshape(2,2,2)
+  bz = as_blitz(nd.transpose(2,0,1))
+  for i in range(2):
+    for j in range(2):
+      for k in range(2):
+        nose.tools.eq_(bz[k,i,j], nd[i,j,k])
 
 @nose.tools.raises(ValueError)
 def test_detects_unsupported_dims():

@@ -199,7 +199,7 @@ PyObject* getitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos) {
 
     case 3:
       {
-        T& val = (*reinterpret_cast<blitz::Array<T,2>*>(o->bzarr))((int)tmp[0], (int)tmp[1], (int)tmp[2]);
+        T& val = (*reinterpret_cast<blitz::Array<T,3>*>(o->bzarr))((int)tmp[0], (int)tmp[1], (int)tmp[2]);
         return PyArray_Scalar(&val, PyArray_DescrFromType(o->type_num), 0);
       }
 
@@ -900,11 +900,12 @@ PyObject* PyBlitzArray_FromNumpyArray(PyArrayObject* o) {
 #     endif
       );
 
-  if (!retval) return retval;
+  if (!retval) return 0;
 
   PyObject* pyo = reinterpret_cast<PyObject*>(o);
   reinterpret_cast<PyBlitzArrayObject*>(retval)->base = pyo;
   Py_INCREF(pyo);
+
   return retval;
 
 }
