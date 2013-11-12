@@ -7,6 +7,7 @@
 
 #define BLITZ_ARRAY_MODULE
 #include <blitz.array/cppapi.h>
+#include <algorithm>
 
 PyDoc_STRVAR(s_array_str, BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX) ".array");
 
@@ -653,6 +654,15 @@ PyObject* PyBlitzArray_SimpleNew (int type_num, Py_ssize_t ndim, Py_ssize_t* sha
 
 }
 
+template <int N>
+void stride_order(Py_ssize_t* s, blitz::TinyVector<int,N>& tv) {
+
+  for (int i=0; i<N; ++i) tv[i] = i;
+  int* idx = tv.data();
+  std::sort(idx, idx+N, [s](int i1, int i2) {return s[i1] < s[i2];});
+
+}
+
 template<typename T, int N>
 PyObject* simplenewfromdata_2(int type_num, Py_ssize_t ndim,
     Py_ssize_t* shape, Py_ssize_t* stride, void* data, int writeable) {
@@ -666,7 +676,15 @@ PyObject* simplenewfromdata_2(int type_num, Py_ssize_t ndim,
       tv_stride(i) = stride[i]/sizeof(T); ///< from **bytes**
     }
     PyBlitzArrayObject* retval = (PyBlitzArrayObject*)PyBlitzArray_New(&PyBlitzArray_Type, 0, 0);
-    auto bz = new blitz::Array<T,N>(reinterpret_cast<T*>(data), tv_shape, tv_stride, blitz::neverDeleteData);
+
+    //get the storage right
+    blitz::TinyVector<bool,N> ascending;
+    ascending = true;
+    blitz::TinyVector<int,N> ordering;
+    stride_order(stride, ordering);
+    blitz::GeneralArrayStorage<N> storage(ordering, ascending);
+
+    auto bz = new blitz::Array<T,N>(reinterpret_cast<T*>(data), tv_shape, tv_stride, blitz::neverDeleteData, storage);
     retval->bzarr = static_cast<void*>(bz);
     retval->data = data;
     retval->type_num = type_num;
