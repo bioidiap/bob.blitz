@@ -253,7 +253,7 @@ def test_from_ndarray_shallow():
   nose.tools.eq_(nd[0,1], bz[0,1])
 
 
-def test_from_ndarray_transposed():
+def test_from_2darray_transposed():
 
   nd = numpy.array([1, 2, 3, -1]).reshape(2,2).T
   bz = as_blitz(nd)
