@@ -53,6 +53,25 @@ static PyMethodDef array_methods[] = {
     {0}  /* Sentinel */
 };
 
+static PyObject* build_version_dictionary() {
+
+  PyObject* retval = PyDict_New();
+  if (!retval) return 0;
+
+  PyObject* v = Py_BuildValue("s", BLITZ_VERSION);
+  if (!v) {
+    Py_DECREF(retval);
+    return 0;
+  }
+
+  int error = PyDict_SetItemString(retval, "Blitz++", v);
+  Py_DECREF(v);
+  if (error == 0) return retval;
+
+  Py_DECREF(retval);
+  return 0;
+}
+
 int PyBlitzArray_APIVersion = BLITZ_ARRAY_API_VERSION;
 
 #define ENTRY_FUNCTION_INNER(a) init ## a
@@ -70,6 +89,7 @@ PyMODINIT_FUNC ENTRY_FUNCTION(BLITZ_ARRAY_MODULE_NAME) (void) {
   /* register version numbers and constants */
   PyModule_AddIntConstant(m, "__api_version__", BLITZ_ARRAY_API_VERSION);
   PyModule_AddStringConstant(m, "__version__", BLITZ_ARRAY_STR(BLITZ_ARRAY_VERSION));
+  PyModule_AddObject(m, "versions", build_version_dictionary());
 
   /* register the type object to python */
   Py_INCREF(&PyBlitzArray_Type);

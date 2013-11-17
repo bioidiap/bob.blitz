@@ -39,6 +39,9 @@ from distutils.version import StrictVersion
 if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
   define_macros.append(("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"))
 
+# Blitz versioning macros and availability
+define_macros += blitz_pkg.package_macros()
+
 # Compilation options
 import platform
 if platform.system() == 'Darwin':
