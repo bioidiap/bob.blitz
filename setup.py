@@ -51,6 +51,7 @@ setup(
     install_requires=[
       'setuptools',
       'numpy',
+      'xbob.extension',
     ],
 
     ext_modules = [
