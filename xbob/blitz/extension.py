@@ -35,11 +35,11 @@ class Extension(XbobExtension):
     numpy_include = ['-isystem', numpy.get_include()]
     kwargs.setdefault('extra_compile_args', []).extend(numpy_include)
 
-    blitz_array_include = resource_filename(__name__, 'include')
-    kwargs.setdefault('include_dirs', []).append(blitz_array_include)
+    self_include_dir = resource_filename(__name__, 'include')
+    kwargs.setdefault('include_dirs', []).append(self_include_dir)
 
     macros = [
-          ("PY_ARRAY_UNIQUE_SYMBOL", "BLITZ_ARRAY_NUMPY_C_API"),
+          ("PY_ARRAY_UNIQUE_SYMBOL", "XBOB_BLITZ_NUMPY_C_API"),
           ("NO_IMPORT_ARRAY", "1"),
           ]
 

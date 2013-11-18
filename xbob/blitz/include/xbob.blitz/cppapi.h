@@ -6,10 +6,10 @@
  * transforming C++ objects into our Pythonic blitz::Array<> layer.
  */
 
-#ifndef PY_BLITZARRAY_CPPAPI_H
-#define PY_BLITZARRAY_CPPAPI_H
+#ifndef PY_XBOB_BLITZ_CPPAPI_H
+#define PY_XBOB_BLITZ_CPPAPI_H
 
-#include <blitz.array/capi.h>
+#include <xbob.blitz/capi.h>
 
 #include <complex>
 #include <blitz/array.h>
@@ -173,7 +173,7 @@ template <typename T, int N>
 PyObject* PyBlitzArrayCxx_NewFromConstArray(const blitz::Array<T,N>& a) {
 
   if (!PyBlitzArrayCxx_IsBehaved(a)) {
-    PyErr_Format(PyExc_ValueError, "cannot convert C++ blitz::Array<%s,%d> which doesn't behave (memory contiguous, aligned, C-style) into a pythonic %s.array", PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), N, BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX));
+    PyErr_Format(PyExc_ValueError, "cannot convert C++ blitz::Array<%s,%d> which doesn't behave (memory contiguous, aligned, C-style) into a pythonic %s.array", PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), N, XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX));
     return 0;
   }
 
@@ -195,11 +195,11 @@ PyObject* PyBlitzArrayCxx_NewFromConstArray(const blitz::Array<T,N>& a) {
   }
 
   catch (std::exception& e) {
-    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating %s.array(@%" PY_FORMAT_SIZE_T "d,'%s'): %s", BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX), N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), e.what());
+    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating %s.array(@%" PY_FORMAT_SIZE_T "d,'%s'): %s", XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX), N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), e.what());
   }
 
   catch (...) {
-    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating %s.array(@%" PY_FORMAT_SIZE_T "d,'%s')", BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX), N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()));
+    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating %s.array(@%" PY_FORMAT_SIZE_T "d,'%s')", XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX), N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()));
   }
 
   /** some test code
@@ -230,4 +230,4 @@ blitz::Array<T,N>* PyBlitzArrayCxx_AsBlitz(PyBlitzArrayObject* o) {
   return reinterpret_cast<blitz::Array<T,N>*>(o->bzarr);
 }
 
-#endif /* PY_BLITZARRAY_CPPAPI_H */
+#endif /* PY_XBOB_BLITZ_CPPAPI_H */

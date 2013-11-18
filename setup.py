@@ -11,14 +11,14 @@ from xbob.extension import Extension
 # Local include directory
 import os
 package_dir = os.path.dirname(os.path.realpath(__file__))
-package_dir = os.path.join(package_dir, 'blitz', 'include')
+package_dir = os.path.join(package_dir, 'xbob', 'blitz', 'include')
 
 # Add numpy includes
 extra_compile_args = ['-isystem', numpy.get_include()]
 
 # NumPy API macros necessary?
 define_macros=[
-    ("PY_ARRAY_UNIQUE_SYMBOL", "BLITZ_ARRAY_NUMPY_C_API"),
+    ("PY_ARRAY_UNIQUE_SYMBOL", "XBOB_BLITZ_NUMPY_C_API"),
     ("NO_IMPORT_ARRAY", "1"),
     ]
 from distutils.version import StrictVersion
@@ -35,7 +35,7 @@ define_macros += [
 # parameters that define our package.
 setup(
 
-    name='blitz.array',
+    name='xbob.blitz',
     version=version,
     description='Bindings for Blitz++ (a C++ array template library)',
     url='http://github.com/anjos/blitz.array',
@@ -48,6 +48,10 @@ setup(
     packages=find_packages(),
     include_package_data=True,
 
+    namespace_packages = [
+      'xbob',
+    ],
+
     install_requires=[
       'setuptools',
       'numpy',
@@ -55,11 +59,11 @@ setup(
     ],
 
     ext_modules = [
-      Extension("blitz._library",
+      Extension("xbob.blitz._library",
         [
-          "blitz/api.cpp",
-          "blitz/array.cpp",
-          "blitz/main.cpp",
+          "xbob/blitz/api.cpp",
+          "xbob/blitz/array.cpp",
+          "xbob/blitz/main.cpp",
           ],
         packages=[
           'blitz >= 0.10',

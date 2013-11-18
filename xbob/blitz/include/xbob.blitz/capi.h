@@ -12,8 +12,8 @@
  * http://docs.python.org/2/extending/extending.html#using-capsules.
  */
 
-#ifndef PY_BLITZARRAY_API_H
-#define PY_BLITZARRAY_API_H
+#ifndef PY_XBOB_BLITZ_API_H
+#define PY_XBOB_BLITZ_API_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,14 +23,14 @@ extern "C" {
 #include <numpy/arrayobject.h>
 
 /* Macros that define versions and important names */
-#define BLITZ_ARRAY_MODULE_PREFIX blitz
-#define BLITZ_ARRAY_MODULE_NAME _library
-#define BLITZ_ARRAY_API_VERSION 0x0000
-#define BLITZ_ARRAY_STR_INNER(a) #a
-#define BLITZ_ARRAY_STR(a) BLITZ_ARRAY_STR_INNER(a)
+#define XBOB_BLITZ_MODULE_PREFIX xbob.blitz
+#define XBOB_BLITZ_MODULE_NAME _library
+#define XBOB_BLITZ_API_VERSION 0x0000
+#define XBOB_BLITZ_STR_INNER(a) #a
+#define XBOB_BLITZ_STR(a) XBOB_BLITZ_STR_INNER(a)
 
 /* Maximum number of dimensions supported at this library */
-#define BLITZ_ARRAY_MAXDIMS 4
+#define XBOB_BLITZ_MAXDIMS 4
 
 /* Type definition for PyBlitzArrayObject */
 typedef struct {
@@ -41,8 +41,8 @@ typedef struct {
   void* data; ///< a pointer to the internal data buffer
   int type_num; ///< numpy type number of elements
   Py_ssize_t ndim; ///< number of dimensions
-  Py_ssize_t shape[BLITZ_ARRAY_MAXDIMS]; ///< shape
-  Py_ssize_t stride[BLITZ_ARRAY_MAXDIMS]; ///< strides
+  Py_ssize_t shape[XBOB_BLITZ_MAXDIMS]; ///< shape
+  Py_ssize_t stride[XBOB_BLITZ_MAXDIMS]; ///< strides
   int writeable; ///< 1 if data is writeable, 0 otherwise
 
   /* Base pointer, if the memory of this object is coming from elsewhere */
@@ -201,7 +201,7 @@ typedef struct {
 /* Total number of C API pointers */
 #define PyBlitzArray_API_pointers 29
 
-#ifdef BLITZ_ARRAY_MODULE
+#ifdef XBOB_BLITZ_MODULE
 
   /* This section is used when compiling `blitz.array' itself */
 
@@ -297,9 +297,9 @@ typedef struct {
  ************************************************************************/
 
 #  if defined(PY_ARRAY_UNIQUE_SYMBOL)
-#    define BLITZ_ARRAY_MAKE_API_NAME_INNER(a) BLITZ_ ## a
-#    define BLITZ_ARRAY_MAKE_API_NAME(a) BLITZ_ARRAY_MAKE_API_NAME_INNER(a)
-#    define PyBlitzArray_API BLITZ_ARRAY_MAKE_API_NAME(PY_ARRAY_UNIQUE_SYMBOL)
+#    define XBOB_BLITZ_MAKE_API_NAME_INNER(a) BLITZ_ ## a
+#    define XBOB_BLITZ_MAKE_API_NAME(a) XBOB_BLITZ_MAKE_API_NAME_INNER(a)
+#    define PyBlitzArray_API XBOB_BLITZ_MAKE_API_NAME(PY_ARRAY_UNIQUE_SYMBOL)
 #  endif
 
 #  if defined(NO_IMPORT_ARRAY)
@@ -404,7 +404,7 @@ typedef struct {
 
     /* New Python API support for library loading */
 
-    PyBlitzArray_API = (void **)PyCapsule_Import(BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX) "." BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_NAME) "._C_API", 0);
+    PyBlitzArray_API = (void **)PyCapsule_Import(XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX) "." XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_NAME) "._C_API", 0);
 
     if (!PyBlitzArray_API) return -1;
 
@@ -415,7 +415,7 @@ typedef struct {
     PyObject *c_api_object;
     PyObject *module;
 
-    module = PyImport_ImportModule(BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX) "." BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_NAME));
+    module = PyImport_ImportModule(XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX) "." XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_NAME));
 
     if (module == NULL) return -1;
 
@@ -438,8 +438,8 @@ typedef struct {
     /* Checks that the imported version matches the compiled version */
     int imported_version = *(int*)PyBlitzArray_API[PyBlitzArray_APIVersion_NUM];
 
-    if (BLITZ_ARRAY_API_VERSION != imported_version) {
-      PyErr_Format(PyExc_RuntimeError, "%s.%s import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX), BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_NAME), BLITZ_ARRAY_API_VERSION, imported_version);
+    if (XBOB_BLITZ_API_VERSION != imported_version) {
+      PyErr_Format(PyExc_RuntimeError, "%s.%s import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX), XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_NAME), XBOB_BLITZ_API_VERSION, imported_version);
       return -1;
     }
 
@@ -448,10 +448,10 @@ typedef struct {
 
   }
 
-#endif // BLITZ_ARRAY_MODULE
+#endif // XBOB_BLITZ_MODULE
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
-#endif /* PY_BLITZARRAY_API_H */
+#endif /* PY_XBOB_BLITZ_API_H */

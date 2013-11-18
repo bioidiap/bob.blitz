@@ -5,11 +5,11 @@
  * @brief Pure python bindings for Blitz Arrays
  */
 
-#define BLITZ_ARRAY_MODULE
-#include <blitz.array/capi.h>
+#define XBOB_BLITZ_MODULE
+#include <xbob.blitz/capi.h>
 #include <structmember.h>
 
-PyDoc_STRVAR(s_array_str, BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX) ".array");
+PyDoc_STRVAR(s_array_str, XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX) ".array");
 
 /**
  * Formal initialization of an Array object
@@ -141,7 +141,7 @@ PyDoc_STRVAR(s_private_array_str, "__array__");
 PyDoc_STRVAR(s_private_array__doc__,
 "x.__array__() -> numpy.ndarray\n\
 \n\
-numpy.ndarray accessor (shallow wraps ``blitz.array`` as numpy.ndarray)"
+numpy.ndarray accessor (shallow wraps ``xbob.blitz.array`` as numpy.ndarray)"
 );
 
 static PyMethodDef PyBlitzArray_methods[] = {

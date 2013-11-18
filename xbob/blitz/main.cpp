@@ -8,8 +8,8 @@
 #ifdef NO_IMPORT_ARRAY
 #undef NO_IMPORT_ARRAY
 #endif
-#define BLITZ_ARRAY_MODULE
-#include <blitz.array/capi.h>
+#define XBOB_BLITZ_MODULE
+#include <xbob.blitz/capi.h>
 
 static PyObject* PyBlitzArray_as_blitz(PyObject*, PyObject* args, PyObject* kwds) {
 
@@ -26,20 +26,20 @@ static PyObject* PyBlitzArray_as_blitz(PyObject*, PyObject* args, PyObject* kwds
 
 PyDoc_STRVAR(s_as_blitz_str, "as_blitz");
 PyDoc_STRVAR(s_as_blitz__doc__,
-"as_blitz(x) -> blitz.array\n\
+"as_blitz(x) -> xbob.blitz.array\n\
 \n\
-Converts any compatible python object into a shallow " BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX) ".array\n\
+Converts any compatible python object into a shallow " XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX) ".array\n\
 \n\
 This function works by first converting the input object ``x`` into\n\
 a :py:class:`numpy.ndarray` and then shallow wrapping that ``ndarray``\n\
-into a new :py:class:`" BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX) ".array`. You can access the converted\n\
+into a new :py:class:`" XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX) ".array`. You can access the converted\n\
 ``ndarray`` using the returned value's ``base`` attribute. If the\n\
 ``ndarray`` cannot be shallow-wrapped, a :py:class:`ValueError` is\n\
 raised.\n\
 \n\
 In the case the input object ``x`` is already a behaved (C-style,\n\
 memory-aligned, contiguous) :py:class:`numpy.ndarray`, then this\n\
-function only shallow wrap's it into a ``" BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX) ".array`` skin.\n\
+function only shallow wrap's it into a ``" XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX) ".array`` skin.\n\
 "
 );
 
@@ -72,23 +72,23 @@ static PyObject* build_version_dictionary() {
   return 0;
 }
 
-int PyBlitzArray_APIVersion = BLITZ_ARRAY_API_VERSION;
+int PyBlitzArray_APIVersion = XBOB_BLITZ_API_VERSION;
 
 #define ENTRY_FUNCTION_INNER(a) init ## a
 #define ENTRY_FUNCTION(a) ENTRY_FUNCTION_INNER(a)
 
-PyMODINIT_FUNC ENTRY_FUNCTION(BLITZ_ARRAY_MODULE_NAME) (void) {
+PyMODINIT_FUNC ENTRY_FUNCTION(XBOB_BLITZ_MODULE_NAME) (void) {
   PyObject* m;
 
   PyBlitzArray_Type.tp_new = PyType_GenericNew;
   if (PyType_Ready(&PyBlitzArray_Type) < 0) return;
 
-  m = Py_InitModule3(BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_NAME), array_methods,
+  m = Py_InitModule3(XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_NAME), array_methods,
       "array definition and generic functions");
 
   /* register version numbers and constants */
-  PyModule_AddIntConstant(m, "__api_version__", BLITZ_ARRAY_API_VERSION);
-  PyModule_AddStringConstant(m, "__version__", BLITZ_ARRAY_STR(BLITZ_ARRAY_VERSION));
+  PyModule_AddIntConstant(m, "__api_version__", XBOB_BLITZ_API_VERSION);
+  PyModule_AddStringConstant(m, "__version__", XBOB_BLITZ_STR(XBOB_BLITZ_VERSION));
   PyModule_AddObject(m, "versions", build_version_dictionary());
 
   /* register the type object to python */
@@ -145,7 +145,7 @@ PyMODINIT_FUNC ENTRY_FUNCTION(BLITZ_ARRAY_MODULE_NAME) (void) {
   /* defines the PyCapsule */
 
   PyObject* c_api_object = PyCapsule_New((void *)PyBlitzArray_API, 
-      BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_PREFIX) "." BLITZ_ARRAY_STR(BLITZ_ARRAY_MODULE_NAME) "._C_API", 0);
+      XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX) "." XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_NAME) "._C_API", 0);
 
 #else
 
