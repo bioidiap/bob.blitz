@@ -2,11 +2,11 @@
  * @author Andre Anjos <andre.anjos@idiap.ch>
  * @date Tue  8 Oct 08:19:28 2013 
  *
- * @brief Defines the blitz.array C-API
+ * @brief Defines the xbob.blitz C-API
  *
  * This module allows somebody else, externally to this package, to include the
- * blitz.array C-API functionality on their own package. Because the API is
- * compiled with a Python module (named `blitz.array`), we need to dig it out
+ * xbob.blitz C-API functionality on their own package. Because the API is
+ * compiled with a Python module (named `xbob.blitz`), we need to dig it out
  * from there and bind it to the following C-API members. We do this using a
  * PyCObject/PyCapsule module as explained in:
  * http://docs.python.org/2/extending/extending.html#using-capsules.
@@ -203,7 +203,7 @@ typedef struct {
 
 #ifdef XBOB_BLITZ_MODULE
 
-  /* This section is used when compiling `blitz.array' itself */
+  /* This section is used when compiling `xbob.blitz' itself */
 
   extern int PyBlitzArray_APIVersion;
 
