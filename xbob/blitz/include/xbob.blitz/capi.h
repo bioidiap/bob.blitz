@@ -398,7 +398,7 @@ typedef struct {
    * Returns -1 on error, 0 on success. PyCapsule_Import will set an exception
    * if there's an error.
    */
-  static int import_blitz_array(void) {
+  static int import_xbob_blitz(void) {
 
 #if PY_VERSION_HEX >= 0x02070000
 
