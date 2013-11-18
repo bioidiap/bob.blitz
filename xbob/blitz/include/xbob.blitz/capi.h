@@ -297,7 +297,7 @@ typedef struct {
  ************************************************************************/
 
 #  if defined(PY_ARRAY_UNIQUE_SYMBOL)
-#    define XBOB_BLITZ_MAKE_API_NAME_INNER(a) BLITZ_ ## a
+#    define XBOB_BLITZ_MAKE_API_NAME_INNER(a) XBOB_BLITZ_ ## a
 #    define XBOB_BLITZ_MAKE_API_NAME(a) XBOB_BLITZ_MAKE_API_NAME_INNER(a)
 #    define PyBlitzArray_API XBOB_BLITZ_MAKE_API_NAME(PY_ARRAY_UNIQUE_SYMBOL)
 #  endif
