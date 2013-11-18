@@ -33,7 +33,7 @@ Testing
 
 You can run a set of tests using the nose test runner::
 
-  $ nosetests -sv blitz
+  $ nosetests -sv xbob.blitz
 
 You can run our documentation tests using sphinx itself::
 
@@ -41,7 +41,7 @@ You can run our documentation tests using sphinx itself::
 
 You can test overall test coverage with::
 
-  $ nosetests --with-coverage --cover-package=blitz
+  $ nosetests --with-coverage --cover-package=xbob.blitz
 
 The ``coverage`` egg must be installed for this to work properly.
 
