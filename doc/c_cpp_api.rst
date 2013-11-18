@@ -1,23 +1,25 @@
 .. vim: set fileencoding=utf-8 :
 .. Andre Anjos <andre.dos.anjos@gmail.com>
 .. Tue 15 Oct 14:59:05 2013
+.. 
+.. Copyright (C) 2011-2013 Idiap Research Institute, Martigny, Switzerland
 
 ===============
  C and C++ API
 ===============
 
 This section includes information for using the pure C or C++ API for
-manipulating :py:class:`blitz.array` objects in compiled code.
+manipulating :py:class:`xbob.xbob.blitz` objects in compiled code.
 
 C API
 -----
 
-The C API of ``blitz.array`` allows users to leverage from automatic converters
-between :py:class:`numpy.ndarray` and :py:class:`blitz.array` within their own
-python extensions. To use the C API, clients should first, include the header
-file ``<blitz.array/capi.h>`` on their compilation units and then, make sure to
-call once ``import_blitz_array()`` at their module instantiation, as explained
-at the `Python manual
+The C API of ``xbob.blitz`` allows users to leverage from automatic converters
+between :py:class:`numpy.ndarray` and :py:class:`xbob.blitz.array` within their
+own python extensions. To use the C API, clients should first, include the
+header file ``<xbob.blitz/capi.h>`` on their compilation units and then, make
+sure to call once ``import_xbob_blitz()`` at their module instantiation, as
+explained at the `Python manual
 <http://docs.python.org/2/extending/extending.html#using-capsules>`_.
 
 Here is a dummy C example showing how to include the header and where to call
@@ -25,7 +27,7 @@ the import function:
 
 .. code-block:: c++
 
-   #include <blitz.array/capi.h>
+   #include <xbob.blitz/capi.h>
 
    PyMODINIT_FUNC initclient(void) {
 
@@ -36,8 +38,8 @@ the import function:
      // imports the NumPy C-API 
      import_array();
 
-     // imports blitz.array C-API
-     import_blitz_array();
+     // imports xbob.blitz C-API
+     import_xbob_blitz();
 
    }
 
@@ -50,9 +52,9 @@ Array Structure
 
 .. c:type:: PyBlitzArrayObject
 
-   The basic array structure represents a ``blitz.array`` instance from the
-   C-side of the interpreter. You should **avoid direct access to
-   the structure components** (it is presented just as an overview on the
+   The basic array structure represents a ``xbob.blitz.array`` instance from
+   the C-side of the interpreter. You should **avoid direct access to the
+   structure components** (it is presented just as an overview on the
    functionality). Instead, use the accessor methods described below.
 
    .. code-block:: c
@@ -72,8 +74,8 @@ Array Structure
 
    .. c:macro:: BLITZ_ARRAY_MAXDIMS
       
-      The maximum number of dimensions supported by the current ``blitz.array``
-      implementation.
+      The maximum number of dimensions supported by the current
+      ``xbob.blitz.array`` implementation.
 
    .. c:member:: void* bzarr
 
@@ -170,8 +172,8 @@ Basic Properties and Checking
 
 .. c:function:: Py_ssize_t PyBlitzArray_NDIM (PyBlitzArrayObject* o)
 
-   Returns the number of dimensions in a given ``blitz.array``. This is the
-   formal way to check for ``o->ndim``.
+   Returns the number of dimensions in a given ``xbob.blitz.array``. This is
+   the formal way to check for ``o->ndim``.
 
 
 .. c:function:: Py_ssize_t* PyBlitzArray_SHAPE (PyBlitzArrayObject* o)
@@ -266,7 +268,7 @@ Construction and Destruction
 
 .. c:function:: PyObject* PyBlitzArray_SimpleNew (int typenum, Py_ssize_t ndim, Py_ssize_t* shape)
 
-   Allocates a new ``blitz.array`` with a given (supported) type and return it
+   Allocates a new ``xbob.blitz`` with a given (supported) type and return it
    as a python object. ``typenum`` should be set to the numpy type number of
    the array type (e.g. ``NPY_FLOAT64``). ``ndim`` should be set to the total
    number of dimensions the array should have. ``shape`` should be set to the
@@ -275,14 +277,14 @@ Construction and Destruction
    
 .. c:function:: PyObject* PyBlitzArray_SimpleNewFromData (int type_num, Py_ssize_t ndim, Py_ssize_t* shape, Py_ssize_t* stride, void* data, int writeable)
 
-   Allocates a new ``blitz.array`` with a given (supported) type and return it
-   as a python object. ``typenum`` should be set to the numpy type number of
-   the array type (e.g. ``NPY_FLOAT64``). ``ndim`` should be set to the total
-   number of dimensions the array should have. ``shape`` should be set to the
-   array shape. ``stride`` should be set to the array stride in the numpy style
-   (in number of bits). ``data`` should be a pointer to the begin of the data
-   area. ``writeable`` indicates if the resulting array should be writeble (set
-   it to ``1``), or read-only (set it to ``0``).
+   Allocates a new ``xbob.blitz.array`` with a given (supported) type and
+   return it as a python object. ``typenum`` should be set to the numpy type
+   number of the array type (e.g. ``NPY_FLOAT64``). ``ndim`` should be set to
+   the total number of dimensions the array should have. ``shape`` should be
+   set to the array shape. ``stride`` should be set to the array stride in the
+   numpy style (in number of bits). ``data`` should be a pointer to the begin
+   of the data area. ``writeable`` indicates if the resulting array should be
+   writeble (set it to ``1``), or read-only (set it to ``0``).
 
    
 To/From Numpy Converters
@@ -290,14 +292,14 @@ To/From Numpy Converters
 
 .. c:function:: PyObject* PyBlitzArray_AsNumpyArray (PyBlitzArrayObject* o)
 
-   Creates a **shallow** copy of the given ``blitz.array`` as a
+   Creates a **shallow** copy of the given ``xbob.blitz.array`` as a
    ``numpy.ndarray``.
     
 
 .. c:function:: PyObject* PyBlitzArray_FromNumpyArray (PyObject* o)
 
-   Creates a new ``blitz.array`` from a ``numpy.ndarray`` object in a shallow
-   manner.
+   Creates a new ``xbob.blitz.array`` from a ``numpy.ndarray`` object in a
+   shallow manner.
 
 
 Converter Functions for PyArg_Parse* family
@@ -348,10 +350,9 @@ Converter Functions for PyArg_Parse* family
 .. c:function:: int PyBlitzArray_IndexConverter (PyObject* o, PyBlitzArrayObject** shape)
 
    Converts any compatible sequence into a C-array containing the shape
-   information. The shape information and number of dimensions is stored on
-   the previously allocated ``PyBlitzArrayObject*`` you should provide. This
-   method is supposed to be used with ``PyArg_ParseTupleAndKeywords`` and
-   derivatives.
+   information. The shape information and number of dimensions is stored on the
+   previously allocated ``PyBlitzArrayObject*`` you should provide. This method
+   is supposed to be used with ``PyArg_ParseTupleAndKeywords`` and derivatives.
 
    Parameters are:
    
@@ -397,7 +398,7 @@ C++ API
 The C++ API consists mostly of templated methods for manipulating the C++ type
 ``blitz::Array<>`` so as to convert ``PyObject*``'s from and to objects of that
 type. To use the C++ API you must include the header file
-``<blitz.array/cppapi.h>`` and ``import_blitz_array()`` on your module, as
+``<xbob.blitz/cppapi.h>`` and ``import_xbob_blitz()`` on your module, as
 explained on the C-API section of this document.
 
 Basic Properties and Checking
