@@ -4,50 +4,26 @@
 # Mon 16 Apr 08:18:08 2012 CEST
 
 from setuptools import setup, find_packages, dist
-from distutils.extension import Extension
-
-dist.Distribution(dict(setup_requires=['pypkg', 'numpy']))
-import pypkg
+dist.Distribution(dict(setup_requires=['numpy', 'xbob.extension']))
 import numpy
-
-# Minimum version requirements for pkg-config packages
-MINIMAL_BLITZ_VERSION_REQUIRED = '0.10'
-
-# Pkg-config dependencies
-blitz_pkg = pypkg.pkgconfig('blitz')
-if blitz_pkg < MINIMAL_BLITZ_VERSION_REQUIRED:
-  raise RuntimeError("This package requires Blitz++ %s or superior, but you have %s" % (MINIMAL_BLITZ_VERSION_REQUIRED, blitz_pkg.version))
+from xbob.extension import Extension
 
 # Local include directory
 import os
 package_dir = os.path.dirname(os.path.realpath(__file__))
 package_dir = os.path.join(package_dir, 'blitz', 'include')
-include_dirs = [package_dir]
 
-# Add system include directories
-extra_compile_args = []
-system_includes = blitz_pkg.include_directories() + [numpy.get_include()]
-for k in system_includes: extra_compile_args += ['-isystem', k]
+# Add numpy includes
+extra_compile_args = ['-isystem', numpy.get_include()]
 
 # NumPy API macros necessary?
 define_macros=[
     ("PY_ARRAY_UNIQUE_SYMBOL", "BLITZ_ARRAY_NUMPY_C_API"),
     ("NO_IMPORT_ARRAY", "1"),
     ]
-import numpy
 from distutils.version import StrictVersion
 if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
   define_macros.append(("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"))
-
-# Blitz versioning macros and availability
-define_macros += blitz_pkg.package_macros()
-
-# Compilation options
-import platform
-if platform.system() == 'Darwin':
-  extra_compile_args += ['-std=c++11', '-Wno-#warnings']
-else:
-  extra_compile_args += ['-std=c++11']
 
 # Define package version
 version = '0.0.1'
@@ -84,13 +60,12 @@ setup(
           "blitz/array.cpp",
           "blitz/main.cpp",
           ],
+        packages=[
+          'blitz >= 0.10',
+          ],
         define_macros=define_macros,
-        include_dirs=include_dirs,
+        include_dirs=[package_dir],
         extra_compile_args=extra_compile_args,
-        library_dirs=blitz_pkg.library_directories(),
-        runtime_library_dirs=blitz_pkg.library_directories(),
-        libraries=blitz_pkg.libraries(),
-        language="c++",
         )
       ],
 
