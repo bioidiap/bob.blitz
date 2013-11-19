@@ -195,11 +195,11 @@ PyObject* PyBlitzArrayCxx_NewFromConstArray(const blitz::Array<T,N>& a) {
   }
 
   catch (std::exception& e) {
-    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating %s.array(@%" PY_FORMAT_SIZE_T "d,'%s'): %s", XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX), N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), e.what());
+    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating %s.array(@%d,'%s'): %s", XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX), N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), e.what());
   }
 
   catch (...) {
-    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating %s.array(@%" PY_FORMAT_SIZE_T "d,'%s')", XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX), N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()));
+    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating %s.array(@%d,'%s')", XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX), N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()));
   }
 
   /** some test code
