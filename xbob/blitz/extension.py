@@ -39,7 +39,7 @@ class Extension(XbobExtension):
     kwargs.setdefault('include_dirs', []).append(self_include_dir)
 
     macros = [
-          ("PY_ARRAY_UNIQUE_SYMBOL", "XBOB_BLITZ_NUMPY_C_API"),
+          ("PY_ARRAY_UNIQUE_SYMBOL", "XBOB_NUMPY_C_API"),
           ("NO_IMPORT_ARRAY", "1"),
           ]
 
