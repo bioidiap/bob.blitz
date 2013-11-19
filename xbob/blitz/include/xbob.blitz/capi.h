@@ -402,18 +402,6 @@ typedef struct {
    */
   static int import_xbob_blitz(void) {
 
-#if PY_VERSION_HEX >= 0x02070000
-
-    /* New Python API support for library loading */
-
-    PyBlitzArray_API = (void **)PyCapsule_Import(XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX) "." XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_NAME) "._C_API", 0);
-
-    if (!PyBlitzArray_API) return -1;
-
-#else
-
-    /* Old-style Python API support for library loading */
-
     PyObject *c_api_object;
     PyObject *module;
 
@@ -428,15 +416,20 @@ typedef struct {
       return -1;
     }
 
+#   if PY_VERSION_HEX >= 0x02070000
+    if (PyCapsule_CheckExact(c_api_object)) {
+      PyBlitzArray_API = (void **)PyCapsule_GetPointer(c_api_object, 
+          PyCapsule_GetName(c_api_object));
+    }
+#   else
     if (PyCObject_Check(c_api_object)) {
       PyBlitzArray_API = (void **)PyCObject_AsVoidPtr(c_api_object);
     }
+#   endif
 
     Py_DECREF(c_api_object);
     Py_DECREF(module);
 
-#endif
-    
     /* Checks that the imported version matches the compiled version */
     int imported_version = *(int*)PyBlitzArray_API[PyBlitzArray_APIVersion_NUM];
 
