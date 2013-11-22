@@ -28,7 +28,7 @@ if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
 # Define package version
 version = '0.0.1'
 define_macros += [
-    ("BLITZ_ARRAY_VERSION", version),
+    ("XBOB_BLITZ_VERSION", '"%s"' % version),
     ]
 
 # The only thing we do in this file is to call the setup() function with all

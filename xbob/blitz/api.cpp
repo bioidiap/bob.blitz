@@ -9,7 +9,7 @@
 #include <xbob.blitz/cppapi.h>
 #include <algorithm>
 
-PyDoc_STRVAR(s_array_str, XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX) ".array");
+PyDoc_STRVAR(s_array_str, XBOB_BLITZ_MODULE_PREFIX ".array");
 
 /*******************
  * Non-API Helpers *
@@ -211,8 +211,7 @@ PyObject* getitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos) {
       }
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot index %s(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", s_array_str, o->ndim, PyBlitzArray_TypenumAsString(o->type_num), XBOB_BLITZ_MAXDIMS);
-      return 0;
+      PyErr_Format(PyExc_NotImplementedError, "cannot index %s(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", s_array_str, o->ndim, PyBlitzArray_TypenumAsString(o->type_num), XBOB_BLITZ_MAXDIMS); return 0;
   }
 }
 

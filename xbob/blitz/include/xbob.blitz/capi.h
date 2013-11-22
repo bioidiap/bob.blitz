@@ -23,11 +23,10 @@ extern "C" {
 #include <numpy/arrayobject.h>
 
 /* Macros that define versions and important names */
-#define XBOB_BLITZ_MODULE_PREFIX xbob.blitz
-#define XBOB_BLITZ_MODULE_NAME _library
+#define XBOB_BLITZ_MODULE_PREFIX "xbob.blitz"
+#define XBOB_BLITZ_MODULE_NAME "_library"
+#define XBOB_BLITZ_LIB_NAME _library
 #define XBOB_BLITZ_API_VERSION 0x0000
-#define XBOB_BLITZ_STR_INNER(a) #a
-#define XBOB_BLITZ_STR(a) XBOB_BLITZ_STR_INNER(a)
 
 /* Maximum number of dimensions supported at this library */
 #define XBOB_BLITZ_MAXDIMS 4
@@ -405,7 +404,7 @@ typedef struct {
     PyObject *c_api_object;
     PyObject *module;
 
-    module = PyImport_ImportModule(XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX) "." XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_NAME));
+    module = PyImport_ImportModule(XBOB_BLITZ_MODULE_PREFIX "." XBOB_BLITZ_MODULE_NAME);
 
     if (module == NULL) return -1;
 
@@ -431,14 +430,13 @@ typedef struct {
     Py_DECREF(module);
 
     if (!PyBlitzArray_API) {
-      PyErr_Format(PyExc_ImportError,
+      PyErr_SetString(PyExc_ImportError, "cannot find C/C++ API "
 #   if PY_VERSION_HEX >= 0x02070000
-          "cannot find C/C++ API capsule at `%s.%s._C_API'",
+          "capsule"
 #   else
-          "cannot find C/C++ API cobject at `%s.%s._C_API'",
+          "cobject"
 #   endif
-          BOOST_PP_STRINGIZE(XBOB_BLITZ_MODULE_PREFIX),
-          BOOST_PP_STRINGIZE(XBOB_BLITZ_MODULE_NAME));
+          " at `" XBOB_BLITZ_MODULE_PREFIX "." XBOB_BLITZ_MODULE_NAME "._C_API'");
       return -1;
     }
 
@@ -446,7 +444,7 @@ typedef struct {
     int imported_version = *(int*)PyBlitzArray_API[PyBlitzArray_APIVersion_NUM];
 
     if (XBOB_BLITZ_API_VERSION != imported_version) {
-      PyErr_Format(PyExc_RuntimeError, "%s.%s import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_PREFIX), XBOB_BLITZ_STR(XBOB_BLITZ_MODULE_NAME), XBOB_BLITZ_API_VERSION, imported_version);
+      PyErr_Format(PyExc_RuntimeError, XBOB_BLITZ_MODULE_PREFIX "."  XBOB_BLITZ_MODULE_NAME " import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", XBOB_BLITZ_API_VERSION, imported_version);
       return -1;
     }
 

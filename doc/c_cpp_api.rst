@@ -322,6 +322,8 @@ Converter Functions for PyArg_Parse* family
    :c:type:`PyBlitzArrayObject`. Otherwise, it creates a new
    :c:type:`PyBlitzArrayObject` by first creating a :c:type:`PyArrayObject` and
    then shallow wrapping it with a :c:type:`PyBlitzArrayObject`.
+   
+   Returns 0 if an error is detected, 1 on success.
 
 .. c:function:: int PyBlitzArray_BehavedConverter(PyObject* o, PyBlitzArrayObject** a)
 
@@ -333,6 +335,8 @@ Converter Functions for PyArg_Parse* family
    In the event the input object is already a :c:type:`PyBlitzArrayObject`,
    then a new reference to it is returned. It does not check, in this
    particular case, that the input object is well-behaved.
+
+   Returns 0 if an error is detected, 1 on success.
 
 .. c:function:: int PyBlitzArray_OutputConverter(PyObject* o, PyBlitzArrayObject** a)
 
@@ -346,6 +350,8 @@ Converter Functions for PyArg_Parse* family
    :py:class:`numpy.ndarray` as with :c:func:`PyArray_OutputConverter`. As any
    other standard Python converter, it returns a **new** reference to a
    ``PyBlitzArrayObject*``.
+
+   Returns 0 if an error is detected, 1 on success.
 
 .. c:function:: int PyBlitzArray_IndexConverter (PyObject* o, PyBlitzArrayObject** shape)
 
