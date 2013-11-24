@@ -22,6 +22,11 @@ extern "C" {
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
+/* Define Module Name and Prefix for other Modules
+   Note: We cannot use XBOB_EXT_* macros here, unfortunately */
+#define XBOB_BLITZ_PREFIX    "xbob.blitz"
+#define XBOB_BLITZ_FULL_NAME "xbob.blitz._library"
+
 /* Define API version */
 #define XBOB_BLITZ_API_VERSION 0x0000
 
@@ -401,7 +406,7 @@ typedef struct {
     PyObject *c_api_object;
     PyObject *module;
 
-    module = PyImport_ImportModule(XBOB_EXT_MODULE_PREFIX "." XBOB_EXT_MODULE_NAME);
+    module = PyImport_ImportModule(XBOB_BLITZ_FULL_NAME);
 
     if (module == NULL) return -1;
 
@@ -433,7 +438,7 @@ typedef struct {
 #   else
           "cobject"
 #   endif
-          " at `" XBOB_EXT_MODULE_PREFIX "." XBOB_EXT_MODULE_NAME "._C_API'");
+          " at `" XBOB_BLITZ_FULL_NAME "._C_API'");
       return -1;
     }
 
@@ -441,7 +446,7 @@ typedef struct {
     int imported_version = *(int*)PyBlitzArray_API[PyBlitzArray_APIVersion_NUM];
 
     if (XBOB_BLITZ_API_VERSION != imported_version) {
-      PyErr_Format(PyExc_RuntimeError, XBOB_EXT_MODULE_PREFIX "."  XBOB_EXT_MODULE_NAME " import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", XBOB_BLITZ_API_VERSION, imported_version);
+      PyErr_Format(PyExc_RuntimeError, XBOB_BLITZ_FULL_NAME " import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", XBOB_BLITZ_API_VERSION, imported_version);
       return -1;
     }
 
