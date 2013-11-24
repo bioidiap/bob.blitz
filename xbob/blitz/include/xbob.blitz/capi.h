@@ -12,8 +12,8 @@
  * http://docs.python.org/2/extending/extending.html#using-capsules.
  */
 
-#ifndef PY_XBOB_BLITZ_API_H
-#define PY_XBOB_BLITZ_API_H
+#ifndef XBOB_BLITZ_C_API_H
+#define XBOB_BLITZ_C_API_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -22,10 +22,7 @@ extern "C" {
 #include <Python.h>
 #include <numpy/arrayobject.h>
 
-/* Macros that define versions and important names */
-#define XBOB_BLITZ_MODULE_PREFIX "xbob.blitz"
-#define XBOB_BLITZ_MODULE_NAME "_library"
-#define XBOB_BLITZ_LIB_NAME _library
+/* Define API version */
 #define XBOB_BLITZ_API_VERSION 0x0000
 
 /* Maximum number of dimensions supported at this library */
@@ -404,7 +401,7 @@ typedef struct {
     PyObject *c_api_object;
     PyObject *module;
 
-    module = PyImport_ImportModule(XBOB_BLITZ_MODULE_PREFIX "." XBOB_BLITZ_MODULE_NAME);
+    module = PyImport_ImportModule(XBOB_EXT_MODULE_PREFIX "." XBOB_EXT_MODULE_NAME);
 
     if (module == NULL) return -1;
 
@@ -436,7 +433,7 @@ typedef struct {
 #   else
           "cobject"
 #   endif
-          " at `" XBOB_BLITZ_MODULE_PREFIX "." XBOB_BLITZ_MODULE_NAME "._C_API'");
+          " at `" XBOB_EXT_MODULE_PREFIX "." XBOB_EXT_MODULE_NAME "._C_API'");
       return -1;
     }
 
@@ -444,7 +441,7 @@ typedef struct {
     int imported_version = *(int*)PyBlitzArray_API[PyBlitzArray_APIVersion_NUM];
 
     if (XBOB_BLITZ_API_VERSION != imported_version) {
-      PyErr_Format(PyExc_RuntimeError, XBOB_BLITZ_MODULE_PREFIX "."  XBOB_BLITZ_MODULE_NAME " import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", XBOB_BLITZ_API_VERSION, imported_version);
+      PyErr_Format(PyExc_RuntimeError, XBOB_EXT_MODULE_PREFIX "."  XBOB_EXT_MODULE_NAME " import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", XBOB_BLITZ_API_VERSION, imported_version);
       return -1;
     }
 
@@ -460,4 +457,4 @@ typedef struct {
 } // extern "C"
 #endif
 
-#endif /* PY_XBOB_BLITZ_API_H */
+#endif /* XBOB_BLITZ_C_API_H */

@@ -9,7 +9,7 @@
 #include <xbob.blitz/capi.h>
 #include <structmember.h>
 
-PyDoc_STRVAR(s_array_str, XBOB_BLITZ_MODULE_PREFIX ".array");
+PyDoc_STRVAR(s_array_str, XBOB_EXT_MODULE_PREFIX ".array");
 
 /**
  * Formal initialization of an Array object

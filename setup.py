@@ -27,9 +27,6 @@ if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
 
 # Define package version
 version = '0.0.1'
-define_macros += [
-    ("XBOB_BLITZ_VERSION", '"%s"' % version),
-    ]
 
 # The only thing we do in this file is to call the setup() function with all
 # parameters that define our package.
@@ -68,6 +65,7 @@ setup(
         packages=[
           'blitz >= 0.10',
           ],
+        version=version,
         define_macros=define_macros,
         include_dirs=[package_dir],
         extra_compile_args=extra_compile_args,
