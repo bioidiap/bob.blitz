@@ -995,7 +995,12 @@ int PyBlitzArray_OutputConverter(PyObject* o, PyBlitzArrayObject** a) {
   }
 
   PyObject* retval = PyBlitzArray_FromNumpyArray(ao);
-  Py_DECREF(ao);
+
+  // note: as the numpy c-api manual states, if the input object to
+  // PyArray_OutputConverter() responds 'true' to PyArray_Check(), then
+  // its reference count is not incremented. Therefore, we only need
+  // to DECREF this guy if it is PyArray_Check() is 'false'.
+  if (!PyArray_Check(o)) Py_DECREF(ao);
 
   *a = reinterpret_cast<PyBlitzArrayObject*>(retval);
 
