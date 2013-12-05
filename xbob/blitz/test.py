@@ -314,3 +314,11 @@ def test_re_wrapping_ndarray():
   bz = as_blitz(nd)
   nd2 = bz.as_ndarray()
   nose.tools.eq_(id(nd), id(nd2))
+  
+def test_can_use_bz_with_npy_ops():
+
+  bz = bzarray(2, numpy.uint64)
+  bz[0] = 1
+  bz[1] = 3
+  npy = numpy.array([1,3], dtype=numpy.uint64)
+  assert numpy.all(numpy.abs(bz-npy) < 1e-4)
