@@ -829,7 +829,6 @@ PyObject* PyBlitzArray_AsNumpyArray(PyBlitzArrayObject* o) {
       NPY_BEHAVED,
 #     endif
       0);
-  Py_DECREF(dtype);
 
   if (!retval) return 0;
 
