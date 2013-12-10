@@ -101,7 +101,9 @@ int PyBlitzArray_TYPE (PyBlitzArrayObject* o) {
 }
 
 PyArray_Descr* PyBlitzArray_PyDTYPE (PyBlitzArrayObject* o) {
-  return PyArray_DescrFromType(o->type_num);
+  PyArray_Descr* retval = PyArray_DescrFromType(o->type_num);
+  if (retval) Py_INCREF(reinterpret_cast<PyObject*>(retval));
+  return retval;
 }
 
 Py_ssize_t PyBlitzArray_NDIM (PyBlitzArrayObject* o) {
@@ -810,10 +812,11 @@ PyObject* PyBlitzArray_SimpleNewFromData (int type_num, Py_ssize_t ndim,
  * From/To NumPy Converters *
  ****************************/
 
-PyObject* PyBlitzArray_AsNumpyArray(PyBlitzArrayObject* o) {
+PyObject* PyBlitzArray_AsNumpyArray(PyBlitzArrayObject* o, PyArray_Descr* newtype) {
 
   // if o->base is a numpy array, return it
   if (o->base && PyArray_Check(o->base)) {
+    if (newtype) return PyArray_FromArray(reinterpret_cast<PyArrayObject*>(o->base), newtype, 0);
     Py_INCREF(o->base);
     return o->base;
   }
@@ -829,6 +832,7 @@ PyObject* PyBlitzArray_AsNumpyArray(PyBlitzArrayObject* o) {
       NPY_BEHAVED,
 #     endif
       0);
+  Py_DECREF(dtype);
 
   if (!retval) return 0;
 
@@ -843,6 +847,14 @@ PyObject* PyBlitzArray_AsNumpyArray(PyBlitzArrayObject* o) {
   }
 #endif
   Py_INCREF(reinterpret_cast<PyObject*>(o));
+
+  // if newtype was specified and the types are not equivalent, cast
+  if (newtype && !PyArray_EquivTypenums(newtype->type_num, o->type_num)) {
+    PyObject* new_retval = PyArray_FromArray(reinterpret_cast<PyArrayObject*>(retval),
+        newtype, 0);
+    Py_DECREF(retval);
+    retval = new_retval;
+  }
 
   return retval;
 

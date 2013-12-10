@@ -290,10 +290,13 @@ Construction and Destruction
 To/From Numpy Converters
 ========================
 
-.. c:function:: PyObject* PyBlitzArray_AsNumpyArray (PyBlitzArrayObject* o)
+.. c:function:: PyObject* PyBlitzArray_AsNumpyArray (PyBlitzArrayObject* o, PyArrayDescr* dtype)
 
    Creates a **shallow** copy of the given ``xbob.blitz.array`` as a
-   ``numpy.ndarray``.
+   ``numpy.ndarray``. The argument ``dtype`` may be given, in which case
+   if the current data type is not the same, then forces the creation of a copy
+   conforming to the require data type, if possible. You may set ``dtype`` to
+   ``NULL`` in case you don't mind the resulting data type.
     
 
 .. c:function:: PyObject* PyBlitzArray_FromNumpyArray (PyObject* o)

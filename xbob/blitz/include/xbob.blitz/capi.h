@@ -161,7 +161,7 @@ typedef struct {
 
 #define PyBlitzArray_AsNumpyArray_NUM 21
 #define PyBlitzArray_AsNumpyArray_RET PyObject*
-#define PyBlitzArray_AsNumpyArray_PROTO (PyBlitzArrayObject* o)
+#define PyBlitzArray_AsNumpyArray_PROTO (PyBlitzArrayObject* o, PyArray_Descr* dtype)
 
 #define PyBlitzArray_FromNumpyArray_NUM 22
 #define PyBlitzArray_FromNumpyArray_RET PyObject*

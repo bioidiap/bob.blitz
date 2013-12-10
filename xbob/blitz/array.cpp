@@ -139,22 +139,42 @@ static PyMappingMethods PyBlitzArray_mapping = {
 PyDoc_STRVAR(s_as_ndarray_str, "as_ndarray");
 PyDoc_STRVAR(s_private_array_str, "__array__");
 PyDoc_STRVAR(s_private_array__doc__,
-"x.__array__() -> numpy.ndarray\n\
+"x.__array__([dtype]) -> numpy.ndarray\n\
+x.as_ndarray([dtype]) -> numpy.ndarray\n\
 \n\
-numpy.ndarray accessor (shallow wraps ``xbob.blitz.array`` as numpy.ndarray)"
-);
+numpy.ndarray accessor (shallow wraps ``xbob.blitz.array`` as\n\
+numpy.ndarray). If `dtype' is given and the current data type\n\
+is not the same, then forces the creation of a copy conforming\n\
+to the require data type, if possible.\n\
+");
+
+static PyObject* PyBlitzArray_AsNumpyArrayPrivate(PyBlitzArrayObject* self,
+    PyObject* args, PyObject* kwds) {
+
+  /* Parses input arguments in a single shot */
+  static const char* const_kwlist[] = {"dtype", 0};
+  static char** kwlist = const_cast<char**>(const_kwlist);
+
+  PyArray_Descr* dtype = 0;
+  
+  if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O&", kwlist, 
+        &PyArray_DescrConverter2, &dtype)) return 0;
+
+  return PyBlitzArray_AsNumpyArray(self, dtype);
+
+}
 
 static PyMethodDef PyBlitzArray_methods[] = {
     {
       s_as_ndarray_str,
-      (PyCFunction)PyBlitzArray_AsNumpyArray,
-      METH_NOARGS,
+      (PyCFunction)PyBlitzArray_AsNumpyArrayPrivate,
+      METH_VARARGS|METH_KEYWORDS,
       s_private_array__doc__
     },
     {
       s_private_array_str,
-      (PyCFunction)PyBlitzArray_AsNumpyArray,
-      METH_NOARGS,
+      (PyCFunction)PyBlitzArray_AsNumpyArrayPrivate,
+      METH_VARARGS|METH_KEYWORDS,
       s_private_array__doc__
     },
     {0}  /* Sentinel */
@@ -227,7 +247,7 @@ static PyGetSetDef PyBlitzArray_getseters[] = {
 
 /* Stringification */
 static PyObject* PyBlitzArray_str(PyBlitzArrayObject* o) {
-  PyObject* nd = PyBlitzArray_AsNumpyArray(o);
+  PyObject* nd = PyBlitzArray_AsNumpyArray(o, 0);
   if (!nd) {
     PyErr_Print();
     PyErr_SetString(PyExc_RuntimeError, "could not convert array into numpy ndarray for str() method call");

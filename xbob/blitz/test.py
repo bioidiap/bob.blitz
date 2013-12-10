@@ -322,3 +322,18 @@ def test_can_use_bz_with_npy_ops():
   bz[1] = 3
   npy = numpy.array([1,3], dtype=numpy.uint64)
   assert numpy.all(numpy.abs(bz-npy) < 1e-4)
+
+def test_as_ndarray_cast():
+
+  bz = bzarray((2,2), int)
+  bz[0,0] = 1
+  bz[0,1] = 3
+  bz[1,0] = 2
+  bz[1,1] = 4
+  nd = bz.as_ndarray(complex)
+  nose.tools.eq_(nd.base, None)
+  nose.tools.eq_(nd.dtype, numpy.complex128)
+  nose.tools.eq_(nd[0,0], 1+0j)
+  nose.tools.eq_(nd[0,1], 3+0j)
+  nose.tools.eq_(nd[1,0], 2+0j)
+  nose.tools.eq_(nd[1,1], 4+0j)
