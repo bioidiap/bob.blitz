@@ -337,3 +337,18 @@ def test_as_ndarray_cast():
   nose.tools.eq_(nd[0,1], 3+0j)
   nose.tools.eq_(nd[1,0], 2+0j)
   nose.tools.eq_(nd[1,1], 4+0j)
+
+def test_as_ndarray_nocast():
+
+  bz = bzarray((2,2), int)
+  bz[0,0] = 1
+  bz[0,1] = 3
+  bz[1,0] = 2
+  bz[1,1] = 4
+  nd = bz.as_ndarray(numpy.int64)
+  nose.tools.eq_(nd.base, bz)
+  nose.tools.eq_(nd.dtype, numpy.int64)
+  nose.tools.eq_(nd[0,0], nd[0,0])
+  nose.tools.eq_(nd[0,1], nd[0,1])
+  nose.tools.eq_(nd[1,0], nd[1,0])
+  nose.tools.eq_(nd[1,1], nd[1,1])
