@@ -822,7 +822,7 @@ PyObject* PyBlitzArray_AsNumpyArray(PyBlitzArrayObject* o, PyArray_Descr* newtyp
   }
 
   // creates an ndarray from the blitz::Array<>.data()
-  PyArray_Descr* dtype = PyBlitzArray_PyDTYPE(o);
+  PyArray_Descr* dtype = PyArray_DescrFromType(o->type_num); //borrowed
   PyObject* retval = PyArray_NewFromDescr(&PyArray_Type,
       dtype,
       o->ndim, o->shape, o->stride, o->data,
@@ -832,7 +832,6 @@ PyObject* PyBlitzArray_AsNumpyArray(PyBlitzArrayObject* o, PyArray_Descr* newtyp
       NPY_BEHAVED,
 #     endif
       0);
-  Py_DECREF(dtype);
 
   if (!retval) return 0;
 
@@ -933,6 +932,41 @@ PyObject* PyBlitzArray_FromNumpyArray(PyArrayObject* o) {
   PyObject* pyo = reinterpret_cast<PyObject*>(o);
   reinterpret_cast<PyBlitzArrayObject*>(retval)->base = pyo;
   Py_INCREF(pyo);
+
+  return retval;
+
+}
+
+PyObject* PyBlitzArray_NUMPY_WRAP(PyObject* bz) {
+
+  if (!bz) return bz;
+
+  PyBlitzArrayObject* o = reinterpret_cast<PyBlitzArrayObject*>(bz);
+
+  // creates an ndarray from the blitz::Array<>.data()
+  PyArray_Descr* dtype = PyArray_DescrFromType(o->type_num); //borrowed
+  PyObject* retval = PyArray_NewFromDescr(&PyArray_Type,
+      dtype,
+      o->ndim, o->shape, o->stride, o->data,
+#     if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
+      NPY_ARRAY_BEHAVED,
+#     else
+      NPY_BEHAVED,
+#     endif
+      0);
+
+  if (!retval) return 0;
+
+  // link this object with the returned numpy ndarray
+
+#if NPY_FEATURE_VERSION < NUMPY17_API /* NumPy C-API version >= 1.7 */
+  PyArray_BASE(reinterpret_cast<PyArrayObject*>(retval)) = bz;
+#else
+  if (PyArray_SetBaseObject(reinterpret_cast<PyArrayObject*>(retval), bz) != 0) {
+    Py_DECREF(retval);
+    return 0;
+  }
+#endif
 
   return retval;
 

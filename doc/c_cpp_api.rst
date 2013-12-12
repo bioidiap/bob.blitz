@@ -305,6 +305,29 @@ To/From Numpy Converters
    shallow manner.
 
 
+.. c:function:: PyObject* PyBlitzArray_NUMPY_WRAP (PyObject* o)
+
+   Creates a **shallow** copy of the given :py:class:`xbob.blitz.array` as a
+   :py:class:`numpy.ndarray`. This function is a shortcut replacement for
+   :c:func:`PyBlitzArray_AsNumpyArray`. It can be used when the input object
+   ``o`` is surely of type :c:type:`PyBlitzArrayObject`. It creates a wrapper
+   :c:type:`PyArrayObject` that contains, as base, a **stolen** reference to
+   the input object ``o``.
+
+   It is designed like this so you can easily wrap **freshly** created objects
+   of type :c:type:`PyBlitzArrayObject` as :c:type:`PyArrayObject`. It
+   *assumes* the input object is of the right type and wrap-able as a
+   :py:class:`numpy.ndarray`. It does not check the object ``base`` variable,
+   assuming it is set to ``NULL`` (what is the case to freshly created
+   :c:type:`PyBlitzArrayObject`'s). If you are not sure about the nature of
+   ``o``, use the slower but safer :c:func:`PyBlitzArray_AsNumpyArray`.
+   
+   .. note::
+   
+      The value of ``o`` can be ``NULL``, in which case this function returns
+      immediately, allowing you to propagate exceptions.
+
+
 Converter Functions for PyArg_Parse* family
 ===========================================
 

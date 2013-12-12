@@ -126,6 +126,7 @@ PyMODINIT_FUNC XBOB_EXT_ENTRY_NAME (void) {
   // From/To NumPy Converters
   PyBlitzArray_API[PyBlitzArray_AsNumpyArray_NUM] = (void *)PyBlitzArray_AsNumpyArray;
   PyBlitzArray_API[PyBlitzArray_FromNumpyArray_NUM] = (void *)PyBlitzArray_FromNumpyArray;
+  PyBlitzArray_API[PyBlitzArray_NUMPY_WRAP_NUM] = (void *)PyBlitzArray_NUMPY_WRAP;
   
   // Converter Functions for PyArg_Parse* family
   PyBlitzArray_API[PyBlitzArray_Converter_NUM] = (void *)PyBlitzArray_Converter;

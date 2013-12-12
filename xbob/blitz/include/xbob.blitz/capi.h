@@ -167,6 +167,10 @@ typedef struct {
 #define PyBlitzArray_FromNumpyArray_RET PyObject*
 #define PyBlitzArray_FromNumpyArray_PROTO (PyArrayObject* o)
 
+#define PyBlitzArray_NUMPY_WRAP_NUM 21
+#define PyBlitzArray_NUMPY_WRAP_RET PyObject*
+#define PyBlitzArray_NUMPY_WRAP_PROTO (PyObject* o)
+
 /***********************************************
  * Converter Functions for PyArg_Parse* family *
  ***********************************************/
@@ -269,6 +273,8 @@ typedef struct {
   
   PyBlitzArray_FromNumpyArray_RET PyBlitzArray_FromNumpyArray PyBlitzArray_FromNumpyArray_PROTO;
   
+  PyBlitzArray_NUMPY_WRAP_RET PyBlitzArray_NUMPY_WRAP PyBlitzArray_NUMPY_WRAP_PROTO;
+
 /***********************************************
  * Converter Functions for PyArg_Parse* family *
  ***********************************************/
@@ -374,6 +380,8 @@ typedef struct {
 #define PyBlitzArray_AsNumpyArray (*(PyBlitzArray_AsNumpyArray_RET (*)PyBlitzArray_AsNumpyArray_PROTO) PyBlitzArray_API[PyBlitzArray_AsNumpyArray_NUM])
 
 #define PyBlitzArray_FromNumpyArray (*(PyBlitzArray_FromNumpyArray_RET (*)PyBlitzArray_FromNumpyArray_PROTO) PyBlitzArray_API[PyBlitzArray_FromNumpyArray_NUM])
+
+#define PyBlitzArray_NUMPY_WRAP (*(PyBlitzArray_NUMPY_WRAP_RET (*)PyBlitzArray_NUMPY_WRAP_PROTO) PyBlitzArray_API[PyBlitzArray_NUMPY_WRAP_NUM])
 
 /***********************************************
  * Converter Functions for PyArg_Parse* family *
