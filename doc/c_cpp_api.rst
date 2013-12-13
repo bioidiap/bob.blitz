@@ -1,7 +1,7 @@
 .. vim: set fileencoding=utf-8 :
 .. Andre Anjos <andre.dos.anjos@gmail.com>
 .. Tue 15 Oct 14:59:05 2013
-.. 
+..
 .. Copyright (C) 2011-2013 Idiap Research Institute, Martigny, Switzerland
 
 ===============
@@ -35,7 +35,7 @@ the import function:
 
      if (!m) return;
 
-     // imports the NumPy C-API 
+     // imports the NumPy C-API
      import_array();
 
      // imports xbob.blitz C-API
@@ -73,7 +73,7 @@ Array Structure
       } PyBlitzArrayObject;
 
    .. c:macro:: BLITZ_ARRAY_MAXDIMS
-      
+
       The maximum number of dimensions supported by the current
       ``xbob.blitz.array`` implementation.
 
@@ -138,7 +138,7 @@ Array Structure
       If the memory pointed by the currently allocated ``blitz::Array<>``
       belongs to another Python object, the object is ``Py_INCREF()``'ed and a
       pointer is kept on this structure member.
-   
+
 
 Basic Properties and Checking
 =============================
@@ -162,7 +162,7 @@ Basic Properties and Checking
    Returns integral type number (as defined by the Numpy C-API) of elements
    in this blitz::Array<>. This is the formal method to query for
    ``o->type_num``.
-   
+
 
 .. c:function:: PyArray_Descr* PyBlitzArray_PyDTYPE (PyBlitzArrayObject* o)
 
@@ -181,14 +181,14 @@ Basic Properties and Checking
    Returns the C-stype shape for this blitz::Array<>. This is the formal method
    to query for ``o->shape``. The shape represents the number of elements in
    each dimension of the array.
-   
+
 
 .. c:function:: PyObject* PyBlitzArray_PySHAPE (PyBlitzArrayObject* o)
 
    Returns a **new reference** to a Python tuple holding a copy of the shape
    for the given array. The shape represents the number of elements in each
    dimension of the array.
-   
+
 
 .. c:function:: Py_ssize_t* PyBlitzArray_STRIDE (PyBlitzArrayObject* o)
 
@@ -197,7 +197,7 @@ Basic Properties and Checking
    represented in number of bytes and **not** in number of elements considering
    its ``type_num``. This is compatible with the :py:class:`numpy.ndarray`
    strategy.
-   
+
 
 .. c:function:: PyObject* PyBlitzArray_PySTRIDE (PyBlitzArrayObject* o)
 
@@ -205,7 +205,7 @@ Basic Properties and Checking
    for the given array. The strides in this object are represented in number of
    bytes and **not** in number of elements considering its ``type_num``. This
    is compatible with the :py:class:`numpy.ndarray` strategy.
-   
+
 
 .. c:function:: int PyBlitzArray_WRITEABLE (PyBlitzArrayObject* o)
 
@@ -229,7 +229,7 @@ Basic Properties and Checking
    Returns a **new reference** to the base of this object. If the internal
    ``o->base`` is ``NULL``, then returns ``Py_None``. Use this when interfacing
    with the Python interpreter.
-  
+
 
 Indexing
 ========
@@ -241,7 +241,7 @@ Indexing
    be the PyBlitzArrayObject to be queried. ``pos`` should be a C-style array
    indicating the precise position to fetch. It is considered to have the same
    number of entries as the current array shape.
-   
+
 
 .. c:function:: int PyBlitzArray_SetItem (PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value)
 
@@ -258,13 +258,13 @@ Construction and Destruction
 
    Allocates memory and pre-initializes a ``PyBlitzArrayObject*`` object. This
    is the base allocator - seldomly used in user code.
-   
+
 
 .. c:function:: void PyBlitzArray_Delete (PyBlitzArrayObject* o)
 
    Completely deletes a ``PyBlitzArrayObject*`` and associated memory areas.
    This is the base deallocator - seldomly used in user code.
-   
+
 
 .. c:function:: PyObject* PyBlitzArray_SimpleNew (int typenum, Py_ssize_t ndim, Py_ssize_t* shape)
 
@@ -274,7 +274,7 @@ Construction and Destruction
    number of dimensions the array should have. ``shape`` should be set to the
    array shape.
 
-   
+
 .. c:function:: PyObject* PyBlitzArray_SimpleNewFromData (int type_num, Py_ssize_t ndim, Py_ssize_t* shape, Py_ssize_t* stride, void* data, int writeable)
 
    Allocates a new ``xbob.blitz.array`` with a given (supported) type and
@@ -286,7 +286,7 @@ Construction and Destruction
    of the data area. ``writeable`` indicates if the resulting array should be
    writeble (set it to ``1``), or read-only (set it to ``0``).
 
-   
+
 To/From Numpy Converters
 ========================
 
@@ -297,7 +297,7 @@ To/From Numpy Converters
    if the current data type is not the same, then forces the creation of a copy
    conforming to the require data type, if possible. You may set ``dtype`` to
    ``NULL`` in case you don't mind the resulting data type.
-    
+
 
 .. c:function:: PyObject* PyBlitzArray_FromNumpyArray (PyObject* o)
 
@@ -321,9 +321,9 @@ To/From Numpy Converters
    assuming it is set to ``NULL`` (what is the case to freshly created
    :c:type:`PyBlitzArrayObject`'s). If you are not sure about the nature of
    ``o``, use the slower but safer :c:func:`PyBlitzArray_AsNumpyArray`.
-   
+
    .. note::
-   
+
       The value of ``o`` can be ``NULL``, in which case this function returns
       immediately, allowing you to propagate exceptions.
 
@@ -331,7 +331,7 @@ To/From Numpy Converters
 Converter Functions for PyArg_Parse* family
 ===========================================
 
-.. c:function:: int PyBlitzArray_Converter(PyObject* o, PyBlitzArrayObject** a) 
+.. c:function:: int PyBlitzArray_Converter(PyObject* o, PyBlitzArrayObject** a)
 
    This function is meant to be used with :c:func:`PyArg_ParseTupleAndKeywords`
    family of functions in the Python C-API. It converts an arbitrary input
@@ -348,7 +348,7 @@ Converter Functions for PyArg_Parse* family
    :c:type:`PyBlitzArrayObject`. Otherwise, it creates a new
    :c:type:`PyBlitzArrayObject` by first creating a :c:type:`PyArrayObject` and
    then shallow wrapping it with a :c:type:`PyBlitzArrayObject`.
-   
+
    Returns 0 if an error is detected, 1 on success.
 
 .. c:function:: int PyBlitzArray_BehavedConverter(PyObject* o, PyBlitzArrayObject** a)
@@ -387,14 +387,14 @@ Converter Functions for PyArg_Parse* family
    is supposed to be used with ``PyArg_ParseTupleAndKeywords`` and derivatives.
 
    Parameters are:
-   
+
    ``o``
      The input object to be converted into a C-shape
 
    ``shape``
      A preallocated (double) address for storing the shape value, on successful
      conversion
-   
+
    Returns 0 if an error is detected, 1 on success.
 
 
@@ -405,17 +405,17 @@ Converter Functions for PyArg_Parse* family
    derivatives.
 
    Parameters are:
-   
+
    ``o``
      The input object to be converted into a C-shape
 
    ``type_num``
       A preallocated (double) address for storing the type on successful
       conversion.
-   
+
    Returns 0 if an error is detected, 1 on success.
 
-  
+
 Other Utilities
 ===============
 
@@ -468,7 +468,7 @@ Other Utilities
 .. cpp:function:: int PyBlitzArrayCxx_CToTypenum<T>()
 
    Converts from C/C++ type to ndarray type_num.
-   
+
    We cover only simple conversions (i.e., standard integers, floats and
    complex numbers only). If the input type is not convertible, an exception
    is set on the Python error stack. You must check ``PyErr_Occurred()`` after
@@ -476,7 +476,7 @@ Other Utilities
    example:
 
    .. code-block:: c++
-   
+
       int typenum = PyBlitzArrayCxx_CToTypenum<my_weird_type>(obj);
       if (PyErr_Occurred()) return 0; ///< propagate exception
 
@@ -484,7 +484,7 @@ Other Utilities
 .. cpp:function:: T PyBlitzArrayCxx_AsCScalar<T>(PyObject* o)
 
    Extraction API for **simple** types.
-   
+
    We cover only simple conversions (i.e., standard integers, floats and
    complex numbers only). If the input object is not convertible to the given
    type, an exception is set on the Python error stack. You must check
@@ -492,10 +492,10 @@ Other Utilities
    and act accordingly. For example:
 
    .. code-block:: c++
-   
+
       auto z = extract<uint8_t>(obj);
       if (PyErr_Occurred()) return 0; ///< propagate exception
- 
+
 .. cpp:function:: PyBlitzArrayCxx_FromCScalar<T>(T v)
 
    Converts **simple** C types into numpy scalars
@@ -503,4 +503,4 @@ Other Utilities
    We cover only simple conversions (i.e., standard integers, floats and
    complex numbers only). If the input object is not convertible to the given
    type, an exception is set on the Python error stack and ``0`` (``NULL``) is
-   returned. 
+   returned.
