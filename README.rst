@@ -49,7 +49,7 @@ Development
 -----------
 
 To develop this package, install using ``zc.buildout``, using the buildout
-configuration found on the root of the package:
+configuration found on the root of the package::
 
   $ python bootstrap.py
   ...
