@@ -1,6 +1,6 @@
 /**
  * @author Andre Anjos <andre.anjos@idiap.ch>
- * @date Tue  8 Oct 08:19:28 2013 
+ * @date Tue  8 Oct 08:19:28 2013
  *
  * @brief Defines the xbob.blitz C-API
  *
@@ -233,46 +233,46 @@ typedef struct {
   PyBlitzArray_PySHAPE_RET PyBlitzArray_PySHAPE PyBlitzArray_PySHAPE_PROTO;
 
   PyBlitzArray_STRIDE_RET PyBlitzArray_STRIDE PyBlitzArray_STRIDE_PROTO;
-  
+
   PyBlitzArray_PySTRIDE_RET PyBlitzArray_PySTRIDE PyBlitzArray_PySTRIDE_PROTO;
-  
+
   PyBlitzArray_WRITEABLE_RET PyBlitzArray_WRITEABLE PyBlitzArray_WRITEABLE_PROTO;
-  
+
   PyBlitzArray_PyWRITEABLE_RET PyBlitzArray_PyWRITEABLE PyBlitzArray_PyWRITEABLE_PROTO;
-  
+
   PyBlitzArray_BASE_RET PyBlitzArray_BASE PyBlitzArray_BASE_PROTO;
-  
+
   PyBlitzArray_PyBASE_RET PyBlitzArray_PyBASE PyBlitzArray_PyBASE_PROTO;
-  
+
 /************
  * Indexing *
  ************/
 
   PyBlitzArray_GetItem_RET PyBlitzArray_GetItem PyBlitzArray_GetItem_PROTO;
-  
+
   PyBlitzArray_SetItem_RET PyBlitzArray_SetItem PyBlitzArray_SetItem_PROTO;
 
 
 /********************************
  * Construction and Destruction *
  ********************************/
-  
+
   PyBlitzArray_New_RET PyBlitzArray_New PyBlitzArray_New_PROTO;
-  
+
   PyBlitzArray_Delete_RET PyBlitzArray_Delete PyBlitzArray_Delete_PROTO;
-  
+
   PyBlitzArray_SimpleNew_RET PyBlitzArray_SimpleNew PyBlitzArray_SimpleNew_PROTO;
-  
+
   PyBlitzArray_SimpleNewFromData_RET PyBlitzArray_SimpleNewFromData PyBlitzArray_SimpleNewFromData_PROTO;
-  
+
 /****************************
  * From/To NumPy Converters *
  ****************************/
 
   PyBlitzArray_AsNumpyArray_RET PyBlitzArray_AsNumpyArray PyBlitzArray_AsNumpyArray_PROTO;
-  
+
   PyBlitzArray_FromNumpyArray_RET PyBlitzArray_FromNumpyArray PyBlitzArray_FromNumpyArray_PROTO;
-  
+
   PyBlitzArray_NUMPY_WRAP_RET PyBlitzArray_NUMPY_WRAP PyBlitzArray_NUMPY_WRAP_PROTO;
 
 /***********************************************
@@ -280,15 +280,15 @@ typedef struct {
  ***********************************************/
 
   PyBlitzArray_Converter_RET PyBlitzArray_Converter PyBlitzArray_Converter_PROTO;
-  
+
   PyBlitzArray_BehavedConverter_RET PyBlitzArray_BehavedConverter PyBlitzArray_BehavedConverter_PROTO;
-  
+
   PyBlitzArray_OutputConverter_RET PyBlitzArray_OutputConverter PyBlitzArray_OutputConverter_PROTO;
-  
+
   PyBlitzArray_IndexConverter_RET PyBlitzArray_IndexConverter PyBlitzArray_IndexConverter_PROTO;
-  
+
   PyBlitzArray_TypenumConverter_RET PyBlitzArray_TypenumConverter PyBlitzArray_TypenumConverter_PROTO;
-  
+
 /*************
  * Utilities *
  *************/
@@ -426,7 +426,7 @@ typedef struct {
 
 #   if PY_VERSION_HEX >= 0x02070000
     if (PyCapsule_CheckExact(c_api_object)) {
-      PyBlitzArray_API = (void **)PyCapsule_GetPointer(c_api_object, 
+      PyBlitzArray_API = (void **)PyCapsule_GetPointer(c_api_object,
           PyCapsule_GetName(c_api_object));
     }
 #   else
