@@ -11,6 +11,55 @@
 
 PyDoc_STRVAR(s_array_str, XBOB_EXT_MODULE_PREFIX ".array");
 
+PyDoc_STRVAR(s_array_doc,
+"array(shape, dtype) -> new n-dimensional blitz::Array\n\
+\n\
+An N-dimensional blitz::Array<T,N> pythonic representation\n\
+\n\
+Constructor parameters:\n\
+\n\
+shape\n\
+  An iterable, indicating the shape of the array to be constructed\n\
+  \n\
+  The implementation current supports a maximum of 4 dimensions.\n\
+  Building an array with more dimensions will raise a \n\
+  :py:class:`TypeError`. There are no explicit limits for the size in\n\
+  each dimension, except for the machine's maximum address size.\n\
+\n\
+dtype\n\
+  A :py:class:`numpy.dtype` or ``dtype`` convertible object that\n\
+  specified the type of elements in this array.\n\
+  \n\
+  The following numpy data types are supported by this library:\n\
+  \n\
+    * :py:class:`numpy.bool_`\n\
+    * :py:class:`numpy.int8`\n\
+    * :py:class:`numpy.int16`\n\
+    * :py:class:`numpy.int32`\n\
+    * :py:class:`numpy.int64`\n\
+    * :py:class:`numpy.uint8`\n\
+    * :py:class:`numpy.uint16`\n\
+    * :py:class:`numpy.uint32`\n\
+    * :py:class:`numpy.uint64`\n\
+    * :py:class:`numpy.float32`\n\
+    * :py:class:`numpy.float64`\n\
+    * :py:class:`numpy.float128` (if this architecture suppports it)\n\
+    * :py:class:`numpy.complex64`\n\
+    * :py:class:`numpy.complex128`\n\
+    * :py:class:`numpy.complex256` (if this architecture suppports it)\n\
+\n\
+Objects of this class hold a pointer to C++ ``blitz::Array<T,N>``.\n\
+The C++ data type ``T`` is mapped to a :py:class:`numpy.dtype` object,\n\
+while the extents and number of dimensions ``N`` are mapped to a shape,\n\
+similar to what is done for :py:class:`numpy.ndarray` objects.\n\
+\n\
+Objects of this class can be wrapped in :py:class:`numpy.ndarray`\n\
+quite efficiently, so that flexible numpy-like operations are possible\n\
+on its contents. You can also deploy objects of this class wherever\n\
+:py:class:`numpy.ndarray`'s may be input.\n\
+"
+);
+
 /**
  * Formal initialization of an Array object
  */
@@ -46,7 +95,7 @@ static int PyBlitzArray__init__(PyBlitzArrayObject* self, PyObject *args,
 
   /* Copies the new object to the pre-allocated one */
   (*self) = (*tmp);
-  tmp->ob_type->tp_free((PyObject*)tmp); ///< Deallocates only the Python stuff
+  Py_TYPE(tmp)->tp_free((PyObject*)tmp); ///< Deallocates only the Python stuff
 
   return 0; ///< SUCCESS
 }
@@ -91,7 +140,7 @@ static PyObject* PyBlitzArray_getitem(PyBlitzArrayObject* self,
 
   }
 
-  PyErr_Format(PyExc_TypeError, "%s(@%" PY_FORMAT_SIZE_T "d,'%s') indexing requires a single integers (for 1D arrays) or sequences, for any rank size", s_array_str, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
+  PyErr_Format(PyExc_TypeError, "%s(@%" PY_FORMAT_SIZE_T "d,'%s') indexing requires a single integers (for 1D arrays) or sequences, for any rank size", Py_TYPE(self)->tp_name, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
   return 0;
 }
 
@@ -101,7 +150,7 @@ static int PyBlitzArray_setitem(PyBlitzArrayObject* self, PyObject* item,
   if (PyNumber_Check(item)) {
 
     if (self->ndim != 1) {
-      PyErr_Format(PyExc_TypeError, "expected sequence for accessing %s(@%" PY_FORMAT_SIZE_T "d,'%s'", s_array_str, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
+      PyErr_Format(PyExc_TypeError, "expected sequence for accessing %s(@%" PY_FORMAT_SIZE_T "d,'%s'", Py_TYPE(self)->tp_name, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
       return -1;
     }
 
@@ -114,7 +163,7 @@ static int PyBlitzArray_setitem(PyBlitzArrayObject* self, PyObject* item,
   if (PySequence_Check(item)) {
 
     if (self->ndim != PySequence_Fast_GET_SIZE(item)) {
-      PyErr_Format(PyExc_TypeError, "expected sequence of size %" PY_FORMAT_SIZE_T "d for accessing %s(@%" PY_FORMAT_SIZE_T "d,'%s')", PySequence_Fast_GET_SIZE(item), s_array_str, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
+      PyErr_Format(PyExc_TypeError, "expected sequence of size %" PY_FORMAT_SIZE_T "d for accessing %s(@%" PY_FORMAT_SIZE_T "d,'%s')", PySequence_Fast_GET_SIZE(item), Py_TYPE(self)->tp_name, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
       return -1;
     }
 
@@ -126,7 +175,7 @@ static int PyBlitzArray_setitem(PyBlitzArrayObject* self, PyObject* item,
 
   }
 
-  PyErr_Format(PyExc_TypeError, "%s(@%" PY_FORMAT_SIZE_T "d,'%s') assignment requires a single integers (for 1D arrays) or sequences, for any rank size", s_array_str, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
+  PyErr_Format(PyExc_TypeError, "%s(@%" PY_FORMAT_SIZE_T "d,'%s') assignment requires a single integers (for 1D arrays) or sequences, for any rank size", Py_TYPE(self)->tp_name, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));
   return -1;
 }
 
@@ -262,29 +311,53 @@ static PyObject* PyBlitzArray_str(PyBlitzArrayObject* o) {
 static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
   switch (o->ndim) {
     case 1:
-      return PyString_FromFormat("%s(%" PY_FORMAT_SIZE_T "d,'%s')",
-          s_array_str,
+      return 
+#       if PY_VERSION_HEX >= 0x03000000
+        PyUnicode_FromFormat
+#       else
+        PyString_FromFormat
+#       endif
+          ("%s(%" PY_FORMAT_SIZE_T "d,'%s')",
+          Py_TYPE(o)->tp_name,
           o->shape[0],
           PyBlitzArray_TypenumAsString(o->type_num)
           );
     case 2:
-      return PyString_FromFormat("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')",
-          s_array_str,
+      return 
+#       if PY_VERSION_HEX >= 0x03000000
+        PyUnicode_FromFormat
+#       else
+        PyString_FromFormat
+#       endif
+          ("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')",
+          Py_TYPE(o)->tp_name,
           o->shape[0],
           o->shape[1],
           PyBlitzArray_TypenumAsString(o->type_num)
           );
     case 3:
-      return PyString_FromFormat("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')", 
-          s_array_str,
+      return 
+#       if PY_VERSION_HEX >= 0x03000000
+        PyUnicode_FromFormat
+#       else
+        PyString_FromFormat
+#       endif
+          ("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')", 
+          Py_TYPE(o)->tp_name,
           o->shape[0],
           o->shape[1],
           o->shape[2],
           PyBlitzArray_TypenumAsString(o->type_num)
           );
     case 4:
-      return PyString_FromFormat("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')", 
-          s_array_str,
+      return
+#       if PY_VERSION_HEX >= 0x03000000
+        PyUnicode_FromFormat
+#       else
+        PyString_FromFormat
+#       endif
+          ("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')", 
+          Py_TYPE(o)->tp_name,
           o->shape[0],
           o->shape[1],
           o->shape[2],
@@ -292,8 +365,14 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
           PyBlitzArray_TypenumAsString(o->type_num)
           );
     default:
-      return PyString_FromFormat("[unsupported] %s(@%" PY_FORMAT_SIZE_T "d,'%s') %" PY_FORMAT_SIZE_T "d elements>",
-          s_array_str,
+      return
+#       if PY_VERSION_HEX >= 0x03000000
+        PyUnicode_FromFormat
+#       else
+        PyString_FromFormat
+#       endif
+          ("[unsupported] %s(@%" PY_FORMAT_SIZE_T "d,'%s') %" PY_FORMAT_SIZE_T "d elements>",
+          Py_TYPE(o)->tp_name,
           o->ndim,
           PyBlitzArray_TypenumAsString(o->type_num),
           PyBlitzArray_len(o)
@@ -306,58 +385,8 @@ static PyMemberDef PyBlitzArray_members[] = {
     {0}  /* Sentinel */
 };
 
-PyDoc_STRVAR(s_array__doc__,
-"array(shape, dtype) -> new n-dimensional blitz::Array\n\
-\n\
-An N-dimensional blitz::Array<T,N> pythonic representation\n\
-\n\
-Constructor parameters:\n\
-\n\
-shape\n\
-  An iterable, indicating the shape of the array to be constructed\n\
-  \n\
-  The implementation current supports a maximum of 4 dimensions.\n\
-  Building an array with more dimensions will raise a \n\
-  :py:class:`TypeError`. There are no explicit limits for the size in\n\
-  each dimension, except for the machine's maximum address size.\n\
-\n\
-dtype\n\
-  A :py:class:`numpy.dtype` or ``dtype`` convertible object that\n\
-  specified the type of elements in this array.\n\
-  \n\
-  The following numpy data types are supported by this library:\n\
-  \n\
-    * :py:class:`numpy.bool_`\n\
-    * :py:class:`numpy.int8`\n\
-    * :py:class:`numpy.int16`\n\
-    * :py:class:`numpy.int32`\n\
-    * :py:class:`numpy.int64`\n\
-    * :py:class:`numpy.uint8`\n\
-    * :py:class:`numpy.uint16`\n\
-    * :py:class:`numpy.uint32`\n\
-    * :py:class:`numpy.uint64`\n\
-    * :py:class:`numpy.float32`\n\
-    * :py:class:`numpy.float64`\n\
-    * :py:class:`numpy.float128` (if this architecture suppports it)\n\
-    * :py:class:`numpy.complex64`\n\
-    * :py:class:`numpy.complex128`\n\
-    * :py:class:`numpy.complex256` (if this architecture suppports it)\n\
-\n\
-Objects of this class hold a pointer to C++ ``blitz::Array<T,N>``.\n\
-The C++ data type ``T`` is mapped to a :py:class:`numpy.dtype` object,\n\
-while the extents and number of dimensions ``N`` are mapped to a shape,\n\
-similar to what is done for :py:class:`numpy.ndarray` objects.\n\
-\n\
-Objects of this class can be wrapped in :py:class:`numpy.ndarray`\n\
-quite efficiently, so that flexible numpy-like operations are possible\n\
-on its contents. You can also deploy objects of this class wherever\n\
-:py:class:`numpy.ndarray`'s may be input.\n\
-"
-);
-
 PyTypeObject PyBlitzArray_Type = {
-    PyObject_HEAD_INIT(0)
-    0,                                          /*ob_size*/
+    PyVarObject_HEAD_INIT(0, 0)
     s_array_str,                                /*tp_name*/
     sizeof(PyBlitzArrayObject),                 /*tp_basicsize*/
     0,                                          /*tp_itemsize*/
@@ -377,7 +406,7 @@ PyTypeObject PyBlitzArray_Type = {
     0,                                          /*tp_setattro*/
     0,                                          /*tp_as_buffer*/
     Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   /*tp_flags*/
-    s_array__doc__,                             /* tp_doc */
+    s_array_doc,                                /* tp_doc */
     0,		                                      /* tp_traverse */
     0,		                                      /* tp_clear */
     0,		                                      /* tp_richcompare */

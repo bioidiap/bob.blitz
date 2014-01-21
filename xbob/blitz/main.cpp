@@ -43,7 +43,7 @@ function only shallow wrap's it into a ``" XBOB_EXT_MODULE_PREFIX ".array`` skin
 "
 );
 
-static PyMethodDef array_methods[] = {
+static PyMethodDef module_methods[] = {
     {
       s_as_blitz_str,
       (PyCFunction)PyBlitzArray_as_blitz,
@@ -74,14 +74,36 @@ static PyObject* build_version_dictionary() {
 
 int PyBlitzArray_APIVersion = XBOB_BLITZ_API_VERSION;
 
+PyDoc_STRVAR(s_module_doc, "Blitz++ array definition and generic functions");
+
+#if PY_VERSION_HEX >= 0x03000000
+static PyModuleDef module_definition = {
+  PyModuleDef_HEAD_INIT,
+  XBOB_EXT_MODULE_NAME,
+  s_module_doc,
+  -1,
+  module_methods, 
+  0, 0, 0, 0
+};
+#endif
+
 PyMODINIT_FUNC XBOB_EXT_ENTRY_NAME (void) {
-  PyObject* m;
 
   PyBlitzArray_Type.tp_new = PyType_GenericNew;
-  if (PyType_Ready(&PyBlitzArray_Type) < 0) return;
+  if (PyType_Ready(&PyBlitzArray_Type) < 0) return
+# if PY_VERSION_HEX >= 0x03000000
+    0
+# endif
+    ;
 
-  m = Py_InitModule3(XBOB_EXT_MODULE_NAME, array_methods,
-      "Blitz++ array definition and generic functions");
+# if PY_VERSION_HEX >= 0x03000000
+  PyObject* m = PyModule_Create(&module_definition);
+  if (!m) return 0;
+# else
+  PyObject* m = Py_InitModule3(XBOB_EXT_MODULE_NAME, 
+      module_methods, s_module_doc);
+  if (!m) return;
+# endif
 
   /* register version numbers and constants */
   PyModule_AddIntConstant(m, "__api_version__", XBOB_BLITZ_API_VERSION);
@@ -155,4 +177,9 @@ PyMODINIT_FUNC XBOB_EXT_ENTRY_NAME (void) {
 
   /* imports the NumPy C-API as well */
   import_array();
+
+# if PY_VERSION_HEX >= 0x03000000
+  return m;
+# endif
+
 }
