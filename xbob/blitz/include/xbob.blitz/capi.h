@@ -457,6 +457,9 @@ typedef struct {
       return -1;
     }
 
+    /* Imports the numpy C-API */
+    import_array1(-1);
+
     /* If you get to this point, all is good */
     return 0;
 

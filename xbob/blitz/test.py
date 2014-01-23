@@ -277,11 +277,11 @@ def test_detects_unsupported_dims():
   nd = numpy.array(range(32)).reshape(2,2,2,2,2)
   bz = as_blitz(nd)
 
-def test_can_use_long_as_dtype():
+def test_can_use_int_as_dtype():
 
-  bz = bzarray(2, long)
+  bz = bzarray(2, int)
   nose.tools.eq_(bz.dtype, numpy.int64)
-  bz[0] = 33L
+  bz[0] = 33
   nose.tools.eq_(bz[0].dtype, numpy.int64)
   nose.tools.eq_(bz[0], 33)
 

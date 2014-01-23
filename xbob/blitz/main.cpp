@@ -10,6 +10,7 @@
 #endif
 #define XBOB_BLITZ_MODULE
 #include <xbob.blitz/capi.h>
+#include <xbob.blitz/cleanup.h>
 
 static PyObject* PyBlitzArray_as_blitz(PyObject*, PyObject* args, PyObject* kwds) {
 
@@ -87,32 +88,29 @@ static PyModuleDef module_definition = {
 };
 #endif
 
-PyMODINIT_FUNC XBOB_EXT_ENTRY_NAME (void) {
+static PyObject* create_module(void) {
 
   PyBlitzArray_Type.tp_new = PyType_GenericNew;
-  if (PyType_Ready(&PyBlitzArray_Type) < 0) return
-# if PY_VERSION_HEX >= 0x03000000
-    0
-# endif
-    ;
+  if (PyType_Ready(&PyBlitzArray_Type) < 0) return 0;
 
 # if PY_VERSION_HEX >= 0x03000000
   PyObject* m = PyModule_Create(&module_definition);
-  if (!m) return 0;
 # else
-  PyObject* m = Py_InitModule3(XBOB_EXT_MODULE_NAME, 
-      module_methods, s_module_doc);
-  if (!m) return;
+  PyObject* m = Py_InitModule3(XBOB_EXT_MODULE_NAME, module_methods, s_module_doc);
 # endif
+  if (!m) return 0;
+  auto m_ = make_safe(m); ///< protects against early returns
 
   /* register version numbers and constants */
-  PyModule_AddIntConstant(m, "__api_version__", XBOB_BLITZ_API_VERSION);
-  PyModule_AddStringConstant(m, "__version__", XBOB_EXT_MODULE_VERSION);
-  PyModule_AddObject(m, "versions", build_version_dictionary());
+  if (PyModule_AddIntConstant(m, "__api_version__", XBOB_BLITZ_API_VERSION) < 0) 
+    return 0;
+  if (PyModule_AddStringConstant(m, "__version__", XBOB_EXT_MODULE_VERSION) < 0)
+    return 0;
+  if (PyModule_AddObject(m, "versions", build_version_dictionary()) < 0) return 0;
 
   /* register the type object to python */
   Py_INCREF(&PyBlitzArray_Type);
-  PyModule_AddObject(m, "array", (PyObject *)&PyBlitzArray_Type);
+  if (PyModule_AddObject(m, "array", (PyObject *)&PyBlitzArray_Type) < 0) return 0;
 
   static void* PyBlitzArray_API[PyBlitzArray_API_pointers];
 
@@ -173,13 +171,21 @@ PyMODINIT_FUNC XBOB_EXT_ENTRY_NAME (void) {
 
 #endif
 
-  if (c_api_object) PyModule_AddObject(m, "_C_API", c_api_object);
+  if (!c_api_object) return 0;
+
+  if (PyModule_AddObject(m, "_C_API", c_api_object) < 0) return 0;
 
   /* imports the NumPy C-API as well */
-  import_array();
+  import_array1(0);
 
-# if PY_VERSION_HEX >= 0x03000000
+  Py_INCREF(m);
   return m;
-# endif
 
+}
+
+PyMODINIT_FUNC XBOB_EXT_ENTRY_NAME (void) {
+# if PY_VERSION_HEX >= 0x03000000
+  return
+# endif
+    create_module();
 }
