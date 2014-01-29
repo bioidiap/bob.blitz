@@ -58,19 +58,16 @@ static PyObject* build_version_dictionary() {
 
   PyObject* retval = PyDict_New();
   if (!retval) return 0;
+  auto retval_ = make_safe(retval);
 
   PyObject* v = Py_BuildValue("s", BLITZ_VERSION);
-  if (!v) {
-    Py_DECREF(retval);
-    return 0;
-  }
+  if (!v) return 0;
+  auto v_ = make_safe(v);
 
-  int error = PyDict_SetItemString(retval, "Blitz++", v);
-  Py_DECREF(v);
-  if (error == 0) return retval;
+  if (PyDict_SetItemString(retval, "Blitz++", v) != 0) return 0;
 
-  Py_DECREF(retval);
-  return 0;
+  Py_INCREF(retval);
+  return retval;
 }
 
 int PyBlitzArray_APIVersion = XBOB_BLITZ_API_VERSION;
@@ -106,7 +103,9 @@ static PyObject* create_module (void) {
     return 0;
   if (PyModule_AddStringConstant(m, "__version__", XBOB_EXT_MODULE_VERSION) < 0)
     return 0;
-  if (PyModule_AddObject(m, "versions", build_version_dictionary()) < 0) return 0;
+  PyObject* versions = build_version_dictionary();
+  if (!versions) return 0;
+  if (PyModule_AddObject(m, "versions", versions) < 0) return 0;
 
   /* register the type object to python */
   Py_INCREF(&PyBlitzArray_Type);

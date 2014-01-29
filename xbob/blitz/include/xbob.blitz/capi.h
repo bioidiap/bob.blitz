@@ -297,18 +297,6 @@ typedef struct {
 
 #else
 
-/************************************************************************
- * Macros to avoid symbol collision and allow for separate compilation. *
- * We pig-back on symbols already defined for NumPy and apply the same  *
- * set of rules here, creating our own API symbol names.                *
- ************************************************************************/
-
-#  if defined(PY_ARRAY_UNIQUE_SYMBOL)
-#    define XBOB_BLITZ_MAKE_API_NAME_INNER(a) BLITZ_ ## a
-#    define XBOB_BLITZ_MAKE_API_NAME(a) XBOB_BLITZ_MAKE_API_NAME_INNER(a)
-#    define PyBlitzArray_API XBOB_BLITZ_MAKE_API_NAME(PY_ARRAY_UNIQUE_SYMBOL)
-#  endif
-
 #  if defined(NO_IMPORT_ARRAY)
   extern void **PyBlitzArray_API;
 #  else
