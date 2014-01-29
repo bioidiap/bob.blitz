@@ -75,13 +75,13 @@ static PyObject* build_version_dictionary() {
 
 int PyBlitzArray_APIVersion = XBOB_BLITZ_API_VERSION;
 
-PyDoc_STRVAR(s_module_doc, "Blitz++ array definition and generic functions");
+PyDoc_STRVAR(module_docstr, "Blitz++ array definition and generic functions");
 
 #if PY_VERSION_HEX >= 0x03000000
 static PyModuleDef module_definition = {
   PyModuleDef_HEAD_INIT,
   XBOB_EXT_MODULE_NAME,
-  s_module_doc,
+  module_docstr,
   -1,
   module_methods, 
   0, 0, 0, 0
@@ -96,7 +96,7 @@ static PyObject* create_module (void) {
 # if PY_VERSION_HEX >= 0x03000000
   PyObject* m = PyModule_Create(&module_definition);
 # else
-  PyObject* m = Py_InitModule3(XBOB_EXT_MODULE_NAME, module_methods, s_module_doc);
+  PyObject* m = Py_InitModule3(XBOB_EXT_MODULE_NAME, module_methods, module_docstr);
 # endif
   if (!m) return 0;
   auto m_ = make_safe(m); ///< protects against early returns
