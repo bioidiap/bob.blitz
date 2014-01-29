@@ -88,7 +88,7 @@ static PyModuleDef module_definition = {
 };
 #endif
 
-static PyObject* create_module(void) {
+static PyObject* create_module (void) {
 
   PyBlitzArray_Type.tp_new = PyType_GenericNew;
   if (PyType_Ready(&PyBlitzArray_Type) < 0) return 0;
