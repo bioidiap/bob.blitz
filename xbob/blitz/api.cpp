@@ -658,7 +658,7 @@ void stride_order(Py_ssize_t* s, blitz::TinyVector<int,N>& tv) {
 
   for (int i=0; i<N; ++i) tv[i] = i;
   int* idx = tv.data();
-  std::sort(idx, idx+N, [s](int i1, int i2) {return s[i1] < s[i2];});
+  std::sort(idx, idx+N, [s](int i1, int i2) {return s[i1] <= s[i2];});
 
 }
 
