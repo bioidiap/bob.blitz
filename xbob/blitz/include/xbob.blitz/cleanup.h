@@ -7,7 +7,7 @@
  */
 
 #include <Python.h>
-#include <memory>
+#include <boost/shared_ptr.hpp>
 #include <numpy/arrayobject.h>
 
 /**
@@ -19,8 +19,8 @@
  * After this point, no need to worry about DECREF'ing x anymore. 
  * You can still use `x' inside your code, or protected_x.get().
  */
-template <typename T> std::shared_ptr<T> make_safe(T* o) {
-  return std::shared_ptr<T>(o, [&](T* p){Py_DECREF(p);});
+template <typename T> boost::shared_ptr<T> make_safe(T* o) {
+  return boost::shared_ptr<T>(o, [&](T* p){Py_DECREF(p);});
 }
 
 /**
@@ -33,6 +33,6 @@ template <typename T> std::shared_ptr<T> make_safe(T* o) {
  * You can still use `x' inside your code, or protected_x.get(). Note
  * `x' may be NULL with this method.
  */
-template <typename T> std::shared_ptr<T> make_xsafe(T* o) {
-  return std::shared_ptr<T>(o, [&](T* p){Py_XDECREF(p);});
+template <typename T> boost::shared_ptr<T> make_xsafe(T* o) {
+  return boost::shared_ptr<T>(o, [&](T* p){Py_XDECREF(p);});
 }

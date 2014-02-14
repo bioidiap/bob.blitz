@@ -204,7 +204,7 @@ PyObject* PyBlitzArrayCxx_NewFromConstArray(const blitz::Array<T,N>& a) {
 
   /** some test code
   std::cout << "allocating array" << std::endl;
-  std::shared_ptr<blitz::Array<T,N>> retval(new blitz::Array<T,N>(tv_shape),
+  boost::shared_ptr<blitz::Array<T,N>> retval(new blitz::Array<T,N>(tv_shape),
       &delete_array<T,N>);
   **/
 
