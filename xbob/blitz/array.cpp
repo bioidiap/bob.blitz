@@ -192,7 +192,7 @@ PyDoc_STRVAR(s_private_array__doc__,
 x.as_ndarray([dtype]) -> numpy.ndarray\n\
 \n\
 numpy.ndarray accessor (shallow wraps ``xbob.blitz.array`` as\n\
-numpy.ndarray). If `dtype' is given and the current data type\n\
+numpy.ndarray). If ``dtype`` is given and the current data type\n\
 is not the same, then forces the creation of a copy conforming\n\
 to the require data type, if possible.\n\
 ");
@@ -205,8 +205,8 @@ static PyObject* PyBlitzArray_AsNumpyArrayPrivate(PyBlitzArrayObject* self,
   static char** kwlist = const_cast<char**>(const_kwlist);
 
   PyArray_Descr* dtype = 0;
-  
-  if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O&", kwlist, 
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwds, "|O&", kwlist,
         &PyArray_DescrConverter2, &dtype)) return 0;
 
   return PyBlitzArray_AsNumpyArray(self, dtype);
@@ -257,7 +257,7 @@ PyDoc_STRVAR(s_base__doc__,
 
 static PyGetSetDef PyBlitzArray_getseters[] = {
     {
-      s_dtype_str, 
+      s_dtype_str,
       (getter)PyBlitzArray_PyDTYPE,
       0,
       s_dtype__doc__,
@@ -302,7 +302,7 @@ static PyObject* PyBlitzArray_str(PyBlitzArrayObject* o) {
     PyErr_SetString(PyExc_RuntimeError, "could not convert array into numpy ndarray for str() method call");
     return 0;
   }
-  PyObject* retval = PyObject_Str(nd); 
+  PyObject* retval = PyObject_Str(nd);
   Py_DECREF(nd);
   return retval;
 }
@@ -311,7 +311,7 @@ static PyObject* PyBlitzArray_str(PyBlitzArrayObject* o) {
 static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
   switch (o->ndim) {
     case 1:
-      return 
+      return
 #       if PY_VERSION_HEX >= 0x03000000
         PyUnicode_FromFormat
 #       else
@@ -323,7 +323,7 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
           PyBlitzArray_TypenumAsString(o->type_num)
           );
     case 2:
-      return 
+      return
 #       if PY_VERSION_HEX >= 0x03000000
         PyUnicode_FromFormat
 #       else
@@ -336,13 +336,13 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
           PyBlitzArray_TypenumAsString(o->type_num)
           );
     case 3:
-      return 
+      return
 #       if PY_VERSION_HEX >= 0x03000000
         PyUnicode_FromFormat
 #       else
         PyString_FromFormat
 #       endif
-          ("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')", 
+          ("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')",
           Py_TYPE(o)->tp_name,
           o->shape[0],
           o->shape[1],
@@ -356,7 +356,7 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
 #       else
         PyString_FromFormat
 #       endif
-          ("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')", 
+          ("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')",
           Py_TYPE(o)->tp_name,
           o->shape[0],
           o->shape[1],
