@@ -653,12 +653,19 @@ PyObject* PyBlitzArray_SimpleNew (int type_num, Py_ssize_t ndim, Py_ssize_t* sha
 
 }
 
+// N.B.: cannot use lambdas with very old versions of gcc
+struct stride_sorter {
+  Py_ssize_t* _s;
+  stride_sorter(Py_ssize_t* s) { _s = s; }
+  bool operator() (int i1, int i2) { return _s[i1] <= _s[i2]; }
+};
+
 template <int N>
 void stride_order(Py_ssize_t* s, blitz::TinyVector<int,N>& tv) {
 
   for (int i=0; i<N; ++i) tv[i] = i;
   int* idx = tv.data();
-  std::sort(idx, idx+N, [s](int i1, int i2) {return s[i1] <= s[i2];});
+  std::sort(idx, idx+N, stride_sorter(s));
 
 }
 
