@@ -915,7 +915,7 @@ PyObject* PyBlitzArray_FromNumpyArray(PyArrayObject* o) {
   }
 
   if (!ndarray_behaves(o)) {
-    PyErr_Format(PyExc_ValueError, "cannot convert numpy.ndarray which doesn't behave (memory contiguous, aligned, C-style, <%d dimensions) into a %s", XBOB_BLITZ_MAXDIMS, Py_TYPE(o)->tp_name);
+    PyErr_Format(PyExc_ValueError, "cannot convert `%s' which doesn't behave (memory contiguous, aligned, C-style, minimum 1 and up to %d dimensions) into a `%s'", Py_TYPE(o)->tp_name, XBOB_BLITZ_MAXDIMS, PyBlitzArray_Type.tp_name);
     return 0;
   }
 
@@ -1004,7 +1004,7 @@ int PyBlitzArray_Converter(PyObject* o, PyBlitzArrayObject** a) {
   PyObject* ao = 0;
   if (!PyArray_Converter(o, &ao)) {
     PyErr_Print();
-    PyErr_Format(PyExc_ValueError, "cannot convert argument to %s - prefix conversion to numpy.ndarray failed", Py_TYPE(o)->tp_name);
+    PyErr_Format(PyExc_ValueError, "cannot convert argument to `%s' - prefix conversion to numpy.ndarray failed", Py_TYPE(*a)->tp_name);
     return 0;
   }
 
