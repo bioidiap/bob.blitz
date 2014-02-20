@@ -1,12 +1,12 @@
 .. vim: set fileencoding=utf-8 :
 .. Andre Anjos <andre.dos.anjos@gmail.com>
-.. Tue 15 Oct 17:41:52 2013 
-.. 
+.. Tue 15 Oct 17:41:52 2013
+..
 .. Copyright (C) 2011-2013 Idiap Research Institute, Martigny, Switzerland
 
 .. testsetup:: blitztest
 
-   import xbob.blitz 
+   import xbob.blitz
    import numpy
 
 ============
