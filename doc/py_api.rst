@@ -44,7 +44,7 @@ You can build a new ``xbob.blitz.array`` using one of two possible ways:
 
       >>> import xbob.blitz
       >>> a = xbob.blitz.as_blitz(range(5))
-      >>> print a
+      >>> print(a)
       [0 1 2 3 4]
       >>> a.dtype
       dtype('int64')
@@ -66,7 +66,7 @@ You can build a new ``xbob.blitz.array`` using one of two possible ways:
    .. doctest:: blitztest
 
       >>> a.base[3] = 67
-      >>> print a
+      >>> print(a)
       [ 0  1  2 67  4]
 
 You can get and set the individual values on ``xbob.blitz.array`` objects,
@@ -77,10 +77,10 @@ using the normal python indexing operatiors ``[]``:
    >>> a = xbob.blitz.array(2, 'float64')
    >>> a[0] = 3.2
    >>> a[1] = 6.14
-   >>> print a
+   >>> print(a)
    [ 3.2   6.14]
    >>> t = a[1]
-   >>> print t
+   >>> print(t)
    6.14
 
 You can convert ``xbob.blitz.array`` objects into either (shallow)
@@ -92,11 +92,11 @@ You can convert ``xbob.blitz.array`` objects into either (shallow)
    >>> a[0] = complex(3,4)
    >>> a[1] = complex(2,2)
    >>> npy = a.as_ndarray()
-   >>> print npy
+   >>> print(npy)
    [ 3.+4.j  2.+2.j]
    >>> id(npy.base) == id(a)
    True
-   >>> print npy.flags.owndata
+   >>> print(npy.flags.owndata)
    False
 
 You can detach the :py:class:`numpy.ndarray` from the
@@ -107,7 +107,7 @@ You can detach the :py:class:`numpy.ndarray` from the
    >>> npy_copy = npy.copy()
    >>> npy_copy.base is None
    True
-   >>> print npy_copy.flags.owndata
+   >>> print(npy_copy.flags.owndata)
    True
 
 You can use ``xbob.blitz.array`` anywhere a :py:class:`numpy.ndarray` is
@@ -122,7 +122,7 @@ conversion path to generate a :py:class:`numpy.ndarray`.
    >>> a = xbob.blitz.array(2, float)
    >>> a[0] = 3
    >>> a[1] = 4
-   >>> print numpy.mean(a)
+   >>> print(numpy.mean(a))
    3.5
 
 Reference
