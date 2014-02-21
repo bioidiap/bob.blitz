@@ -19,8 +19,9 @@
  * After this point, no need to worry about DECREF'ing x anymore. 
  * You can still use `x' inside your code, or protected_x.get().
  */
+template <typename T> void __decref(T* p) { Py_DECREF(p); }
 template <typename T> boost::shared_ptr<T> make_safe(T* o) {
-  return boost::shared_ptr<T>(o, [&](T* p){Py_DECREF(p);});
+  return boost::shared_ptr<T>(o, &__decref<T>);
 }
 
 /**
@@ -33,6 +34,7 @@ template <typename T> boost::shared_ptr<T> make_safe(T* o) {
  * You can still use `x' inside your code, or protected_x.get(). Note
  * `x' may be NULL with this method.
  */
+template <typename T> void __xdecref(T* p) { Py_XDECREF(p); }
 template <typename T> boost::shared_ptr<T> make_xsafe(T* o) {
-  return boost::shared_ptr<T>(o, [&](T* p){Py_XDECREF(p);});
+  return boost::shared_ptr<T>(o, &__xdecref<T>);
 }
