@@ -58,7 +58,7 @@ You can build a new ``xbob.blitz.array`` using one of two possible ways:
       >>> a.base
       array([0, 1, 2, 3, 4])
       >>> type(a.base)
-      <type 'numpy.ndarray'>
+      <... 'numpy.ndarray'>
 
    Because this is a shallow copy, any modifications done in any of the two
    arrays will be reflected in the other:
