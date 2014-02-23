@@ -12,6 +12,9 @@ import numpy
 from . import array as bzarray
 from . import as_blitz
 
+import platform
+IS_32BIT = platform.architecture()[0] == '32bit'
+
 def test_array_from_scratch():
 
   bz = bzarray(10, dtype='uint8')
@@ -229,7 +232,7 @@ def test_s64d2_indirect_array():
 
 @nose.tools.raises(ValueError)
 def test_s64d2_cannot_resize_shallow():
-  
+
   bz = bzarray((2,2), dtype='int64')
   bz[0,0] = 1
   bz[0,1] = 2
@@ -280,11 +283,21 @@ def test_detects_unsupported_dims():
 def test_can_use_int_as_dtype():
 
   bz = bzarray(2, int)
-  nose.tools.eq_(bz.dtype, numpy.int64)
+  if IS_32BIT: nose.tools.eq_(bz.dtype, numpy.int32)
+  else: nose.tools.eq_(bz.dtype, numpy.int64)
   bz[0] = 33
-  nose.tools.eq_(bz[0].dtype, numpy.int64)
+  if IS_32BIT: nose.tools.eq_(bz[0].dtype, numpy.int32)
+  else: nose.tools.eq_(bz[0].dtype, numpy.int64)
   nose.tools.eq_(bz[0], 33)
 
+def skip_if_at_32bit_arch(func):
+  from nose.plugins.skip import SkipTest
+  def _():
+    if IS_32BIT: raise SkipTest('test makes no sense on 32-bit platforms')
+  _.__name__ = func.__name__
+  return _
+
+@skip_if_at_32bit_arch
 def test_can_use_float128_as_dtype():
 
   bz = bzarray(2, 'float128')
@@ -293,6 +306,7 @@ def test_can_use_float128_as_dtype():
   nose.tools.eq_(bz[1].dtype, numpy.float128)
   nose.tools.eq_(bz[1], 0.125)
 
+@skip_if_at_32bit_arch
 def test_can_use_complex256_as_dtype():
 
   bz = bzarray(2, 'complex256')
@@ -314,7 +328,7 @@ def test_re_wrapping_ndarray():
   bz = as_blitz(nd)
   nd2 = bz.as_ndarray()
   nose.tools.eq_(id(nd), id(nd2))
-  
+
 def test_can_use_bz_with_npy_ops():
 
   bz = bzarray(2, numpy.uint64)
@@ -345,9 +359,11 @@ def test_as_ndarray_nocast():
   bz[0,1] = 3
   bz[1,0] = 2
   bz[1,1] = 4
-  nd = bz.as_ndarray(numpy.int64)
+  if IS_32BIT: nd = bz.as_ndarray(numpy.int32)
+  else: nd = bz.as_ndarray(numpy.int64)
   nose.tools.eq_(nd.base, bz)
-  nose.tools.eq_(nd.dtype, numpy.int64)
+  if IS_32BIT: nose.tools.eq_(nd.dtype, numpy.int32)
+  else: nose.tools.eq_(nd.dtype, numpy.int64)
   nose.tools.eq_(nd[0,0], nd[0,0])
   nose.tools.eq_(nd[0,1], nd[0,1])
   nose.tools.eq_(nd[1,0], nd[1,0])
