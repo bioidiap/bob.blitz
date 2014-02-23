@@ -47,7 +47,7 @@ You can build a new ``xbob.blitz.array`` using one of two possible ways:
       >>> print(a)
       [0 1 2 3 4]
       >>> a.dtype
-      dtype('int64')
+      dtype('int...')
 
 
    The shallow copied ``ndarray`` remains visible through the returned object's
