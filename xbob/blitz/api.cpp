@@ -896,8 +896,8 @@ static int ndarray_behaves (PyArrayObject* o) {
     case NPY_COMPLEX128:
 #ifdef NPY_COMPLEX256
     case NPY_COMPLEX256:
-      break;
 #endif
+      break;
     default:
       return 0;
   }
@@ -1181,8 +1181,8 @@ int PyBlitzArray_TypenumConverter(PyObject* o, int** type_num) {
     case NPY_COMPLEX128:
 #ifdef NPY_COMPLEX256
     case NPY_COMPLEX256:
-      break;
 #endif
+      break;
     default:
     {
       PyErr_Format(PyExc_NotImplementedError, "no support for using type number %d in %s", (**type_num), Py_TYPE(o)->tp_name);
