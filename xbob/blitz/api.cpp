@@ -832,9 +832,9 @@ PyObject* PyBlitzArray_AsNumpyArray(PyBlitzArrayObject* o, PyArray_Descr* newtyp
       dtype,
       o->ndim, o->shape, o->stride, o->data,
 #     if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
-      NPY_ARRAY_BEHAVED,
+      NPY_ARRAY_CARRAY,
 #     else
-      NPY_BEHAVED,
+      NPY_CARRAY,
 #     endif
       0);
 
@@ -954,9 +954,9 @@ PyObject* PyBlitzArray_NUMPY_WRAP(PyObject* bz) {
       dtype,
       o->ndim, o->shape, o->stride, o->data,
 #     if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
-      NPY_ARRAY_BEHAVED,
+      NPY_ARRAY_CARRAY,
 #     else
-      NPY_BEHAVED,
+      NPY_CARRAY,
 #     endif
       0);
 
