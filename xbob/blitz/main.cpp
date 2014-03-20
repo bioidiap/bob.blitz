@@ -54,22 +54,6 @@ static PyMethodDef module_methods[] = {
     {0}  /* Sentinel */
 };
 
-static PyObject* build_version_dictionary() {
-
-  PyObject* retval = PyDict_New();
-  if (!retval) return 0;
-  auto retval_ = make_safe(retval);
-
-  PyObject* v = Py_BuildValue("s", BLITZ_VERSION);
-  if (!v) return 0;
-  auto v_ = make_safe(v);
-
-  if (PyDict_SetItemString(retval, "Blitz++", v) != 0) return 0;
-
-  Py_INCREF(retval);
-  return retval;
-}
-
 int PyBlitzArray_APIVersion = XBOB_BLITZ_API_VERSION;
 
 PyDoc_STRVAR(module_docstr, "Blitz++ array definition and generic functions");
@@ -80,7 +64,7 @@ static PyModuleDef module_definition = {
   XBOB_EXT_MODULE_NAME,
   module_docstr,
   -1,
-  module_methods, 
+  module_methods,
   0, 0, 0, 0
 };
 #endif
@@ -99,13 +83,10 @@ static PyObject* create_module (void) {
   auto m_ = make_safe(m); ///< protects against early returns
 
   /* register version numbers and constants */
-  if (PyModule_AddIntConstant(m, "__api_version__", XBOB_BLITZ_API_VERSION) < 0) 
+  if (PyModule_AddIntConstant(m, "__api_version__", XBOB_BLITZ_API_VERSION) < 0)
     return 0;
   if (PyModule_AddStringConstant(m, "__version__", XBOB_EXT_MODULE_VERSION) < 0)
     return 0;
-  PyObject* versions = build_version_dictionary();
-  if (!versions) return 0;
-  if (PyModule_AddObject(m, "versions", versions) < 0) return 0;
 
   /* register the type object to python */
   Py_INCREF(&PyBlitzArray_Type);
@@ -146,7 +127,7 @@ static PyObject* create_module (void) {
   PyBlitzArray_API[PyBlitzArray_AsNumpyArray_NUM] = (void *)PyBlitzArray_AsNumpyArray;
   PyBlitzArray_API[PyBlitzArray_FromNumpyArray_NUM] = (void *)PyBlitzArray_FromNumpyArray;
   PyBlitzArray_API[PyBlitzArray_NUMPY_WRAP_NUM] = (void *)PyBlitzArray_NUMPY_WRAP;
-  
+
   // Converter Functions for PyArg_Parse* family
   PyBlitzArray_API[PyBlitzArray_Converter_NUM] = (void *)PyBlitzArray_Converter;
   PyBlitzArray_API[PyBlitzArray_BehavedConverter_NUM] = (void *)PyBlitzArray_BehavedConverter;
@@ -161,7 +142,7 @@ static PyObject* create_module (void) {
 
   /* defines the PyCapsule */
 
-  PyObject* c_api_object = PyCapsule_New((void *)PyBlitzArray_API, 
+  PyObject* c_api_object = PyCapsule_New((void *)PyBlitzArray_API,
       XBOB_EXT_MODULE_PREFIX "." XBOB_EXT_MODULE_NAME "._C_API", 0);
 
 #else

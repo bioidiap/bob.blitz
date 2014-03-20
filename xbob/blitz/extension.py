@@ -1,7 +1,7 @@
 #!/usr/bin/env python
 # vim: set fileencoding=utf-8 :
 # Andre Anjos <andre.anjos@idiap.ch>
-# Mon 18 Nov 21:38:19 2013 
+# Mon 18 Nov 21:38:19 2013
 
 """Extension building for using this package
 """
@@ -28,9 +28,9 @@ class Extension(XbobExtension):
     options.
     """
 
-    require = 'blitz>=0.10'
+    require = ['blitz>=0.10', 'boost']
 
-    kwargs.setdefault('packages', []).append(require)
+    kwargs.setdefault('packages', []).extend(require)
 
     numpy_include = ['-isystem', numpy.get_include()]
     kwargs.setdefault('extra_compile_args', []).extend(numpy_include)

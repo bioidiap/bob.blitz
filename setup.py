@@ -28,7 +28,7 @@ if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
 # Pkg-config requirements
 packages = [
     'blitz >= 0.10',
-    'boost', # any version
+    'boost', # any version will do, only need headers
     ]
 
 # Define package version

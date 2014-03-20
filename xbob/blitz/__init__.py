@@ -5,8 +5,10 @@
 
 """Blitz++ Array bindings for Python"""
 
-from ._library import array, as_blitz, __version__, __api_version__, versions
+from ._library import array, as_blitz
 from . import version
+from .version import module as __version__
+from .version import api as __api_version__
 
 def get_include():
   """Returns the directory containing the C/C++ API include directives"""

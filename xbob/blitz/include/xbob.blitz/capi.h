@@ -28,7 +28,7 @@ extern "C" {
 #define XBOB_BLITZ_FULL_NAME "xbob.blitz._library"
 
 /* Define API version */
-#define XBOB_BLITZ_API_VERSION 0x0000
+#define XBOB_BLITZ_API_VERSION 0x0200
 
 /* Maximum number of dimensions supported at this library */
 #define XBOB_BLITZ_MAXDIMS 4
