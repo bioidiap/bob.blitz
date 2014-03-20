@@ -25,8 +25,14 @@ from distutils.version import StrictVersion
 if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
   define_macros.append(("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"))
 
+# Pkg-config requirements
+packages = [
+    'blitz >= 0.10',
+    'boost', # any version
+    ]
+
 # Define package version
-version = '0.0.1'
+version = '2.0.0a0'
 
 # The only thing we do in this file is to call the setup() function with all
 # parameters that define our package.
@@ -56,20 +62,28 @@ setup(
     ],
 
     ext_modules = [
+      Extension("xbob.blitz.version",
+        [
+          "xbob/blitz/version.cpp",
+          ],
+        packages=packages,
+        version=version,
+        define_macros=define_macros,
+        include_dirs=[package_dir],
+        extra_compile_args=extra_compile_args,
+        ),
       Extension("xbob.blitz._library",
         [
           "xbob/blitz/api.cpp",
           "xbob/blitz/array.cpp",
           "xbob/blitz/main.cpp",
           ],
-        packages=[
-          'blitz >= 0.10',
-          ],
+        packages=packages,
         version=version,
         define_macros=define_macros,
         include_dirs=[package_dir],
         extra_compile_args=extra_compile_args,
-        )
+        ),
       ],
 
     classifiers = [

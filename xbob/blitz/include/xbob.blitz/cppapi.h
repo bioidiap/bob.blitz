@@ -1,6 +1,6 @@
 /**
  * @author Andre Anjos <andre.anjos@idiap.ch>
- * @date Thu 10 Oct 16:02:58 2013 
+ * @date Thu 10 Oct 16:02:58 2013
  *
  * @brief These are C++ extensions in the form of templates that are extras for
  * transforming C++ objects into our Pythonic blitz::Array<> layer.
@@ -18,7 +18,7 @@
 #include <typeinfo>
 
 template <typename T> int PyBlitzArrayCxx_CToTypenum() {
-  
+
   const std::type_info& ttype = typeid(T);
 
   if (ttype == typeid(bool))          return NPY_BOOL;
@@ -101,23 +101,23 @@ template <typename T> PyObject* PyBlitzArrayCxx_FromCScalar(T v) {
   PyArray_Descr* descr = 0;
   const std::type_info& ttype = typeid(T);
 
-  if (ttype == typeid(bool)) 
+  if (ttype == typeid(bool))
     descr = PyArray_DescrFromType(NPY_BOOL);
-  else if (ttype == typeid(uint8_t)) 
+  else if (ttype == typeid(uint8_t))
     descr = PyArray_DescrFromType(NPY_UINT8);
   else if (ttype == typeid(uint16_t))
     descr = PyArray_DescrFromType(NPY_UINT16);
-  else if (ttype == typeid(uint32_t)) 
+  else if (ttype == typeid(uint32_t))
     descr = PyArray_DescrFromType(NPY_UINT32);
-  else if (ttype == typeid(uint64_t)) 
+  else if (ttype == typeid(uint64_t))
     descr = PyArray_DescrFromType(NPY_UINT64);
-  else if (ttype == typeid(int8_t)) 
+  else if (ttype == typeid(int8_t))
     descr = PyArray_DescrFromType(NPY_INT8);
-  else if (ttype == typeid(int16_t)) 
+  else if (ttype == typeid(int16_t))
     descr = PyArray_DescrFromType(NPY_INT16);
-  else if (ttype == typeid(int32_t)) 
+  else if (ttype == typeid(int32_t))
     descr = PyArray_DescrFromType(NPY_INT32);
-  else if (ttype == typeid(int64_t)) 
+  else if (ttype == typeid(int64_t))
     descr = PyArray_DescrFromType(NPY_INT64);
   else if (ttype == typeid(float))
     descr = PyArray_DescrFromType(NPY_FLOAT32);
@@ -155,7 +155,7 @@ template <typename T> PyObject* PyBlitzArrayCxx_FromCScalar(T v) {
   return retval;
 }
 
-template <typename T, int N> 
+template <typename T, int N>
 int PyBlitzArrayCxx_IsBehaved(const blitz::Array<T,N>& a) {
 
   if(!a.isStorageContiguous()) return 0;
@@ -169,7 +169,7 @@ int PyBlitzArrayCxx_IsBehaved(const blitz::Array<T,N>& a) {
   return 1;
 }
 
-template <typename T, int N> 
+template <typename T, int N>
 PyObject* PyBlitzArrayCxx_NewFromConstArray(const blitz::Array<T,N>& a) {
 
   if (!PyBlitzArrayCxx_IsBehaved(a)) {
