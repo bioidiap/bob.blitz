@@ -13,8 +13,8 @@ objects which allows for type-free manipulation of those typed objects in
 Python code. It also offers a C and a `C++`_ API for efficiently converting
 between :py:class:`numpy.ndarray` and the `Blitz++`_ C++ or Pythonic API.
 
-User Guide
-----------
+Documentation
+-------------
 
 .. toctree::
    :maxdepth: 2
