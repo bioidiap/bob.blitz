@@ -57,13 +57,13 @@ static PyObject* compiler_version() {
   f % BOOST_PP_STRINGIZE(__GNUC__);
   f % BOOST_PP_STRINGIZE(__GNUC_MINOR__);
   f % BOOST_PP_STRINGIZE(__GNUC_PATCHLEVEL__);
-  return Py_BuildValue("ss", "gcc", f.str().c_str());
+  return Py_BuildValue("{ssss}", "name", "gcc", "version", f.str().c_str());
 # elif defined(__llvm__) && !defined(__clang__)
-  return Py_BuildValue("ss", "llvm-gcc", __VERSION__);
+  return Py_BuildValue("{ssss}", "name", "llvm-gcc", "version", __VERSION__);
 # elif defined(__clang__)
-  return Py_BuildValue("ss", "clang", __clang_version__);
+  return Py_BuildValue("{ssss}", "name", "clang", "version", __clang_version__);
 # else
-  return Py_BuildValue("s", "unsupported");
+  return Py_BuildValue("{ssss}", "name", "unsupported", "version", "unknown");
 # endif
 }
 
@@ -82,7 +82,8 @@ static PyObject* python_version() {
  * Numpy version
  */
 static PyObject* numpy_version() {
-  return Py_BuildValue("s", BOOST_PP_STRINGIZE(NPY_VERSION));
+  return Py_BuildValue("{ssss}", "abi", BOOST_PP_STRINGIZE(NPY_VERSION),
+      "api", BOOST_PP_STRINGIZE(NPY_API_VERSION));
 }
 
 static PyObject* build_version_dictionary() {
