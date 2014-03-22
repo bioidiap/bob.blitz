@@ -17,7 +17,6 @@ def get_include():
 
   return pkg_resources.resource_filename(__name__, 'include')
 
-
 def get_config():
   """Returns a string containing the configuration information.
   """
