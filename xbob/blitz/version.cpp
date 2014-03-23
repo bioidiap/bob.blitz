@@ -98,6 +98,7 @@ static PyObject* build_version_dictionary() {
   if (!dict_steal(retval, "Python", python_version())) return 0;
   if (!dict_steal(retval, "NumPy", numpy_version())) return 0;
 
+  Py_INCREF(retval);
   return retval;
 }
 
