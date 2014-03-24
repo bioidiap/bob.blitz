@@ -4,6 +4,14 @@
 
 .. image:: https://travis-ci.org/bioidiap/xbob.blitz.svg?branch=master
    :target: https://travis-ci.org/bioidiap/xbob.blitz
+.. image:: https://coveralls.io/repos/bioidiap/xbob.blitz/badge.png
+   :target: https://coveralls.io/r/bioidiap/xbob.blitz
+.. image:: http://img.shields.io/github/tag/bioidiap/xbob.blitz.png
+   :target: https://github.com/bioidiap/xbob.blitz
+.. image:: http://img.shields.io/pypi/v/xbob.blitz.png
+   :target: https://pypi.python.org/pypi/xbob.blitz
+.. image:: http://img.shields.io/pypi/dm/xbob.blitz.png
+   :target: https://pypi.python.org/pypi/xbob.blitz
 
 ====================================
  Python bindings for Blitz++ Arrays
