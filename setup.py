@@ -41,7 +41,7 @@ setup(
     name='xbob.blitz',
     version=version,
     description='Bindings for Blitz++ (a C++ array template library)',
-    url='http://github.com/anjos/blitz.array',
+    url='http://github.com/bioidiap/xbob.blitz',
     license='BSD',
     author='Andre Anjos',
     author_email='andre.anjos@idiap.ch',
