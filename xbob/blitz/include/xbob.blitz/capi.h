@@ -203,8 +203,12 @@ typedef struct {
 #define PyBlitzArray_TypenumAsString_RET const char*
 #define PyBlitzArray_TypenumAsString_PROTO (int typenum)
 
+#define PyBlitzArray_Cast_NUM 29
+#define PyBlitzArray_Cast_RET PyObject*
+#define PyBlitzArray_Cast_PROTO (PyBlitzArrayObject* o, int typenum)
+
 /* Total number of C API pointers */
-#define PyBlitzArray_API_pointers 29
+#define PyBlitzArray_API_pointers 30
 
 #ifdef XBOB_BLITZ_MODULE
 
@@ -294,6 +298,8 @@ typedef struct {
  *************/
 
   PyBlitzArray_TypenumAsString_RET PyBlitzArray_TypenumAsString PyBlitzArray_TypenumAsString_PROTO;
+
+  PyBlitzArray_Cast_RET PyBlitzArray_Cast PyBlitzArray_Cast_PROTO;
 
 #else
 
@@ -390,6 +396,8 @@ typedef struct {
  *************/
 
 #define PyBlitzArray_TypenumAsString (*(PyBlitzArray_TypenumAsString_RET (*)PyBlitzArray_TypenumAsString_PROTO) PyBlitzArray_API[PyBlitzArray_TypenumAsString_NUM])
+
+#define PyBlitzArray_Cast (*(PyBlitzArray_Cast_RET (*)PyBlitzArray_Cast_PROTO) PyBlitzArray_API[PyBlitzArray_Cast_NUM])
 
 # if !defined(NO_IMPORT_ARRAY)
 

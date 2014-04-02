@@ -63,7 +63,7 @@ on its contents. You can also deploy objects of this class wherever\n\
 /**
  * Formal initialization of an Array object
  */
-static int PyBlitzArray__init__(PyBlitzArrayObject* self, PyObject *args,
+static int PyBlitzArray_init(PyBlitzArrayObject* self, PyObject *args,
     PyObject* kwds) {
 
   /* Parses input arguments in a single shot */
@@ -187,7 +187,7 @@ static PyMappingMethods PyBlitzArray_mapping = {
 
 PyDoc_STRVAR(s_as_ndarray_str, "as_ndarray");
 PyDoc_STRVAR(s_private_array_str, "__array__");
-PyDoc_STRVAR(s_private_array__doc__,
+PyDoc_STRVAR(s_private_array_doc,
 "x.__array__([dtype]) -> numpy.ndarray\n\
 x.as_ndarray([dtype]) -> numpy.ndarray\n\
 \n\
@@ -213,45 +213,77 @@ static PyObject* PyBlitzArray_AsNumpyArrayPrivate(PyBlitzArrayObject* self,
 
 }
 
+PyDoc_STRVAR(s_cast_str, "cast");
+PyDoc_STRVAR(s_cast_doc,
+"x.cast(dtype) -> blitz array\n\
+\n\
+Casts an existing array into a (possibly) different data type,\n\
+without changing its shape. If the data type matches the current\n\
+array's data type, then a new view to the same array is returned.\n\
+Otherwise, a new array is allocated and returned.\n\
+");
+
+static PyObject* PyBlitzArray_SelfCast(PyBlitzArrayObject* self, PyObject* args, PyObject* kwds) {
+
+  /* Parses input arguments in a single shot */
+  static const char* const_kwlist[] = {"dtype", 0};
+  static char** kwlist = const_cast<char**>(const_kwlist);
+
+  int type_num = NPY_NOTYPE;
+  int* type_num_p = &type_num;
+
+  if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
+        &PyBlitzArray_TypenumConverter, &type_num_p)) return 0;
+
+  return PyBlitzArray_Cast(self, type_num);
+
+}
+
 static PyMethodDef PyBlitzArray_methods[] = {
     {
       s_as_ndarray_str,
       (PyCFunction)PyBlitzArray_AsNumpyArrayPrivate,
       METH_VARARGS|METH_KEYWORDS,
-      s_private_array__doc__
+      s_private_array_doc
     },
     {
       s_private_array_str,
       (PyCFunction)PyBlitzArray_AsNumpyArrayPrivate,
       METH_VARARGS|METH_KEYWORDS,
-      s_private_array__doc__
+      s_private_array_doc
+    },
+    {
+      s_cast_str,
+      (PyCFunction)PyBlitzArray_SelfCast,
+      METH_VARARGS|METH_KEYWORDS,
+      s_cast_doc
     },
     {0}  /* Sentinel */
 };
 
 /* Property API */
 PyDoc_STRVAR(s_shape_str, "shape");
-PyDoc_STRVAR(s_shape__doc__,
+PyDoc_STRVAR(s_shape_doc,
 "A tuple indicating the shape of this array (in **elements**)"
 );
 
 PyDoc_STRVAR(s_stride_str, "stride");
-PyDoc_STRVAR(s_stride__doc__,
+PyDoc_STRVAR(s_stride_doc,
 "A tuple indicating the strides of this array (in **bytes**)"
 );
 
 PyDoc_STRVAR(s_dtype_str, "dtype");
-PyDoc_STRVAR(s_dtype__doc__,
+PyDoc_STRVAR(s_dtype_doc,
 "The :py:class:`numpy.dtype` for every element in this array"
 );
 
 PyDoc_STRVAR(s_writeable_str, "writeable");
-PyDoc_STRVAR(s_writeable__doc__,
+PyDoc_STRVAR(s_writeable_doc,
 "A flag, indicating if this array is writeable"
 );
 
 PyDoc_STRVAR(s_base_str, "base");
-PyDoc_STRVAR(s_base__doc__,
+PyDoc_STRVAR(s_base_doc,
 "If the memory of this array is borrowed from some other object, this is it"
 );
 
@@ -260,35 +292,35 @@ static PyGetSetDef PyBlitzArray_getseters[] = {
       s_dtype_str,
       (getter)PyBlitzArray_PyDTYPE,
       0,
-      s_dtype__doc__,
+      s_dtype_doc,
       0,
     },
     {
       s_shape_str,
       (getter)PyBlitzArray_PySHAPE,
       0,
-      s_shape__doc__,
+      s_shape_doc,
       0,
     },
     {
       s_stride_str,
       (getter)PyBlitzArray_PySTRIDE,
       0,
-      s_stride__doc__,
+      s_stride_doc,
       0,
     },
     {
       s_writeable_str,
       (getter)PyBlitzArray_PyWRITEABLE,
       0,
-      s_writeable__doc__,
+      s_writeable_doc,
       0,
     },
     {
       s_base_str,
       (getter)PyBlitzArray_PyBASE,
       0,
-      s_base__doc__,
+      s_base_doc,
       0,
     },
     {0}  /* Sentinel */
@@ -421,7 +453,7 @@ PyTypeObject PyBlitzArray_Type = {
     0,                                          /* tp_descr_get */
     0,                                          /* tp_descr_set */
     0,                                          /* tp_dictoffset */
-    (initproc)PyBlitzArray__init__,             /* tp_init */
+    (initproc)PyBlitzArray_init,                /* tp_init */
     0,                                          /* tp_alloc */
     PyBlitzArray_New,                           /* tp_new */
 };

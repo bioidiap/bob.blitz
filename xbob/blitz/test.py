@@ -368,3 +368,19 @@ def test_as_ndarray_nocast():
   nose.tools.eq_(nd[0,1], nd[0,1])
   nose.tools.eq_(nd[1,0], nd[1,0])
   nose.tools.eq_(nd[1,1], nd[1,1])
+
+def test_array_cast():
+
+  bz = bzarray((2,2), float)
+  bz[0,0] = 1.
+  bz[0,1] = 3.14
+  bz[1,0] = 2.27
+  bz[1,1] = 4.05
+  bz2 = bz.cast(int)
+  if IS_32BIT: nose.tools.eq_(bz2.dtype, numpy.int32)
+  else: nose.tools.eq_(bz2.dtype, numpy.int64)
+  nose.tools.eq_(bz2[0,0], 1)
+  nose.tools.eq_(bz2[0,1], 3)
+  nose.tools.eq_(bz2[1,0], 2)
+  nose.tools.eq_(bz2[1,1], 4)
+

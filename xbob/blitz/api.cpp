@@ -7,6 +7,7 @@
 
 #define XBOB_BLITZ_MODULE
 #include <xbob.blitz/cppapi.h>
+#include <xbob.blitz/cleanup.h>
 #include <algorithm>
 
 /*******************
@@ -821,7 +822,13 @@ PyObject* PyBlitzArray_AsNumpyArray(PyBlitzArrayObject* o, PyArray_Descr* newtyp
 
   // if o->base is a numpy array, return it
   if (o->base && PyArray_Check(o->base)) {
-    if (newtype) return PyArray_FromArray(reinterpret_cast<PyArrayObject*>(o->base), newtype, 0);
+    if (newtype) return PyArray_FromArray(reinterpret_cast<PyArrayObject*>(o->base), newtype,
+#       if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
+        NPY_ARRAY_FORCECAST
+#       else
+        NPY_FORCECAST
+#       endif
+        );
     Py_INCREF(o->base);
     return o->base;
   }
@@ -855,7 +862,13 @@ PyObject* PyBlitzArray_AsNumpyArray(PyBlitzArrayObject* o, PyArray_Descr* newtyp
   // if newtype was specified and the types are not equivalent, cast
   if (newtype && !PyArray_EquivTypenums(newtype->type_num, o->type_num)) {
     PyObject* new_retval = PyArray_FromArray(reinterpret_cast<PyArrayObject*>(retval),
-        newtype, 0);
+        newtype,
+#       if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
+        NPY_ARRAY_FORCECAST
+#       else
+        NPY_FORCECAST
+#       endif
+        );
     Py_DECREF(retval);
     retval = new_retval;
   }
@@ -1303,4 +1316,19 @@ const char* PyBlitzArray_TypenumAsString (int type_num) {
       return 0;
   }
 
+}
+
+PyObject* PyBlitzArray_Cast (PyBlitzArrayObject* o, int type_num) {
+  if (o->type_num == type_num) {
+    auto pyo = (PyObject*)o;
+    Py_INCREF(pyo);
+    return pyo;
+  }
+
+  //non-matching type has been found, just cast using the NumPy C-API
+  PyObject* npy = PyBlitzArray_AsNumpyArray(o, PyArray_DescrFromType(type_num));
+  if (!npy) return 0;
+  PyObject* retval = PyBlitzArray_FromNumpyArray((PyArrayObject*)npy);
+  Py_DECREF(npy);
+  return retval;
 }

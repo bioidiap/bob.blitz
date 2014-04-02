@@ -400,14 +400,13 @@ Converter Functions for PyArg_Parse* family
 
 .. c:function:: int PyBlitzArray_TypenumConverter (PyObject* o, int** type_num)
 
-   Converts any compatible sequence into a Numpy integer type number. This
-   method is supposed to be used with ``PyArg_ParseTupleAndKeywords`` and
-   derivatives.
+   Converts any compatible value into a Numpy integer type number. This method
+   is supposed to be used with ``PyArg_ParseTupleAndKeywords`` and derivatives.
 
    Parameters are:
 
    ``o``
-     The input object to be converted into a C-shape
+     The input object to be converted into a type number
 
    ``type_num``
       A preallocated (double) address for storing the type on successful
@@ -423,6 +422,21 @@ Other Utilities
 
    Converts from numpy type_num to a string representation
 
+
+.. c:function:: PyObject* PyBlitzArray_Cast (PyBlitzArrayObject* o, int typenum)
+
+   Casts a given Blitz++ Array into another data type, returns a **new
+   reference**. If the underlying Blitz++ Array is already of the given type,
+   then just increments the reference counter and returns.
+
+   If a problem is detected (e.g. the impossibility to cast to the desired
+   type), then this function will return ``NULL``. You must check the return
+   value and then take the appropriate action after calling this function.
+
+   .. note::
+
+      Casting, as operated by this function, may incur in precision loss
+      between the originating type and the destination type.
 
 C++ API
 -------
