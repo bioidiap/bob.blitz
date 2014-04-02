@@ -29,4 +29,4 @@ script:
   - "./bin/sphinx-build -b doctest doc sphinx"
   - "./bin/sphinx-build -b html doc sphinx"
 after_success:
-  - "coveralls --build-root=`pwd`"
+  - "coveralls --build-root=`pwd` --exclude=src"
