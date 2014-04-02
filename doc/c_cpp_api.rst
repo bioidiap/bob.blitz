@@ -286,6 +286,9 @@ Construction and Destruction
    of the data area. ``writeable`` indicates if the resulting array should be
    writeble (set it to ``1``), or read-only (set it to ``0``).
 
+   The memory area pointed by ``data`` is stolen from the user, which should
+   not delete it anymore.
+
 
 To/From Numpy Converters
 ========================
