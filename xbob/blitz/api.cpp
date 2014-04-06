@@ -1312,8 +1312,10 @@ const char* PyBlitzArray_TypenumAsString (int type_num) {
       }
 #endif
     default:
-      PyErr_Format(PyExc_NotImplementedError, "no support for converting type number %d to string", type_num);
-      return 0;
+      {
+        static char s[] = "unsupported";
+        return s;
+      }
   }
 
 }
