@@ -8,6 +8,8 @@
  Blitz++/Python Arrays
 =======================
 
+.. todolist::
+
 This module offers its users a simple pythonic wrapper over `Blitz++`_ array
 objects which allows for type-free manipulation of those typed objects in
 Python code. It also offers a C and a `C++`_ API for efficiently converting
