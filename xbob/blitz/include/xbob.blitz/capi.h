@@ -167,7 +167,7 @@ typedef struct {
 #define PyBlitzArray_FromNumpyArray_RET PyObject*
 #define PyBlitzArray_FromNumpyArray_PROTO (PyArrayObject* o)
 
-#define PyBlitzArray_NUMPY_WRAP_NUM 21
+#define PyBlitzArray_NUMPY_WRAP_NUM 23
 #define PyBlitzArray_NUMPY_WRAP_RET PyObject*
 #define PyBlitzArray_NUMPY_WRAP_PROTO (PyObject* o)
 
@@ -175,23 +175,23 @@ typedef struct {
  * Converter Functions for PyArg_Parse* family *
  ***********************************************/
 
-#define PyBlitzArray_Converter_NUM 23
+#define PyBlitzArray_Converter_NUM 24
 #define PyBlitzArray_Converter_RET int
 #define PyBlitzArray_Converter_PROTO (PyObject* o, PyBlitzArrayObject** a)
 
-#define PyBlitzArray_BehavedConverter_NUM 24
+#define PyBlitzArray_BehavedConverter_NUM 25
 #define PyBlitzArray_BehavedConverter_RET int
 #define PyBlitzArray_BehavedConverter_PROTO (PyObject* o, PyBlitzArrayObject** a)
 
-#define PyBlitzArray_OutputConverter_NUM 25
+#define PyBlitzArray_OutputConverter_NUM 26
 #define PyBlitzArray_OutputConverter_RET int
 #define PyBlitzArray_OutputConverter_PROTO (PyObject* o, PyBlitzArrayObject** a)
 
-#define PyBlitzArray_IndexConverter_NUM 26
+#define PyBlitzArray_IndexConverter_NUM 27
 #define PyBlitzArray_IndexConverter_RET int
 #define PyBlitzArray_IndexConverter_PROTO (PyObject* o, PyBlitzArrayObject** shape)
 
-#define PyBlitzArray_TypenumConverter_NUM 27
+#define PyBlitzArray_TypenumConverter_NUM 28
 #define PyBlitzArray_TypenumConverter_RET int
 #define PyBlitzArray_TypenumConverter_PROTO (PyObject* o, int** type_num)
 
@@ -199,16 +199,16 @@ typedef struct {
  * Utilities *
  *************/
 
-#define PyBlitzArray_TypenumAsString_NUM 28
+#define PyBlitzArray_TypenumAsString_NUM 29
 #define PyBlitzArray_TypenumAsString_RET const char*
 #define PyBlitzArray_TypenumAsString_PROTO (int typenum)
 
-#define PyBlitzArray_Cast_NUM 29
+#define PyBlitzArray_Cast_NUM 30
 #define PyBlitzArray_Cast_RET PyObject*
 #define PyBlitzArray_Cast_PROTO (PyBlitzArrayObject* o, int typenum)
 
 /* Total number of C API pointers */
-#define PyBlitzArray_API_pointers 30
+#define PyBlitzArray_API_pointers 31
 
 #ifdef XBOB_BLITZ_MODULE
 
