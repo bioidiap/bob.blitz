@@ -473,6 +473,31 @@ Construction and Destruction
    array, without copying the data. Returns a new reference.
 
 
+.. cpp:function:: PyObject* PyBlitzArrayCxx_AsConstNumpy<T,N>(const blitz::Array<T,N>& a)
+
+   Builds a new read-only :py:class:`numpy.ndarray` object from the given Blitz++ array
+   without copying the data. Returns a new reference.
+
+   In fact, it actually calls two of the above mentioned functions :cpp:func:`PyBlitzArrayCxx_NewFromConstArray` and :cpp:func:`PyBlitzArray_NUMPY_WRAP`:
+
+   .. code-block:: c++
+
+      PyBlitzArray_NUMPY_WRAP(PyBlitzArrayCxx_NewFromConstArray(a));
+
+
+.. cpp:function:: PyObject* PyBlitzArrayCxx_AsNumpy<T,N>(blitz::Array<T,N>& a)
+
+   Builds a new writeable :py:class:`numpy.ndarray` object from the given Blitz++ array
+   without copying the data. Returns a new reference.
+
+   In fact, it actually calls two of the above mentioned functions :cpp:func:`PyBlitzArrayCxx_NewFromArray` and :cpp:func:`PyBlitzArray_NUMPY_WRAP`:
+
+   .. code-block:: c++
+
+      PyBlitzArray_NUMPY_WRAP(PyBlitzArrayCxx_NewFromArray(a));
+
+
+
 Other Utilities
 ===============
 
@@ -481,6 +506,39 @@ Other Utilities
    Casts a ``PyBlitzArrayObject`` to a specific ``blitz::Array<>`` type. Notice
    this is a brute-force cast. You are responsible for checking if that it is
    correct.
+
+
+.. cpp:function:: blitz::Array<T,N>* PyBlitzArrayCxx_AsBlitz(PyBlitzArrayObject* o, const char* name)
+
+   Casts a ``PyBlitzArrayObject`` to a specific ``blitz::Array<>`` type after checking that the dimensions and the data type of the underlying :cpp:type:`PyBlitzArrayObject` fits to the template parameters.
+   If the check fails, an Python error is set, using the given ``name`` parameter as the name of the object that was passed to the python function, **and** ``NULL`` **is returned**.
+   Hence, please check the result of this function for ``NULL``:
+
+   .. code-block:: c++
+
+      // ...
+
+      PyBlitzArrayObject* data;
+      if (!PyArg_ParseTupleAndKeywords(..., data, ...))
+        return NULL;
+
+      // use safe reference counting
+      auto _ = make_safe(data);
+
+      // get the blitz array; returns NULL on failure
+      blitz::Array<double,2>* array = PyBlitzArrayCxx_AsBlitz<double,2>(data, "data");
+
+      // check for NULL
+      if (!array)
+        // The error message has already been set, so we can simply return NULL
+        return NULL;
+
+      // ...
+
+   .. note:: If you need to check for several data types and/or dimensions, use the first version of this function and perform the checks by hand.
+
+   .. note:: This version of the function might be slightly slower than the first version.
+
 
 .. cpp:function:: int PyBlitzArrayCxx_CToTypenum<T>()
 

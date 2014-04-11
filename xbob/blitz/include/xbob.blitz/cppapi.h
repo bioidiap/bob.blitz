@@ -222,12 +222,59 @@ PyObject* PyBlitzArrayCxx_NewFromArray(blitz::Array<T,N>& a) {
   reinterpret_cast<PyBlitzArrayObject*>(retval)->writeable = 1;
 
   return retval;
-
 }
+
+/**
+ * Converts the given blitz::Array directly into a const numpy.ndarray that can be returned
+ * @param array  The array to convert
+ * @return A representation of the numpy.ndarray that can directly be returned (no Py_INCREF required)
+ */
+template<typename T, int N>
+PyObject* PyBlitzArrayCxx_AsConstNumpy(const blitz::Array<T,N>& array){
+  return PyBlitzArray_NUMPY_WRAP(PyBlitzArrayCxx_NewFromConstArray(array));
+}
+
+/**
+ * Converts the given blitz::Array directly into a numpy.ndarray that can be returned
+ * @param array  The array to convert
+ * @return A representation of the numpy.ndarray that can directly be returned (no Py_INCREF required)
+ */
+template<typename T, int N>
+PyObject* PyBlitzArrayCxx_AsNumpy(blitz::Array<T,N>& array){
+  return PyBlitzArray_NUMPY_WRAP(PyBlitzArrayCxx_NewFromArray(array));
+}
+
 
 template<typename T, int N>
 blitz::Array<T,N>* PyBlitzArrayCxx_AsBlitz(PyBlitzArrayObject* o) {
   return reinterpret_cast<blitz::Array<T,N>*>(o->bzarr);
+}
+
+
+/**
+ * Converts the given PyBlitzArrayObject into a blitz array,
+ * performing consistency checks and sets the error flags in case of problems
+ *
+ * @note    This function might be a bit slower than you checking for the right type yourself.
+ * @warning This function might return NULL, so **DON'T** dereference without checking!
+ *
+ * @param array  The python blitz array object to convert
+ * @param name   The name of the object; this will be used to set an appropriate error message in case of problems
+ * @return A representation of the numpy.ndarray that can directly be returned (no Py_INCREF required)
+ */
+template<typename T, int N>
+blitz::Array<T,N>* PyBlitzArrayCxx_AsBlitz(PyBlitzArrayObject* array, const char* name) {
+
+  // get the python type of the templated C++ type
+  int type_num = PyBlitzArrayCxx_CToTypenum<T>();
+  // perform the checks
+  if (array->type_num != type_num || array->ndim != N){
+    const char* type_num_name = PyBlitzArray_TypenumAsString(type_num);
+    PyErr_Format(PyExc_TypeError, "The parameter '%s' only supports %dD arrays of type '%s'", name, N, type_num_name);
+    return NULL;
+  }
+  // convert
+  return PyBlitzArrayCxx_AsBlitz<T,N>(array);
 }
 
 #endif /* XBOB_BLITZ_CPP_API_H */
