@@ -56,6 +56,10 @@ typedef struct {
 #define NUMPY16_API 0x00000006
 #define NUMPY14_API 0x00000004
 
+/*******************
+ * C API functions *
+ *******************/
+
 /* Enum defining entries in the function table */
 enum _PyBlitzArray_ENUM{
   PyBlitzArray_APIVersion_NUM = 0,
@@ -98,9 +102,9 @@ enum _PyBlitzArray_ENUM{
   PyBlitzArray_API_pointers
 };
 
-/*******************
- * C API functions *
- *******************/
+/**************
+ * Versioning *
+ **************/
 
 #define PyBlitzArray_APIVersion_TYPE int
 
