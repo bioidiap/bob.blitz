@@ -6,6 +6,9 @@
  * easier and other cleanup helpers.
  */
 
+#ifndef XBOB_BLITZ_CLEANUP_H
+#define XBOB_BLITZ_CLEANUP_H
+
 #include <Python.h>
 #include <boost/shared_ptr.hpp>
 #include <numpy/arrayobject.h>
@@ -38,3 +41,5 @@ template <typename T> void __xdecref(T* p) { Py_XDECREF(p); }
 template <typename T> boost::shared_ptr<T> make_xsafe(T* o) {
   return boost::shared_ptr<T>(o, &__xdecref<T>);
 }
+
+#endif /* XBOB_BLITZ_CLEANUP_H */
