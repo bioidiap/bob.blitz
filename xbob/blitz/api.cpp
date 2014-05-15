@@ -1063,7 +1063,9 @@ int PyBlitzArray_OutputConverter(PyObject* o, PyBlitzArrayObject** a) {
   // PyArray_OutputConverter() responds 'true' to PyArray_Check(), then
   // its reference count is not incremented. Therefore, we only need
   // to DECREF this guy if it is PyArray_Check() is 'false'.
-  if (!PyArray_Check(o)) Py_DECREF(ao);
+  if (!PyArray_Check(o)) {
+    Py_DECREF(ao);
+  }
 
   *a = reinterpret_cast<PyBlitzArrayObject*>(retval);
 
