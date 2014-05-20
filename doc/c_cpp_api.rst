@@ -42,12 +42,7 @@ the import function:
        return 0;
      }
 
-     if (import_xbob_io_base() < 0) {
-       PyErr_Print();
-       PyErr_SetString(PyExc_ImportError, "cannot import module");
-       return 0;
-     }
-
+     return m;
    }
 
 .. note::
