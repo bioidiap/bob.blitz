@@ -8,10 +8,10 @@
 
 import numpy
 from pkg_resources import resource_filename
-from xbob.extension import Extension as XbobExtension
+from bob.extension import Extension as BobExtension
 from distutils.version import StrictVersion
 
-class Extension(XbobExtension):
+class Extension(BobExtension):
   """Extension building with pkg-config packages and blitz.array.
 
   See the documentation for :py:class:`distutils.extension.Extension` for more
@@ -24,7 +24,7 @@ class Extension(XbobExtension):
     This extension adds ``blitz>=0.10`` as a requirement for extensions derived
     from this class.
 
-    See the help for :py:class:`xbob.extension.Extension` for more details on
+    See the help for :py:class:`bob.extension.Extension` for more details on
     options.
     """
 
@@ -39,7 +39,7 @@ class Extension(XbobExtension):
     kwargs.setdefault('include_dirs', []).append(self_include_dir)
 
     macros = [
-          ("PY_ARRAY_UNIQUE_SYMBOL", "XBOB_NUMPY_C_API"),
+          ("PY_ARRAY_UNIQUE_SYMBOL", "BOB_NUMPY_C_API"),
           ("NO_IMPORT_ARRAY", "1"),
           ]
 
@@ -49,4 +49,4 @@ class Extension(XbobExtension):
     kwargs.setdefault('define_macros', []).extend(macros)
 
     # Run the constructor for the base class
-    XbobExtension.__init__(self, *args, **kwargs)
+    BobExtension.__init__(self, *args, **kwargs)

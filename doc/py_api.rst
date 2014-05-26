@@ -6,22 +6,22 @@
 
 .. testsetup:: blitztest
 
-   import xbob.blitz
+   import bob.blitz
    import numpy
 
 ============
  User Guide
 ============
 
-You can build a new ``xbob.blitz.array`` using one of two possible ways:
+You can build a new ``bob.blitz.array`` using one of two possible ways:
 
 1. Use the array constructor:
 
    .. doctest:: blitztest
       :options: +NORMALIZE_WHITESPACE
 
-      >>> xbob.blitz.array((2,3), float)
-      xbob.blitz.array((2,3),'float64')
+      >>> bob.blitz.array((2,3), float)
+      bob.blitz.array((2,3),'float64')
 
 
   You should pass the array shape and a dtype convertible object that would
@@ -31,19 +31,19 @@ You can build a new ``xbob.blitz.array`` using one of two possible ways:
    .. doctest:: blitztest
       :options: +NORMALIZE_WHITESPACE +ELLIPSIS
 
-      >>> a = xbob.blitz.array((2,), 'uint8')
+      >>> a = bob.blitz.array((2,), 'uint8')
       >>> a[0] # doctest: +SKIP
       145
 
-2. Use the ``xbob.blitz.as_blitz`` generic converter. This function takes any
+2. Use the ``bob.blitz.as_blitz`` generic converter. This function takes any
    object that is convertible to a :py:class:`numpy.ndarray`, convert it to a
    behaved (C-order, memory aligned and contiguous) ``ndarray`` and then
-   shallow copy it as a new ``xbob.blitz.array``:
+   shallow copy it as a new ``bob.blitz.array``:
 
    .. doctest:: blitztest
 
-      >>> import xbob.blitz
-      >>> a = xbob.blitz.as_blitz(range(5))
+      >>> import bob.blitz
+      >>> a = bob.blitz.as_blitz(range(5))
       >>> print(a)
       [0 1 2 3 4]
       >>> a.dtype
@@ -69,12 +69,12 @@ You can build a new ``xbob.blitz.array`` using one of two possible ways:
       >>> print(a)
       [ 0  1  2 67  4]
 
-You can get and set the individual values on ``xbob.blitz.array`` objects,
+You can get and set the individual values on ``bob.blitz.array`` objects,
 using the normal python indexing operatiors ``[]``:
 
 .. doctest:: blitztest
 
-   >>> a = xbob.blitz.array(2, 'float64')
+   >>> a = bob.blitz.array(2, 'float64')
    >>> a[0] = 3.2
    >>> a[1] = 6.14
    >>> print(a)
@@ -83,12 +83,12 @@ using the normal python indexing operatiors ``[]``:
    >>> print(t)
    6.14
 
-You can convert ``xbob.blitz.array`` objects into either (shallow)
-:py:class:`numpy.ndarray` copies using :py:meth:`xbob.blitz.array.as_ndarray`.
+You can convert ``bob.blitz.array`` objects into either (shallow)
+:py:class:`numpy.ndarray` copies using :py:meth:`bob.blitz.array.as_ndarray`.
 
 .. doctest:: blitztest
 
-   >>> a = xbob.blitz.array(2, complex)
+   >>> a = bob.blitz.array(2, complex)
    >>> a[0] = complex(3,4)
    >>> a[1] = complex(2,2)
    >>> npy = a.as_ndarray()
@@ -100,7 +100,7 @@ You can convert ``xbob.blitz.array`` objects into either (shallow)
    False
 
 You can detach the :py:class:`numpy.ndarray` from the
-:py:class:`xbob.blitz.array`, by issuing a standard numpy copy:
+:py:class:`bob.blitz.array`, by issuing a standard numpy copy:
 
 .. doctest:: blitztest
 
@@ -110,16 +110,16 @@ You can detach the :py:class:`numpy.ndarray` from the
    >>> print(npy_copy.flags.owndata)
    True
 
-You can use ``xbob.blitz.array`` anywhere a :py:class:`numpy.ndarray` is
+You can use ``bob.blitz.array`` anywhere a :py:class:`numpy.ndarray` is
 expected.  In this case, :py:mod:`numpy` checks for the existence of an
 ``__array__`` method on the passed object and if that is available, calls it to
-get an array representation for the object. For ``xbob.blitz.array``, the
-:py:meth:`xbob.blitz.array.__array__` method chooses the fastest possible
+get an array representation for the object. For ``bob.blitz.array``, the
+:py:meth:`bob.blitz.array.__array__` method chooses the fastest possible
 conversion path to generate a :py:class:`numpy.ndarray`.
 
 .. doctest:: blitztest
 
-   >>> a = xbob.blitz.array(2, float)
+   >>> a = bob.blitz.array(2, float)
    >>> a[0] = 3
    >>> a[1] = 4
    >>> print(numpy.mean(a))
@@ -129,11 +129,11 @@ Reference
 ---------
 
 This section includes information for using the pure Python API of
-``xbob.blitz.array``. It is mainly intended as a test layer for the C and C++
+``bob.blitz.array``. It is mainly intended as a test layer for the C and C++
 API.
 
-.. autoclass:: xbob.blitz.array
+.. autoclass:: bob.blitz.array
 
-.. autofunction:: xbob.blitz.as_blitz
+.. autofunction:: bob.blitz.as_blitz
 
-.. autofunction:: xbob.blitz.get_include
+.. autofunction:: bob.blitz.get_include

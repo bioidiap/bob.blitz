@@ -5,9 +5,9 @@
  * @brief Implements some constructions exported to all modules
  */
 
-#define XBOB_BLITZ_MODULE
-#include <xbob.blitz/cppapi.h>
-#include <xbob.blitz/cleanup.h>
+#define BOB_BLITZ_MODULE
+#include <bob.blitz/cppapi.h>
+#include <bob.blitz/cleanup.h>
 #include <algorithm>
 
 /*******************
@@ -171,7 +171,7 @@ PyObject* PyBlitzArray_PyBASE(PyBlitzArrayObject* o) {
 template <typename T>
 PyObject* getitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos) {
 
-  Py_ssize_t tmp[XBOB_BLITZ_MAXDIMS];
+  Py_ssize_t tmp[BOB_BLITZ_MAXDIMS];
 
   /* Fix negative indexes and check ranges */
   for (Py_ssize_t i=0; i<o->ndim; ++i) {
@@ -212,7 +212,7 @@ PyObject* getitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos) {
       }
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot index %s(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", Py_TYPE(o)->tp_name, o->ndim, PyBlitzArray_TypenumAsString(o->type_num), XBOB_BLITZ_MAXDIMS); return 0;
+      PyErr_Format(PyExc_NotImplementedError, "cannot index %s(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", Py_TYPE(o)->tp_name, o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BOB_BLITZ_MAXDIMS); return 0;
   }
 }
 
@@ -285,7 +285,7 @@ PyObject* PyBlitzArray_GetItem(PyBlitzArrayObject* o, Py_ssize_t* pos) {
 template <typename T>
 int setitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
 
-  Py_ssize_t tmp[XBOB_BLITZ_MAXDIMS];
+  Py_ssize_t tmp[BOB_BLITZ_MAXDIMS];
 
   /* Fix negative indexes and check ranges */
   for (Py_ssize_t i=0; i<o->ndim; ++i) {
@@ -334,7 +334,7 @@ int setitem_inner(PyBlitzArrayObject* o, Py_ssize_t* pos, PyObject* value) {
       }
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot set item on %s(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", Py_TYPE(o)->tp_name, o->ndim, PyBlitzArray_TypenumAsString(o->type_num), XBOB_BLITZ_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot set item on %s(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", Py_TYPE(o)->tp_name, o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BOB_BLITZ_MAXDIMS);
       return -1;
   }
 
@@ -448,7 +448,7 @@ template<typename T> void deallocate_inner(PyBlitzArrayObject* o) {
       break;
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot deallocate %s(@%" PY_FORMAT_SIZE_T "d,%s>, this number of dimensions is outside the range of supported dimensions [1,%d]", Py_TYPE(o)->tp_name, o->ndim, PyBlitzArray_TypenumAsString(o->type_num), XBOB_BLITZ_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot deallocate %s(@%" PY_FORMAT_SIZE_T "d,%s>, this number of dimensions is outside the range of supported dimensions [1,%d]", Py_TYPE(o)->tp_name, o->ndim, PyBlitzArray_TypenumAsString(o->type_num), BOB_BLITZ_MAXDIMS);
       return;
   }
 
@@ -583,7 +583,7 @@ PyObject* simplenew_1(int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
       return simplenew_2<T,4>(type_num, ndim, shape);
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot allocate %s(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", PyBlitzArray_Type.tp_name, ndim, PyBlitzArray_TypenumAsString(type_num), XBOB_BLITZ_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot allocate %s(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", PyBlitzArray_Type.tp_name, ndim, PyBlitzArray_TypenumAsString(type_num), BOB_BLITZ_MAXDIMS);
       return 0;
   }
 
@@ -742,7 +742,7 @@ PyObject* simplenewfromdata_1(int type_num, Py_ssize_t ndim,
       return simplenewfromdata_2<T,4>(type_num, ndim, shape, stride, data, writeable);
 
     default:
-      PyErr_Format(PyExc_NotImplementedError, "cannot allocate %s(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", PyBlitzArray_Type.tp_name, ndim, PyBlitzArray_TypenumAsString(type_num), XBOB_BLITZ_MAXDIMS);
+      PyErr_Format(PyExc_NotImplementedError, "cannot allocate %s(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", PyBlitzArray_Type.tp_name, ndim, PyBlitzArray_TypenumAsString(type_num), BOB_BLITZ_MAXDIMS);
       return 0;
   }
 
@@ -887,7 +887,7 @@ static int ndarray_behaves (PyArrayObject* o) {
   if (!PyArray_ISBEHAVED_RO(ao)) return 0;
 
   // checks if the number of dimensions is supported
-  if (PyArray_NDIM(ao) < 1 || PyArray_NDIM(ao) > XBOB_BLITZ_MAXDIMS) return 0;
+  if (PyArray_NDIM(ao) < 1 || PyArray_NDIM(ao) > BOB_BLITZ_MAXDIMS) return 0;
 
   // checks if the type number if supported
   switch(fix_integer_type_num(PyArray_DESCR(ao)->type_num)) {
@@ -928,7 +928,7 @@ PyObject* PyBlitzArray_FromNumpyArray(PyArrayObject* o) {
   }
 
   if (!ndarray_behaves(o)) {
-    PyErr_Format(PyExc_ValueError, "cannot convert `%s' which doesn't behave (memory contiguous, aligned, C-style, minimum 1 and up to %d dimensions) into a `%s'", Py_TYPE(o)->tp_name, XBOB_BLITZ_MAXDIMS, PyBlitzArray_Type.tp_name);
+    PyErr_Format(PyExc_ValueError, "cannot convert `%s' which doesn't behave (memory contiguous, aligned, C-style, minimum 1 and up to %d dimensions) into a `%s'", Py_TYPE(o)->tp_name, BOB_BLITZ_MAXDIMS, PyBlitzArray_Type.tp_name);
     return 0;
   }
 
@@ -996,14 +996,14 @@ PyObject* PyBlitzArray_NUMPY_WRAP(PyObject* bz) {
 
 int PyBlitzArray_Converter(PyObject* o, PyBlitzArrayObject** a) {
 
-  // is already a xbob.blitz.array
+  // is already a bob.blitz.array
   if (PyBlitzArray_Check(o)) {
     *a = reinterpret_cast<PyBlitzArrayObject*>(o);
     Py_INCREF(*a);
     return 1;
   }
 
-  // is numpy.ndarray wrapped around a xbob.blitz.array
+  // is numpy.ndarray wrapped around a bob.blitz.array
   if (PyArray_Check(o)) {
     PyArrayObject* arr = reinterpret_cast<PyArrayObject*>(o);
     if (PyBlitzArray_CheckNumpyBase(arr)) {
@@ -1032,14 +1032,14 @@ int PyBlitzArray_Converter(PyObject* o, PyBlitzArrayObject** a) {
 
 int PyBlitzArray_OutputConverter(PyObject* o, PyBlitzArrayObject** a) {
 
-  // is already a xbob.blitz.array
+  // is already a bob.blitz.array
   if (PyBlitzArray_Check(o)) {
     *a = reinterpret_cast<PyBlitzArrayObject*>(o);
     Py_INCREF(o);
     return 1;
   }
 
-  // is numpy.ndarray wrapped around a xbob.blitz.array
+  // is numpy.ndarray wrapped around a bob.blitz.array
   if (PyArray_Check(o)) {
     PyArrayObject* arr = reinterpret_cast<PyArrayObject*>(o);
     if (PyBlitzArray_CheckNumpyBase(arr)) {
@@ -1075,7 +1075,7 @@ int PyBlitzArray_OutputConverter(PyObject* o, PyBlitzArrayObject** a) {
 
 int PyBlitzArray_BehavedConverter(PyObject* o, PyBlitzArrayObject** a) {
 
-  // is already a xbob.blitz.array
+  // is already a bob.blitz.array
   // TODO: Don't we check in these conditions?
   if (PyBlitzArray_Check(o)) {
     *a = reinterpret_cast<PyBlitzArrayObject*>(o);
@@ -1083,7 +1083,7 @@ int PyBlitzArray_BehavedConverter(PyObject* o, PyBlitzArrayObject** a) {
     return 1;
   }
 
-  // is numpy.ndarray wrapped around a xbob.blitz.array
+  // is numpy.ndarray wrapped around a bob.blitz.array
   if (PyArray_Check(o)) {
     PyArrayObject* arr = reinterpret_cast<PyArrayObject*>(o);
     if (PyArray_ISCARRAY_RO(arr) && PyBlitzArray_CheckNumpyBase(arr)) {
@@ -1141,8 +1141,8 @@ int PyBlitzArray_IndexConverter(PyObject* o, PyBlitzArrayObject** shape) {
 
   (*shape)->ndim = PySequence_Size(o);
 
-  if ((*shape)->ndim == 0 || (*shape)->ndim > XBOB_BLITZ_MAXDIMS) {
-    PyErr_Format(PyExc_TypeError, "shape/index must be a sequence with at least 1 and at most %d element(s) (you passed a sequence with %" PY_FORMAT_SIZE_T "d elements)", XBOB_BLITZ_MAXDIMS, (*shape)->ndim);
+  if ((*shape)->ndim == 0 || (*shape)->ndim > BOB_BLITZ_MAXDIMS) {
+    PyErr_Format(PyExc_TypeError, "shape/index must be a sequence with at least 1 and at most %d element(s) (you passed a sequence with %" PY_FORMAT_SIZE_T "d elements)", BOB_BLITZ_MAXDIMS, (*shape)->ndim);
     return 0;
   }
 

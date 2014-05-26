@@ -2,16 +2,16 @@
 .. Andre Anjos <andre.anjos@idiap.ch>
 .. Thu 29 Aug 2013 16:07:57 CEST
 
-.. image:: https://travis-ci.org/bioidiap/xbob.blitz.svg?branch=master
-   :target: https://travis-ci.org/bioidiap/xbob.blitz
-.. image:: https://coveralls.io/repos/bioidiap/xbob.blitz/badge.png
-   :target: https://coveralls.io/r/bioidiap/xbob.blitz
-.. image:: http://img.shields.io/github/tag/bioidiap/xbob.blitz.png
-   :target: https://github.com/bioidiap/xbob.blitz
-.. image:: http://img.shields.io/pypi/v/xbob.blitz.png
-   :target: https://pypi.python.org/pypi/xbob.blitz
-.. image:: http://img.shields.io/pypi/dm/xbob.blitz.png
-   :target: https://pypi.python.org/pypi/xbob.blitz
+.. image:: https://travis-ci.org/bioidiap/bob.blitz.svg?branch=master
+   :target: https://travis-ci.org/bioidiap/bob.blitz
+.. image:: https://coveralls.io/repos/bioidiap/bob.blitz/badge.png
+   :target: https://coveralls.io/r/bioidiap/bob.blitz
+.. image:: http://img.shields.io/github/tag/bioidiap/bob.blitz.png
+   :target: https://github.com/bioidiap/bob.blitz
+.. image:: http://img.shields.io/pypi/v/bob.blitz.png
+   :target: https://pypi.python.org/pypi/bob.blitz
+.. image:: http://img.shields.io/pypi/dm/bob.blitz.png
+   :target: https://pypi.python.org/pypi/bob.blitz
 
 ====================================
  Python bindings for Blitz++ Arrays
@@ -44,7 +44,7 @@ Testing
 
 You can run a set of tests using the nose test runner::
 
-  $ nosetests -sv xbob.blitz
+  $ nosetests -sv bob.blitz
 
 You can run our documentation tests using sphinx itself::
 
@@ -52,7 +52,7 @@ You can run our documentation tests using sphinx itself::
 
 You can test overall test coverage with::
 
-  $ nosetests --with-coverage --cover-package=xbob.blitz
+  $ nosetests --with-coverage --cover-package=bob.blitz
 
 The ``coverage`` egg must be installed for this to work properly.
 

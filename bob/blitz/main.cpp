@@ -8,9 +8,9 @@
 #ifdef NO_IMPORT_ARRAY
 #undef NO_IMPORT_ARRAY
 #endif
-#define XBOB_BLITZ_MODULE
-#include <xbob.blitz/capi.h>
-#include <xbob.blitz/cleanup.h>
+#define BOB_BLITZ_MODULE
+#include <bob.blitz/capi.h>
+#include <bob.blitz/cleanup.h>
 
 static PyObject* PyBlitzArray_as_blitz(PyObject*, PyObject* args, PyObject* kwds) {
 
@@ -27,20 +27,20 @@ static PyObject* PyBlitzArray_as_blitz(PyObject*, PyObject* args, PyObject* kwds
 
 PyDoc_STRVAR(s_as_blitz_str, "as_blitz");
 PyDoc_STRVAR(s_as_blitz__doc__,
-"as_blitz(x) -> xbob.blitz.array\n\
+"as_blitz(x) -> bob.blitz.array\n\
 \n\
-Converts any compatible python object into a shallow " XBOB_EXT_MODULE_PREFIX ".array\n\
+Converts any compatible python object into a shallow " BOB_EXT_MODULE_PREFIX ".array\n\
 \n\
 This function works by first converting the input object ``x`` into\n\
 a :py:class:`numpy.ndarray` and then shallow wrapping that ``ndarray``\n\
-into a new :py:class:`" XBOB_EXT_MODULE_PREFIX ".array`. You can access the converted\n\
+into a new :py:class:`" BOB_EXT_MODULE_PREFIX ".array`. You can access the converted\n\
 ``ndarray`` using the returned value's ``base`` attribute. If the\n\
 ``ndarray`` cannot be shallow-wrapped, a :py:class:`ValueError` is\n\
 raised.\n\
 \n\
 In the case the input object ``x`` is already a behaved (C-style,\n\
 memory-aligned, contiguous) :py:class:`numpy.ndarray`, then this\n\
-function only shallow wrap's it into a ``" XBOB_EXT_MODULE_PREFIX ".array`` skin.\n\
+function only shallow wrap's it into a ``" BOB_EXT_MODULE_PREFIX ".array`` skin.\n\
 "
 );
 
@@ -54,14 +54,14 @@ static PyMethodDef module_methods[] = {
     {0}  /* Sentinel */
 };
 
-int PyBlitzArray_APIVersion = XBOB_BLITZ_API_VERSION;
+int PyBlitzArray_APIVersion = BOB_BLITZ_API_VERSION;
 
 PyDoc_STRVAR(module_docstr, "Blitz++ array definition and generic functions");
 
 #if PY_VERSION_HEX >= 0x03000000
 static PyModuleDef module_definition = {
   PyModuleDef_HEAD_INIT,
-  XBOB_EXT_MODULE_NAME,
+  BOB_EXT_MODULE_NAME,
   module_docstr,
   -1,
   module_methods,
@@ -77,15 +77,15 @@ static PyObject* create_module (void) {
 # if PY_VERSION_HEX >= 0x03000000
   PyObject* m = PyModule_Create(&module_definition);
 # else
-  PyObject* m = Py_InitModule3(XBOB_EXT_MODULE_NAME, module_methods, module_docstr);
+  PyObject* m = Py_InitModule3(BOB_EXT_MODULE_NAME, module_methods, module_docstr);
 # endif
   if (!m) return 0;
   auto m_ = make_safe(m); ///< protects against early returns
 
   /* register version numbers and constants */
-  if (PyModule_AddIntConstant(m, "__api_version__", XBOB_BLITZ_API_VERSION) < 0)
+  if (PyModule_AddIntConstant(m, "__api_version__", BOB_BLITZ_API_VERSION) < 0)
     return 0;
-  if (PyModule_AddStringConstant(m, "__version__", XBOB_EXT_MODULE_VERSION) < 0)
+  if (PyModule_AddStringConstant(m, "__version__", BOB_EXT_MODULE_VERSION) < 0)
     return 0;
 
   /* register the type object to python */
@@ -144,7 +144,7 @@ static PyObject* create_module (void) {
   /* defines the PyCapsule */
 
   PyObject* c_api_object = PyCapsule_New((void *)PyBlitzArray_API,
-      XBOB_EXT_MODULE_PREFIX "." XBOB_EXT_MODULE_NAME "._C_API", 0);
+      BOB_EXT_MODULE_PREFIX "." BOB_EXT_MODULE_NAME "._C_API", 0);
 
 #else
 
@@ -164,7 +164,7 @@ static PyObject* create_module (void) {
 
 }
 
-PyMODINIT_FUNC XBOB_EXT_ENTRY_NAME (void) {
+PyMODINIT_FUNC BOB_EXT_ENTRY_NAME (void) {
 # if PY_VERSION_HEX >= 0x03000000
   return
 # endif

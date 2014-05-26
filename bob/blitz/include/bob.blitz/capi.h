@@ -2,18 +2,18 @@
  * @author Andre Anjos <andre.anjos@idiap.ch>
  * @date Tue  8 Oct 08:19:28 2013
  *
- * @brief Defines the xbob.blitz C-API
+ * @brief Defines the bob.blitz C-API
  *
  * This module allows somebody else, externally to this package, to include the
- * xbob.blitz C-API functionality on their own package. Because the API is
- * compiled with a Python module (named `xbob.blitz`), we need to dig it out
+ * bob.blitz C-API functionality on their own package. Because the API is
+ * compiled with a Python module (named `bob.blitz`), we need to dig it out
  * from there and bind it to the following C-API members. We do this using a
  * PyCObject/PyCapsule module as explained in:
  * http://docs.python.org/2/extending/extending.html#using-capsules.
  */
 
-#ifndef XBOB_BLITZ_C_API_H
-#define XBOB_BLITZ_C_API_H
+#ifndef BOB_BLITZ_C_API_H
+#define BOB_BLITZ_C_API_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -23,15 +23,15 @@ extern "C" {
 #include <numpy/arrayobject.h>
 
 /* Define Module Name and Prefix for other Modules
-   Note: We cannot use XBOB_EXT_* macros here, unfortunately */
-#define XBOB_BLITZ_PREFIX    "xbob.blitz"
-#define XBOB_BLITZ_FULL_NAME "xbob.blitz._library"
+   Note: We cannot use BOB_EXT_* macros here, unfortunately */
+#define BOB_BLITZ_PREFIX    "bob.blitz"
+#define BOB_BLITZ_FULL_NAME "bob.blitz._library"
 
 /* Define API version */
-#define XBOB_BLITZ_API_VERSION 0x0200
+#define BOB_BLITZ_API_VERSION 0x0200
 
 /* Maximum number of dimensions supported at this library */
-#define XBOB_BLITZ_MAXDIMS 4
+#define BOB_BLITZ_MAXDIMS 4
 
 /* Type definition for PyBlitzArrayObject */
 typedef struct {
@@ -42,8 +42,8 @@ typedef struct {
   void* data; ///< a pointer to the internal data buffer
   int type_num; ///< numpy type number of elements
   Py_ssize_t ndim; ///< number of dimensions
-  Py_ssize_t shape[XBOB_BLITZ_MAXDIMS]; ///< shape
-  Py_ssize_t stride[XBOB_BLITZ_MAXDIMS]; ///< strides
+  Py_ssize_t shape[BOB_BLITZ_MAXDIMS]; ///< shape
+  Py_ssize_t stride[BOB_BLITZ_MAXDIMS]; ///< strides
   int writeable; ///< 1 if data is writeable, 0 otherwise
 
   /* Base pointer, if the memory of this object is coming from elsewhere */
@@ -223,9 +223,9 @@ enum _PyBlitzArray_ENUM{
 #define PyBlitzArray_Cast_PROTO (PyBlitzArrayObject* o, int typenum)
 
 
-#ifdef XBOB_BLITZ_MODULE
+#ifdef BOB_BLITZ_MODULE
 
-  /* This section is used when compiling `xbob.blitz' itself */
+  /* This section is used when compiling `bob.blitz' itself */
 
   extern int PyBlitzArray_APIVersion;
 
@@ -417,12 +417,12 @@ enum _PyBlitzArray_ENUM{
   /**
    * Returns -1 on error, 0 on success.
    */
-  static int import_xbob_blitz(void) {
+  static int import_bob_blitz(void) {
 
     PyObject *c_api_object;
     PyObject *module;
 
-    module = PyImport_ImportModule(XBOB_BLITZ_FULL_NAME);
+    module = PyImport_ImportModule(BOB_BLITZ_FULL_NAME);
 
     if (module == NULL) return -1;
 
@@ -454,15 +454,15 @@ enum _PyBlitzArray_ENUM{
 #   else
           "cobject"
 #   endif
-          " at `" XBOB_BLITZ_FULL_NAME "._C_API'");
+          " at `" BOB_BLITZ_FULL_NAME "._C_API'");
       return -1;
     }
 
     /* Checks that the imported version matches the compiled version */
     int imported_version = *(int*)PyBlitzArray_API[PyBlitzArray_APIVersion_NUM];
 
-    if (XBOB_BLITZ_API_VERSION != imported_version) {
-      PyErr_Format(PyExc_RuntimeError, XBOB_BLITZ_FULL_NAME " import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", XBOB_BLITZ_API_VERSION, imported_version);
+    if (BOB_BLITZ_API_VERSION != imported_version) {
+      PyErr_Format(PyExc_RuntimeError, BOB_BLITZ_FULL_NAME " import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", BOB_BLITZ_API_VERSION, imported_version);
       return -1;
     }
 
@@ -475,10 +475,10 @@ enum _PyBlitzArray_ENUM{
   }
 # endif // !defined(NO_IMPORT_ARRAY)
 
-#endif // XBOB_BLITZ_MODULE
+#endif // BOB_BLITZ_MODULE
 
 #ifdef __cplusplus
 } // extern "C"
 #endif
 
-#endif /* XBOB_BLITZ_C_API_H */
+#endif /* BOB_BLITZ_C_API_H */

@@ -4,21 +4,21 @@
 # Mon 16 Apr 08:18:08 2012 CEST
 
 from setuptools import setup, find_packages, dist
-dist.Distribution(dict(setup_requires=['numpy', 'xbob.extension']))
+dist.Distribution(dict(setup_requires=['numpy', 'bob.extension']))
 import numpy
-from xbob.extension import Extension
+from bob.extension import Extension
 
 # Local include directory
 import os
 package_dir = os.path.dirname(os.path.realpath(__file__))
-package_dir = os.path.join(package_dir, 'xbob', 'blitz', 'include')
+package_dir = os.path.join(package_dir, 'bob', 'blitz', 'include')
 
 # Add numpy includes
 extra_compile_args = ['-isystem', numpy.get_include()]
 
 # NumPy API macros necessary?
 define_macros=[
-    ("PY_ARRAY_UNIQUE_SYMBOL", "XBOB_BLITZ_NUMPY_C_API"),
+    ("PY_ARRAY_UNIQUE_SYMBOL", "BOB_BLITZ_NUMPY_C_API"),
     ("NO_IMPORT_ARRAY", "1"),
     ]
 from distutils.version import StrictVersion
@@ -38,10 +38,10 @@ version = '2.0.0a0'
 # parameters that define our package.
 setup(
 
-    name='xbob.blitz',
+    name='bob.blitz',
     version=version,
     description='Bindings for Blitz++ (a C++ array template library)',
-    url='http://github.com/bioidiap/xbob.blitz',
+    url='http://github.com/bioidiap/bob.blitz',
     license='BSD',
     author='Andre Anjos',
     author_email='andre.anjos@idiap.ch',
@@ -52,19 +52,19 @@ setup(
     include_package_data=True,
 
     namespace_packages = [
-      'xbob',
+      'bob',
     ],
 
     install_requires=[
       'setuptools',
       'numpy',
-      'xbob.extension',
+      'bob.extension',
     ],
 
     ext_modules = [
-      Extension("xbob.blitz.version",
+      Extension("bob.blitz.version",
         [
-          "xbob/blitz/version.cpp",
+          "bob/blitz/version.cpp",
           ],
         packages=packages,
         version=version,
@@ -72,11 +72,11 @@ setup(
         include_dirs=[package_dir],
         extra_compile_args=extra_compile_args,
         ),
-      Extension("xbob.blitz._library",
+      Extension("bob.blitz._library",
         [
-          "xbob/blitz/api.cpp",
-          "xbob/blitz/array.cpp",
-          "xbob/blitz/main.cpp",
+          "bob/blitz/api.cpp",
+          "bob/blitz/array.cpp",
+          "bob/blitz/main.cpp",
           ],
         packages=packages,
         version=version,

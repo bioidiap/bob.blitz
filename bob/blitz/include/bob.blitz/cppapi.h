@@ -6,10 +6,10 @@
  * transforming C++ objects into our Pythonic blitz::Array<> layer.
  */
 
-#ifndef XBOB_BLITZ_CPP_API_H
-#define XBOB_BLITZ_CPP_API_H
+#ifndef BOB_BLITZ_CPP_API_H
+#define BOB_BLITZ_CPP_API_H
 
-#include <xbob.blitz/capi.h>
+#include <bob.blitz/capi.h>
 
 #include <complex>
 #include <blitz/array.h>
@@ -173,7 +173,7 @@ template <typename T, int N>
 PyObject* PyBlitzArrayCxx_NewFromConstArray(const blitz::Array<T,N>& a) {
 
   if (!PyBlitzArrayCxx_IsBehaved(a)) {
-    PyErr_Format(PyExc_ValueError, "cannot convert C++ blitz::Array<%s,%d> which doesn't behave (memory contiguous, aligned, C-style) into a pythonic %s.array", PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), N, XBOB_BLITZ_PREFIX);
+    PyErr_Format(PyExc_ValueError, "cannot convert C++ blitz::Array<%s,%d> which doesn't behave (memory contiguous, aligned, C-style) into a pythonic %s.array", PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), N, BOB_BLITZ_PREFIX);
     return 0;
   }
 
@@ -195,11 +195,11 @@ PyObject* PyBlitzArrayCxx_NewFromConstArray(const blitz::Array<T,N>& a) {
   }
 
   catch (std::exception& e) {
-    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating %s.array(@%d,'%s'): %s", XBOB_BLITZ_PREFIX, N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), e.what());
+    PyErr_Format(PyExc_RuntimeError, "caught exception while instantiating %s.array(@%d,'%s'): %s", BOB_BLITZ_PREFIX, N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()), e.what());
   }
 
   catch (...) {
-    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating %s.array(@%d,'%s')", XBOB_BLITZ_PREFIX, N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()));
+    PyErr_Format(PyExc_RuntimeError, "caught unknown exception while instantiating %s.array(@%d,'%s')", BOB_BLITZ_PREFIX, N, PyBlitzArray_TypenumAsString(PyBlitzArrayCxx_CToTypenum<T>()));
   }
 
   /** some test code
@@ -277,4 +277,4 @@ blitz::Array<T,N>* PyBlitzArrayCxx_AsBlitz(PyBlitzArrayObject* array, const char
   return PyBlitzArrayCxx_AsBlitz<T,N>(array);
 }
 
-#endif /* XBOB_BLITZ_CPP_API_H */
+#endif /* BOB_BLITZ_CPP_API_H */

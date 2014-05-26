@@ -5,11 +5,11 @@
  * @brief Pure python bindings for Blitz Arrays
  */
 
-#define XBOB_BLITZ_MODULE
-#include <xbob.blitz/capi.h>
+#define BOB_BLITZ_MODULE
+#include <bob.blitz/capi.h>
 #include <structmember.h>
 
-PyDoc_STRVAR(s_array_str, XBOB_EXT_MODULE_PREFIX ".array");
+PyDoc_STRVAR(s_array_str, BOB_EXT_MODULE_PREFIX ".array");
 
 PyDoc_STRVAR(s_array_doc,
 "array(shape, dtype) -> new n-dimensional blitz::Array\n\
@@ -191,7 +191,7 @@ PyDoc_STRVAR(s_private_array_doc,
 "x.__array__([dtype]) -> numpy.ndarray\n\
 x.as_ndarray([dtype]) -> numpy.ndarray\n\
 \n\
-numpy.ndarray accessor (shallow wraps ``xbob.blitz.array`` as\n\
+numpy.ndarray accessor (shallow wraps ``bob.blitz.array`` as\n\
 numpy.ndarray). If ``dtype`` is given and the current data type\n\
 is not the same, then forces the creation of a copy conforming\n\
 to the require data type, if possible.\n\
