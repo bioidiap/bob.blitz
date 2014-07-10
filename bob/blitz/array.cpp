@@ -73,12 +73,11 @@ static int PyBlitzArray_init(PyBlitzArrayObject* self, PyObject *args,
   PyBlitzArrayObject shape;
   PyBlitzArrayObject* shape_p = &shape;
   int type_num = NPY_NOTYPE;
-  int* type_num_p = &type_num;
 
   if (!PyArg_ParseTupleAndKeywords(
         args, kwds, "O&O&", kwlist,
         &PyBlitzArray_IndexConverter, &shape_p,
-        &PyBlitzArray_TypenumConverter, &type_num_p)
+        &PyBlitzArray_TypenumConverter, &type_num)
       )
     return -1; ///< FAILURE
 
@@ -230,10 +229,9 @@ static PyObject* PyBlitzArray_SelfCast(PyBlitzArrayObject* self, PyObject* args,
   static char** kwlist = const_cast<char**>(const_kwlist);
 
   int type_num = NPY_NOTYPE;
-  int* type_num_p = &type_num;
 
   if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist,
-        &PyBlitzArray_TypenumConverter, &type_num_p)) return 0;
+        &PyBlitzArray_TypenumConverter, &type_num)) return 0;
 
   return PyBlitzArray_Cast(self, type_num);
 

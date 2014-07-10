@@ -210,7 +210,7 @@ enum _PyBlitzArray_ENUM{
 #define PyBlitzArray_IndexConverter_PROTO (PyObject* o, PyBlitzArrayObject** shape)
 
 #define PyBlitzArray_TypenumConverter_RET int
-#define PyBlitzArray_TypenumConverter_PROTO (PyObject* o, int** type_num)
+#define PyBlitzArray_TypenumConverter_PROTO (PyObject* o, int* type_num)
 
 /*************
  * Utilities *

@@ -403,7 +403,7 @@ Converter Functions for PyArg_Parse* family
    Returns 0 if an error is detected, 1 on success.
 
 
-.. c:function:: int PyBlitzArray_TypenumConverter (PyObject* o, int** type_num)
+.. c:function:: int PyBlitzArray_TypenumConverter (PyObject* o, int* type_num)
 
    Converts any compatible value into a Numpy integer type number. This method
    is supposed to be used with ``PyArg_ParseTupleAndKeywords`` and derivatives.
@@ -414,8 +414,7 @@ Converter Functions for PyArg_Parse* family
      The input object to be converted into a type number
 
    ``type_num``
-      A preallocated (double) address for storing the type on successful
-      conversion.
+      An address for storing the type number on successful conversion.
 
    Returns 0 if an error is detected, 1 on success.
 

@@ -1171,13 +1171,13 @@ int PyBlitzArray_IndexConverter(PyObject* o, PyBlitzArrayObject** shape) {
   return 1;
 }
 
-int PyBlitzArray_TypenumConverter(PyObject* o, int** type_num) {
+int PyBlitzArray_TypenumConverter(PyObject* o, int* type_num) {
 
   PyArray_Descr* dtype = 0;
   if (!PyArray_DescrConverter2(o, &dtype)) return 0; ///< (*dtype) is borrowed
-  (**type_num) = dtype->type_num;
+  (*type_num) = dtype->type_num;
 
-  switch (fix_integer_type_num(**type_num)) {
+  switch (fix_integer_type_num(*type_num)) {
     case NPY_BOOL:
     case NPY_UINT8:
     case NPY_UINT16:
@@ -1200,7 +1200,7 @@ int PyBlitzArray_TypenumConverter(PyObject* o, int** type_num) {
       break;
     default:
     {
-      PyErr_Format(PyExc_NotImplementedError, "no support for using type number %d in %s", (**type_num), Py_TYPE(o)->tp_name);
+      PyErr_Format(PyExc_NotImplementedError, "no support for using type number %d in %s", (*type_num), Py_TYPE(o)->tp_name);
       return 0;
     }
   }
