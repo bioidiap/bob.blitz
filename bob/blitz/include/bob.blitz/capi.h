@@ -97,6 +97,7 @@ enum _PyBlitzArray_ENUM{
   PyBlitzArray_TypenumConverter_NUM,
   // Utilities
   PyBlitzArray_TypenumAsString_NUM,
+  PyBlitzArray_TypenumSize_NUM,
   PyBlitzArray_Cast_NUM,
   /* Total number of C API pointers */
   PyBlitzArray_API_pointers
@@ -219,6 +220,9 @@ enum _PyBlitzArray_ENUM{
 #define PyBlitzArray_TypenumAsString_RET const char*
 #define PyBlitzArray_TypenumAsString_PROTO (int typenum)
 
+#define PyBlitzArray_TypenumSize_RET size_t
+#define PyBlitzArray_TypenumSize_PROTO (int typenum)
+
 #define PyBlitzArray_Cast_RET PyObject*
 #define PyBlitzArray_Cast_PROTO (PyBlitzArrayObject* o, int typenum)
 
@@ -311,6 +315,8 @@ enum _PyBlitzArray_ENUM{
  *************/
 
   PyBlitzArray_TypenumAsString_RET PyBlitzArray_TypenumAsString PyBlitzArray_TypenumAsString_PROTO;
+
+  PyBlitzArray_TypenumSize_RET PyBlitzArray_TypenumSize PyBlitzArray_TypenumSize_PROTO;
 
   PyBlitzArray_Cast_RET PyBlitzArray_Cast PyBlitzArray_Cast_PROTO;
 
@@ -409,6 +415,8 @@ enum _PyBlitzArray_ENUM{
  *************/
 
 #define PyBlitzArray_TypenumAsString (*(PyBlitzArray_TypenumAsString_RET (*)PyBlitzArray_TypenumAsString_PROTO) PyBlitzArray_API[PyBlitzArray_TypenumAsString_NUM])
+
+#define PyBlitzArray_TypenumSize (*(PyBlitzArray_TypenumSize_RET (*)PyBlitzArray_TypenumSize_PROTO) PyBlitzArray_API[PyBlitzArray_TypenumSize_NUM])
 
 #define PyBlitzArray_Cast (*(PyBlitzArray_Cast_RET (*)PyBlitzArray_Cast_PROTO) PyBlitzArray_API[PyBlitzArray_Cast_NUM])
 

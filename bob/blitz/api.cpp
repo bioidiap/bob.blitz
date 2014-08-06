@@ -1322,6 +1322,16 @@ const char* PyBlitzArray_TypenumAsString (int type_num) {
 
 }
 
+size_t PyBlitzArray_TypenumSize (int type_num) {
+
+  PyArray_Descr* dtype = PyArray_DescrFromType(type_num); ///< new reference
+  if (!dtype) return 0;
+  size_t retval = dtype->elsize;
+  Py_DECREF(dtype);
+  return retval;
+
+}
+
 PyObject* PyBlitzArray_Cast (PyBlitzArrayObject* o, int type_num) {
   if (o->type_num == type_num) {
     auto pyo = (PyObject*)o;
