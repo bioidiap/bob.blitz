@@ -137,6 +137,7 @@ static PyObject* create_module (void) {
 
   // Utilities
   PyBlitzArray_API[PyBlitzArray_TypenumAsString_NUM] = (void *)PyBlitzArray_TypenumAsString;
+  PyBlitzArray_API[PyBlitzArray_TypenumSize_NUM] = (void *)PyBlitzArray_TypenumSize;
   PyBlitzArray_API[PyBlitzArray_Cast_NUM] = (void *)PyBlitzArray_Cast;
 
 #if PY_VERSION_HEX >= 0x02070000
