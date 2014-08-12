@@ -10,7 +10,7 @@ import numpy
 from pkg_resources import resource_filename
 from bob.extension import Extension as BobExtension
 # forward the build_ext command from bob.extension
-from bob.extension import build_ext
+from bob.extension import Library, build_ext
 from distutils.version import StrictVersion
 
 class Extension(BobExtension):
