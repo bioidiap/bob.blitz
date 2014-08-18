@@ -11,10 +11,10 @@ from bob.extension import Extension
 # Local include directory
 import os
 package_dir = os.path.dirname(os.path.realpath(__file__))
-package_dir = os.path.join(package_dir, 'bob', 'blitz', 'include')
+include_dir = os.path.join(package_dir, 'bob', 'blitz', 'include')
 
 # Add numpy includes
-extra_compile_args = ['-isystem', numpy.get_include()]
+system_include_dirs = [numpy.get_include()]
 
 # NumPy API macros necessary?
 define_macros=[
@@ -70,8 +70,8 @@ setup(
         packages=packages,
         version=version,
         define_macros=define_macros,
-        include_dirs=[package_dir],
-        extra_compile_args=extra_compile_args,
+        include_dirs=[include_dir],
+        system_include_dirs=system_include_dirs,
         ),
       Extension("bob.blitz._library",
         [
@@ -82,8 +82,8 @@ setup(
         packages=packages,
         version=version,
         define_macros=define_macros,
-        include_dirs=[package_dir],
-        extra_compile_args=extra_compile_args,
+        include_dirs=[include_dir],
+        system_include_dirs=system_include_dirs,
         ),
       ],
 
