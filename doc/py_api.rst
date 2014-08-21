@@ -135,5 +135,3 @@ API.
 .. autoclass:: bob.blitz.array
 
 .. autofunction:: bob.blitz.as_blitz
-
-.. autofunction:: bob.blitz.get_include

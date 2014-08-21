@@ -34,10 +34,8 @@ class Extension(BobExtension):
 
     kwargs.setdefault('packages', []).extend(require)
 
-    numpy_include = ['-isystem', numpy.get_include()]
-    kwargs.setdefault('extra_compile_args', []).extend(numpy_include)
-
     self_include_dir = resource_filename(__name__, 'include')
+    kwargs.setdefault('system_include_dirs', []).append(numpy.get_include())
     kwargs.setdefault('include_dirs', []).append(self_include_dir)
 
     macros = [

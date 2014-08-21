@@ -45,9 +45,6 @@ the import function:
      return m;
    }
 
-.. note::
-
-  The include directory can be discovered using :py:func:`blitz.get_include`.
 
 Array Structure
 ===============
