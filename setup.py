@@ -6,7 +6,7 @@
 from setuptools import setup, find_packages, dist
 dist.Distribution(dict(setup_requires=['numpy', 'bob.extension']))
 import numpy
-from bob.extension import Extension
+from bob.extension import Extension, build_ext
 
 # Local include directory
 import os
@@ -66,35 +66,40 @@ setup(
       Extension("bob.blitz.version",
         [
           "bob/blitz/version.cpp",
-          ],
+        ],
         packages=packages,
         version=version,
         define_macros=define_macros,
         include_dirs=[include_dir],
         system_include_dirs=system_include_dirs,
-        ),
+      ),
+
       Extension("bob.blitz._library",
         [
           "bob/blitz/api.cpp",
           "bob/blitz/array.cpp",
           "bob/blitz/main.cpp",
-          ],
+        ],
         packages=packages,
         version=version,
         define_macros=define_macros,
         include_dirs=[include_dir],
         system_include_dirs=system_include_dirs,
-        ),
-      ],
+      ),
+    ],
+
+    cmdclass = {
+      'build_ext': build_ext
+    },
 
     classifiers = [
-      'Development Status :: 3 - Alpha',
+      'Development Status :: 4 - Beta',
       'Intended Audience :: Developers',
       'License :: OSI Approved :: BSD License',
       'Natural Language :: English',
       'Programming Language :: Python',
       'Programming Language :: Python :: 3',
       'Topic :: Software Development :: Libraries :: Python Modules',
-      ],
+    ],
 
-    )
+  )
