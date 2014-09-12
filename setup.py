@@ -8,6 +8,9 @@ dist.Distribution(dict(setup_requires=['numpy', 'bob.extension']))
 import numpy
 from bob.extension import Extension, build_ext
 
+from bob.extension.utils import load_requirements
+build_requires = load_requirements()
+
 # Local include directory
 import os
 package_dir = os.path.dirname(os.path.realpath(__file__))
@@ -56,11 +59,8 @@ setup(
       'bob',
     ],
 
-    install_requires=[
-      'setuptools',
-      'numpy',
-      'bob.extension',
-    ],
+    setup_requires = build_requires,
+    install_requires = build_requires,
 
     ext_modules = [
       Extension("bob.blitz.version",
