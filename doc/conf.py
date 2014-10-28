@@ -280,5 +280,9 @@ intersphinx_mapping = {
   numpy_manual: None,
   }
 
+from bob.extension.utils import link_documentation
+intersphinx_mapping.update(link_documentation())
+
+
 def setup(app):
   pass
