@@ -249,40 +249,28 @@ autoclass_content = 'both'
 autodoc_member_order = 'bysource'
 autodoc_default_flags = ['members', 'undoc-members', 'inherited-members', 'show-inheritance']
 
-def smaller_than(v1, v2):
-  """Compares scipy/numpy version numbers"""
-
-  c1 = v1.split('.')
-  c2 = v2.split('.')[:len(c1)] #clip to the compared version
-  for i, k in enumerate(c2):
-    n1 = c1[i]
-    n2 = c2[i]
-    try:
-      n1 = int(n1)
-      n2 = int(n2)
-    except ValueError:
-      n1 = str(n1)
-      n2 = str(n2)
-    if n1 > n2: return False
-  return True
-
-# Some name mangling to find the correct sphinx manuals for some packages
-numpy_version = __import__('numpy').version.version
-if smaller_than(numpy_version, '1.5.z'):
-  numpy_version = '.'.join(numpy_version.split('.')[:-1]) + '.x'
-else:
-  numpy_version = '.'.join(numpy_version.split('.')[:-1]) + '.0'
-numpy_manual = 'http://docs.scipy.org/doc/numpy-%s/' % numpy_version
-
 # For inter-documentation mapping:
-intersphinx_mapping = {
-  'http://docs.python.org/%d.%d/' % sys.version_info[:2]: None,
-  numpy_manual: None,
-  }
-
 from bob.extension.utils import link_documentation
-intersphinx_mapping.update(link_documentation())
+intersphinx_mapping = link_documentation()
 
+
+# We want to remove all private (i.e. _. or __.__) members
+# that are not in the list of accepted functions
+accepted_private_functions = ['__array__']
+
+def member_function_test(app, what, name, obj, skip, options):
+  # test if we have a private function
+  if len(name) > 1 and name[0] == '_':
+    # test if this private function should be allowed
+    if name not in accepted_private_functions:
+      # omit privat functions that are not in the list of accepted private functions
+      return skip
+    else:
+      # test if the method is documented
+      if not hasattr(obj, '__doc__') or not obj.__doc__:
+        return skip
+  return False
 
 def setup(app):
-  pass
+  app.connect('autodoc-skip-member', member_function_test)
+

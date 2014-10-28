@@ -190,7 +190,7 @@ PyDoc_STRVAR(s_private_array_doc,
 "x.__array__([dtype]) -> numpy.ndarray\n\
 x.as_ndarray([dtype]) -> numpy.ndarray\n\
 \n\
-numpy.ndarray accessor (shallow wraps ``bob.blitz.array`` as\n\
+numpy.ndarray accessor (shallow wraps :py:class:`bob.blitz.array` as\n\
 numpy.ndarray). If ``dtype`` is given and the current data type\n\
 is not the same, then forces the creation of a copy conforming\n\
 to the require data type, if possible.\n\

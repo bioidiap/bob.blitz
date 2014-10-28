@@ -13,7 +13,7 @@
  User Guide
 ============
 
-You can build a new ``bob.blitz.array`` using one of two possible ways:
+You can build a new :py:class:`bob.blitz.array` using one of two possible ways:
 
 1. Use the array constructor:
 
@@ -35,10 +35,10 @@ You can build a new ``bob.blitz.array`` using one of two possible ways:
       >>> a[0] # doctest: +SKIP
       145
 
-2. Use the ``bob.blitz.as_blitz`` generic converter. This function takes any
+2. Use the :py:func:`bob.blitz.as_blitz` generic converter. This function takes any
    object that is convertible to a :py:class:`numpy.ndarray`, convert it to a
-   behaved (C-order, memory aligned and contiguous) ``ndarray`` and then
-   shallow copy it as a new ``bob.blitz.array``:
+   behaved (C-order, memory aligned and contiguous) :py:class:`numpy.ndarray` and then
+   shallow copy it as a new :py:class:`bob.blitz.array`:
 
    .. doctest:: blitztest
 
@@ -69,7 +69,7 @@ You can build a new ``bob.blitz.array`` using one of two possible ways:
       >>> print(a)
       [ 0  1  2 67  4]
 
-You can get and set the individual values on ``bob.blitz.array`` objects,
+You can get and set the individual values on :py:class:`bob.blitz.array` objects,
 using the normal python indexing operatiors ``[]``:
 
 .. doctest:: blitztest
@@ -83,7 +83,7 @@ using the normal python indexing operatiors ``[]``:
    >>> print(t)
    6.14
 
-You can convert ``bob.blitz.array`` objects into either (shallow)
+You can convert :py:class:`bob.blitz.array` objects into either (shallow)
 :py:class:`numpy.ndarray` copies using :py:meth:`bob.blitz.array.as_ndarray`.
 
 .. doctest:: blitztest
@@ -110,10 +110,10 @@ You can detach the :py:class:`numpy.ndarray` from the
    >>> print(npy_copy.flags.owndata)
    True
 
-You can use ``bob.blitz.array`` anywhere a :py:class:`numpy.ndarray` is
+You can use :py:class:`bob.blitz.array` anywhere a :py:class:`numpy.ndarray` is
 expected.  In this case, :py:mod:`numpy` checks for the existence of an
 ``__array__`` method on the passed object and if that is available, calls it to
-get an array representation for the object. For ``bob.blitz.array``, the
+get an array representation for the object. For :py:class:`bob.blitz.array`, the
 :py:meth:`bob.blitz.array.__array__` method chooses the fastest possible
 conversion path to generate a :py:class:`numpy.ndarray`.
 
@@ -129,7 +129,7 @@ Reference
 ---------
 
 This section includes information for using the pure Python API of
-``bob.blitz.array``. It is mainly intended as a test layer for the C and C++
+:py:class:`bob.blitz.array`. It is mainly intended as a test layer for the C and C++
 API.
 
 .. autoclass:: bob.blitz.array

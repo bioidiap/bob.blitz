@@ -40,7 +40,7 @@ raised.\n\
 \n\
 In the case the input object ``x`` is already a behaved (C-style,\n\
 memory-aligned, contiguous) :py:class:`numpy.ndarray`, then this\n\
-function only shallow wrap's it into a ``" BOB_EXT_MODULE_PREFIX ".array`` skin.\n\
+function only shallow wrap's it into a :py:class:`" BOB_EXT_MODULE_PREFIX ".array` skin.\n\
 "
 );
 
