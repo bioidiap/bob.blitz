@@ -11,6 +11,9 @@ from bob.extension import Extension, build_ext
 from bob.extension.utils import load_requirements
 build_requires = load_requirements()
 
+# Define package version
+version = open("version.txt").read().rstrip()
+
 # Local include directory
 import os
 package_dir = os.path.dirname(os.path.realpath(__file__))
@@ -33,9 +36,6 @@ packages = [
     'blitz >= 0.10',
     'boost', # any version will do, only need headers
     ]
-
-# Define package version
-version = '2.0.0a0'
 
 # The only thing we do in this file is to call the setup() function with all
 # parameters that define our package.
