@@ -28,7 +28,7 @@ extern "C" {
 #define BOB_BLITZ_FULL_NAME "bob.blitz._library"
 
 /* Define API version */
-#define BOB_BLITZ_API_VERSION 0x0200
+#define BOB_BLITZ_API_VERSION 0x0201
 
 /* Maximum number of dimensions supported at this library */
 #define BOB_BLITZ_MAXDIMS 4
@@ -85,6 +85,7 @@ enum _PyBlitzArray_ENUM{
   PyBlitzArray_Delete_NUM,
   PyBlitzArray_SimpleNew_NUM,
   PyBlitzArray_SimpleNewFromData_NUM,
+  PyBlitzArray_SimpleInit_NUM,
   // From/To NumPy Converters
   PyBlitzArray_AsNumpyArray_NUM,
   PyBlitzArray_FromNumpyArray_NUM,
@@ -180,6 +181,9 @@ enum _PyBlitzArray_ENUM{
 
 #define PyBlitzArray_SimpleNewFromData_RET PyObject*
 #define PyBlitzArray_SimpleNewFromData_PROTO (int typenum, Py_ssize_t ndim, Py_ssize_t* shape, Py_ssize_t* stride, void* data, int writeable)
+
+#define PyBlitzArray_SimpleInit_RET int
+#define PyBlitzArray_SimpleInit_PROTO (PyBlitzArrayObject* o, int typenum, Py_ssize_t ndim, Py_ssize_t* shape)
 
 /****************************
  * From/To NumPy Converters *
@@ -286,6 +290,8 @@ enum _PyBlitzArray_ENUM{
 
   PyBlitzArray_SimpleNewFromData_RET PyBlitzArray_SimpleNewFromData PyBlitzArray_SimpleNewFromData_PROTO;
 
+  PyBlitzArray_SimpleInit_RET PyBlitzArray_SimpleInit PyBlitzArray_SimpleInit_PROTO;
+
 /****************************
  * From/To NumPy Converters *
  ****************************/
@@ -386,6 +392,8 @@ enum _PyBlitzArray_ENUM{
 
 #define PyBlitzArray_SimpleNewFromData (*(PyBlitzArray_SimpleNewFromData_RET (*)PyBlitzArray_SimpleNewFromData_PROTO) PyBlitzArray_API[PyBlitzArray_SimpleNewFromData_NUM])
 
+#define PyBlitzArray_SimpleInit (*(PyBlitzArray_SimpleInit_RET (*)PyBlitzArray_SimpleInit_PROTO) PyBlitzArray_API[PyBlitzArray_SimpleInit_NUM])
+
 /****************************
  * From/To NumPy Converters *
  ****************************/
@@ -470,7 +478,7 @@ enum _PyBlitzArray_ENUM{
     int imported_version = *(int*)PyBlitzArray_API[PyBlitzArray_APIVersion_NUM];
 
     if (BOB_BLITZ_API_VERSION != imported_version) {
-      PyErr_Format(PyExc_RuntimeError, BOB_BLITZ_FULL_NAME " import error: you compiled against API version 0x%04x, but are now importing an API with version 0x%04x which is not compatible - check your Python runtime environment for errors", BOB_BLITZ_API_VERSION, imported_version);
+      PyErr_Format(PyExc_RuntimeError, BOB_BLITZ_FULL_NAME " import error: you compiled against API version 0x%x, but are now importing an API with version 0x%x which is not compatible - check your Python runtime environment for errors", BOB_BLITZ_API_VERSION, imported_version);
       return -1;
     }
 

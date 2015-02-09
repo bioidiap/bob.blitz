@@ -89,14 +89,8 @@ static int PyBlitzArray_init(PyBlitzArrayObject* self, PyObject *args,
     }
   }
 
-  PyBlitzArrayObject* tmp = reinterpret_cast<PyBlitzArrayObject*>(PyBlitzArray_SimpleNew(type_num, shape.ndim, shape.shape));
-  if (!tmp) return -1;
+  return PyBlitzArray_SimpleInit(self, type_num, shape.ndim, shape.shape);
 
-  /* Copies the new object to the pre-allocated one */
-  (*self) = (*tmp);
-  Py_TYPE(tmp)->tp_free((PyObject*)tmp); ///< Deallocates only the Python stuff
-
-  return 0; ///< SUCCESS
 }
 
 /**

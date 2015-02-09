@@ -527,25 +527,23 @@ void PyBlitzArray_Delete (PyBlitzArrayObject* o) {
 }
 
 template<typename T, int N>
-PyObject* simplenew_2(int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
+int simplenew_2(PyBlitzArrayObject* arr, int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
 
   try {
 
     blitz::TinyVector<int,N> tv_shape;
     for (int i=0; i<N; ++i) tv_shape(i) = shape[i];
-    PyBlitzArrayObject* retval = (PyBlitzArrayObject*)PyBlitzArray_New(&PyBlitzArray_Type, 0, 0);
     auto bz = new blitz::Array<T,N>(tv_shape);
-    retval->bzarr = static_cast<void*>(bz);
-    retval->data = bz->data();
-    retval->type_num = type_num;
-    retval->ndim = ndim;
+    arr->bzarr = static_cast<void*>(bz);
+    arr->data = bz->data();
+    arr->type_num = type_num;
+    arr->ndim = ndim;
     for (Py_ssize_t i=0; i<N; ++i) {
-      retval->shape[i] = shape[i];
-      retval->stride[i] = sizeof(T)*bz->stride(i); ///in **bytes**
+      arr->shape[i] = shape[i];
+      arr->stride[i] = sizeof(T)*bz->stride(i); ///in **bytes**
     }
-    retval->writeable = 1;
-    return reinterpret_cast<PyObject*>(retval);
-
+    arr->writeable = 1;
+    return 0;
   }
 
   catch (std::exception& e) {
@@ -562,97 +560,120 @@ PyObject* simplenew_2(int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
       &delete_array<T,N>);
   **/
 
-  return 0;
+  return -1;
 
 }
 
 template<typename T>
-PyObject* simplenew_1(int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
+int simplenew_1(PyBlitzArrayObject* arr, int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
   switch (ndim) {
 
     case 1:
-      return simplenew_2<T,1>(type_num, ndim, shape);
+      return simplenew_2<T,1>(arr, type_num, ndim, shape);
 
     case 2:
-      return simplenew_2<T,2>(type_num, ndim, shape);
+      return simplenew_2<T,2>(arr, type_num, ndim, shape);
 
     case 3:
-      return simplenew_2<T,3>(type_num, ndim, shape);
+      return simplenew_2<T,3>(arr, type_num, ndim, shape);
 
     case 4:
-      return simplenew_2<T,4>(type_num, ndim, shape);
+      return simplenew_2<T,4>(arr, type_num, ndim, shape);
 
     default:
       PyErr_Format(PyExc_NotImplementedError, "cannot allocate %s(@%" PY_FORMAT_SIZE_T "d,'%s'): this number of dimensions is outside the range of supported dimensions [1,%d]", PyBlitzArray_Type.tp_name, ndim, PyBlitzArray_TypenumAsString(type_num), BOB_BLITZ_MAXDIMS);
-      return 0;
+      return -1;
   }
 
 }
 
-PyObject* PyBlitzArray_SimpleNew (int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
+// Initializes the given arr with new data of the desired size
+// No check is performed, so old data is simply overwritten!
+// Returns 0 on success and -1 on failure
+int PyBlitzArray_SimpleInit(PyBlitzArrayObject* arr, int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
+
+  if (!arr){
+    PyErr_Format(PyExc_RuntimeError, "PyBlitzArray_SimpleInit: Cannot fill an array pointing to NULL.");
+    return -1;
+  }
 
   type_num = fix_integer_type_num(type_num);
 
   switch (type_num) {
 
     case NPY_BOOL:
-      return simplenew_1<bool>(type_num, ndim, shape);
+      return simplenew_1<bool>(arr, type_num, ndim, shape);
 
     case NPY_INT8:
-      return simplenew_1<int8_t>(type_num, ndim, shape);
+      return simplenew_1<int8_t>(arr, type_num, ndim, shape);
 
     case NPY_INT16:
-      return simplenew_1<int16_t>(type_num, ndim, shape);
+      return simplenew_1<int16_t>(arr, type_num, ndim, shape);
 
     case NPY_INT32:
-      return simplenew_1<int32_t>(type_num, ndim, shape);
+      return simplenew_1<int32_t>(arr, type_num, ndim, shape);
 
     case NPY_INT64:
-      return simplenew_1<int64_t>(type_num, ndim, shape);
+      return simplenew_1<int64_t>(arr, type_num, ndim, shape);
 
     case NPY_UINT8:
-      return simplenew_1<uint8_t>(type_num, ndim, shape);
+      return simplenew_1<uint8_t>(arr, type_num, ndim, shape);
 
     case NPY_UINT16:
-      return simplenew_1<uint16_t>(type_num, ndim, shape);
+      return simplenew_1<uint16_t>(arr, type_num, ndim, shape);
 
     case NPY_UINT32:
-      return simplenew_1<uint32_t>(type_num, ndim, shape);
+      return simplenew_1<uint32_t>(arr, type_num, ndim, shape);
 
     case NPY_UINT64:
-      return simplenew_1<uint64_t>(type_num, ndim, shape);
+      return simplenew_1<uint64_t>(arr, type_num, ndim, shape);
 
     case NPY_FLOAT32:
-      return simplenew_1<float>(type_num, ndim, shape);
+      return simplenew_1<float>(arr, type_num, ndim, shape);
 
     case NPY_FLOAT64:
-      return simplenew_1<double>(type_num, ndim, shape);
+      return simplenew_1<double>(arr, type_num, ndim, shape);
 
 #ifdef NPY_FLOAT128
     case NPY_FLOAT128:
-      return simplenew_1<long double>(type_num, ndim, shape);
+      return simplenew_1<long double>(arr, type_num, ndim, shape);
 
 #endif
 
     case NPY_COMPLEX64:
-      return simplenew_1<std::complex<float>>(type_num, ndim, shape);
+      return simplenew_1<std::complex<float>>(arr, type_num, ndim, shape);
 
     case NPY_COMPLEX128:
-      return simplenew_1<std::complex<double>>(type_num, ndim, shape);
+      return simplenew_1<std::complex<double>>(arr, type_num, ndim, shape);
 
 #ifdef NPY_COMPLEX256
     case NPY_COMPLEX256:
-      return simplenew_1<std::complex<long double>>(type_num, ndim, shape);
+      return simplenew_1<std::complex<long double>>(arr, type_num, ndim, shape);
 
 #endif
 
     default:
       PyErr_Format(PyExc_NotImplementedError, "cannot create %s(@%" PY_FORMAT_SIZE_T "d,T) with T having an unsupported numpy type number of %d", PyBlitzArray_Type.tp_name, ndim, type_num);
-      return 0;
+      return -1;
 
   }
 
 }
+
+// Creates and returns a new PyBlitzArrayObject with the desired size
+PyObject* PyBlitzArray_SimpleNew (int type_num, Py_ssize_t ndim, Py_ssize_t* shape) {
+
+  PyBlitzArrayObject* retval = (PyBlitzArrayObject*)PyBlitzArray_New(&PyBlitzArray_Type, 0, 0);
+
+  auto retval_ = make_safe(retval);
+
+  if (PyBlitzArray_SimpleInit(retval, type_num, ndim, shape) != 0)
+    return 0;
+
+  return Py_BuildValue("O", retval);
+
+}
+
 
 // N.B.: cannot use lambdas with very old versions of gcc
 struct stride_sorter {

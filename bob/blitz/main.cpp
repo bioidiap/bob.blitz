@@ -122,6 +122,7 @@ static PyObject* create_module (void) {
   PyBlitzArray_API[PyBlitzArray_Delete_NUM] = (void *)PyBlitzArray_Delete;
   PyBlitzArray_API[PyBlitzArray_SimpleNew_NUM] = (void *)PyBlitzArray_SimpleNew;
   PyBlitzArray_API[PyBlitzArray_SimpleNewFromData_NUM] = (void *)PyBlitzArray_SimpleNewFromData;
+  PyBlitzArray_API[PyBlitzArray_SimpleInit_NUM] = (void *)PyBlitzArray_SimpleInit;
 
   // From/To NumPy Converters
   PyBlitzArray_API[PyBlitzArray_AsNumpyArray_NUM] = (void *)PyBlitzArray_AsNumpyArray;
