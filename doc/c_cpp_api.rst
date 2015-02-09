@@ -288,6 +288,13 @@ Construction and Destruction
    The memory area pointed by ``data`` is stolen from the user, which should
    not delete it anymore.
 
+.. c:function:: int PyBlitzArray_SimpleInit (PyBlitzArrayObject* arr, int typenum, Py_ssize_t ndim, Py_ssize_t* shape)
+
+   Initializes the given ``PyBlitzArrayObject*`` with a new ``blitz::Array`` of the given typenum, dimensionality and shape.
+   See :c:func:`PyBlitzArray_SimpleNew` for details on the parameters.
+   This function does not check if the memory is already initialized.
+   It returns 0 on success and -1 on failure.
+
 
 To/From Numpy Converters
 ========================
