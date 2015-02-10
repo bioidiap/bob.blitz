@@ -307,11 +307,15 @@ To/From Numpy Converters
    conforming to the require data type, if possible. You may set ``dtype`` to
    ``NULL`` in case you don't mind the resulting data type.
 
+   Returns a **new reference**.
+
 
 .. c:function:: PyObject* PyBlitzArray_FromNumpyArray (PyObject* o)
 
    Creates a new ``bob.blitz.array`` from a ``numpy.ndarray`` object in a
    shallow manner.
+
+   Returns a **new reference**.
 
 
 .. c:function:: PyObject* PyBlitzArray_NUMPY_WRAP (PyObject* o)
