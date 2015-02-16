@@ -6,7 +6,7 @@
    :target: http://pythonhosted.org/bob.blitz/index.html
 .. image:: http://img.shields.io/badge/docs-latest-orange.png
    :target: https://www.idiap.ch/software/bob/docs/latest/bioidiap/bob.blitz/master/index.html
-.. image:: https://travis-ci.org/bioidiap/bob.blitz.svg?branch=master
+.. image:: https://travis-ci.org/bioidiap/bob.blitz.svg?branch=v2.0.2
    :target: https://travis-ci.org/bioidiap/bob.blitz
 .. image:: https://coveralls.io/repos/bioidiap/bob.blitz/badge.png
    :target: https://coveralls.io/r/bioidiap/bob.blitz
