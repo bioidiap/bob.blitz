@@ -105,7 +105,7 @@ static Py_ssize_t PyBlitzArray_len (PyBlitzArrayObject* self) {
 static PyObject* PyBlitzArray_getitem(PyBlitzArrayObject* self,
     PyObject* item) {
 
-  if (PyNumber_Check(item)) {
+  if (PyArray_IsAnyScalar(item)) {
 
     if (self->ndim != 1) {
       PyErr_Format(PyExc_TypeError, "expected tuple for accessing %" PY_FORMAT_SIZE_T "dD array", self->ndim);
@@ -140,7 +140,7 @@ static PyObject* PyBlitzArray_getitem(PyBlitzArrayObject* self,
 static int PyBlitzArray_setitem(PyBlitzArrayObject* self, PyObject* item,
     PyObject* value) {
 
-  if (PyNumber_Check(item)) {
+  if (PyArray_IsAnyScalar(item)) {
 
     if (self->ndim != 1) {
       PyErr_Format(PyExc_TypeError, "expected sequence for accessing %s(@%" PY_FORMAT_SIZE_T "d,'%s'", Py_TYPE(self)->tp_name, self->ndim, PyBlitzArray_TypenumAsString(self->type_num));

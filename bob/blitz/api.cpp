@@ -1143,7 +1143,7 @@ int PyBlitzArray_BehavedConverter(PyObject* o, PyBlitzArrayObject** a) {
 
 int PyBlitzArray_IndexConverter(PyObject* o, PyBlitzArrayObject** shape) {
 
-  if (PyNumber_Check(o)) {
+  if (PyArray_IsAnyScalar(o)) {
     (*shape)->ndim = 1;
     (*shape)->shape[0] = PyNumber_AsSsize_t(o, PyExc_OverflowError);
     if (PyErr_Occurred()) return 0;
@@ -1170,7 +1170,7 @@ int PyBlitzArray_IndexConverter(PyObject* o, PyBlitzArrayObject** shape) {
   for (Py_ssize_t i=0; i<(*shape)->ndim; ++i) {
     PyObject* item = PySequence_GetItem(o, i);
     if (!item) return 0;
-    if (!PyNumber_Check(item)) {
+    if (!PyArray_IsAnyScalar(item)) {
       PyErr_Format(PyExc_ValueError, "element %" PY_FORMAT_SIZE_T "d from shape/index sequence should be an number (coercible to integer)", i);
       Py_DECREF(item);
       return 0;
