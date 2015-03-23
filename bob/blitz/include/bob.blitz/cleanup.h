@@ -12,6 +12,7 @@
 #include <Python.h>
 #include <boost/shared_ptr.hpp>
 #include <numpy/arrayobject.h>
+#include <stdexcept>
 
 /**
  * Calls Py_DECREF(x) on the input object x. Usage pattern:
