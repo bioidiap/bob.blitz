@@ -24,6 +24,7 @@
  */
 template <typename T> void __decref(T* p) { Py_DECREF(p); }
 template <typename T> boost::shared_ptr<T> make_safe(T* o) {
+  if (!o) throw std::runtime_error("A NULL object was passed to the make_safe function. Consider to use make_xsafe, when pointers might be NULL");
   return boost::shared_ptr<T>(o, &__decref<T>);
 }
 
