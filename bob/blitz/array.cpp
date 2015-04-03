@@ -7,58 +7,44 @@
 
 #define BOB_BLITZ_MODULE
 #include <bob.blitz/capi.h>
-#include <bob.extension/defines.h>
+#include <bob.extension/documentation.h>
 #include <structmember.h>
 
-PyDoc_STRVAR(s_array_str, BOB_EXT_MODULE_PREFIX ".array");
-
-PyDoc_STRVAR(s_array_doc,
-"array(shape, dtype) -> new n-dimensional blitz::Array\n\
-\n\
-An N-dimensional blitz::Array<T,N> pythonic representation\n\
-\n\
-Constructor parameters:\n\
-\n\
-shape\n\
-  An iterable, indicating the shape of the array to be constructed\n\
-  \n\
-  The implementation current supports a maximum of 4 dimensions.\n\
-  Building an array with more dimensions will raise a \n\
-  :py:class:`TypeError`. There are no explicit limits for the size in\n\
-  each dimension, except for the machine's maximum address size.\n\
-\n\
-dtype\n\
-  A :py:class:`numpy.dtype` or ``dtype`` convertible object that\n\
-  specified the type of elements in this array.\n\
-  \n\
-  The following numpy data types are supported by this library:\n\
-  \n\
-    * :py:class:`numpy.bool_`\n\
-    * :py:class:`numpy.int8`\n\
-    * :py:class:`numpy.int16`\n\
-    * :py:class:`numpy.int32`\n\
-    * :py:class:`numpy.int64`\n\
-    * :py:class:`numpy.uint8`\n\
-    * :py:class:`numpy.uint16`\n\
-    * :py:class:`numpy.uint32`\n\
-    * :py:class:`numpy.uint64`\n\
-    * :py:class:`numpy.float32`\n\
-    * :py:class:`numpy.float64`\n\
-    * :py:class:`numpy.float128` (if this architecture suppports it)\n\
-    * :py:class:`numpy.complex64`\n\
-    * :py:class:`numpy.complex128`\n\
-    * :py:class:`numpy.complex256` (if this architecture suppports it)\n\
-\n\
-Objects of this class hold a pointer to C++ ``blitz::Array<T,N>``.\n\
-The C++ data type ``T`` is mapped to a :py:class:`numpy.dtype` object,\n\
-while the extents and number of dimensions ``N`` are mapped to a shape,\n\
-similar to what is done for :py:class:`numpy.ndarray` objects.\n\
-\n\
-Objects of this class can be wrapped in :py:class:`numpy.ndarray`\n\
-quite efficiently, so that flexible numpy-like operations are possible\n\
-on its contents. You can also deploy objects of this class wherever\n\
-:py:class:`numpy.ndarray`'s may be input.\n\
-"
+auto array_doc = bob::extension::ClassDoc(
+  BOB_EXT_MODULE_PREFIX ".array",
+  "A pythonic representation of an N-dimensional ``blitz::Array<T,N>``",
+  "Objects of this class hold a pointer to C++ ``blitz::Array<T,N>``. "
+  "The C++ data type ``T`` is mapped to a :py:class:`numpy.dtype` object, while the extents and number of dimensions ``N`` are mapped to a shape, similar to what is done for :py:class:`numpy.ndarray` objects.\n\n"
+  "Objects of this class can be wrapped in :py:class:`numpy.ndarray` quite efficiently, so that flexible numpy-like operations are possible on its contents. "
+  "You can also deploy objects of this class wherever :py:class:`numpy.ndarray`'s may be input."
+).add_constructor(
+  bob::extension::FunctionDoc(
+    "array",
+    "Constructs a new :py:class:`bob.blitz.array`",
+    "The implementation current supports a maximum of 4 dimensions. "
+    "Building an array with more dimensions will raise a :py:class:`TypeError`. "
+    "There are no explicit limits for the size in each dimension, except for the machine's maximum address size.\n\n"
+    "The following numpy data types are supported by this library:\n\n"
+    " * :py:class:`numpy.bool_`\n"
+    " * :py:class:`numpy.int8`\n"
+    " * :py:class:`numpy.int16`\n"
+    " * :py:class:`numpy.int32`\n"
+    " * :py:class:`numpy.int64`\n"
+    " * :py:class:`numpy.uint8`\n"
+    " * :py:class:`numpy.uint16`\n"
+    " * :py:class:`numpy.uint32`\n"
+    " * :py:class:`numpy.uint64`\n"
+    " * :py:class:`numpy.float32`\n"
+    " * :py:class:`numpy.float64`\n"
+    " * :py:class:`numpy.float128` (if this architecture suppports it)\n"
+    " * :py:class:`numpy.complex64`\n"
+    " * :py:class:`numpy.complex128`\n"
+    " * :py:class:`numpy.complex256` (if this architecture suppports it)\n",
+    true
+  )
+  .add_prototype("shape, dtype", "")
+  .add_parameter("shape", "iterable", "An iterable, indicating the shape of the array to be constructed")
+  .add_parameter("dtype", ":py:class:`numpy.dtype` or ``dtype`` convertible object", "The data type of the object to be created")
 );
 
 /**
@@ -179,17 +165,18 @@ static PyMappingMethods PyBlitzArray_mapping = {
     (objobjargproc)PyBlitzArray_setitem,
 };
 
-PyDoc_STRVAR(s_as_ndarray_str, "as_ndarray");
-PyDoc_STRVAR(s_private_array_str, "__array__");
-PyDoc_STRVAR(s_private_array_doc,
-"x.__array__([dtype]) -> numpy.ndarray\n\
-x.as_ndarray([dtype]) -> numpy.ndarray\n\
-\n\
-numpy.ndarray accessor (shallow wraps :py:class:`bob.blitz.array` as\n\
-numpy.ndarray). If ``dtype`` is given and the current data type\n\
-is not the same, then forces the creation of a copy conforming\n\
-to the require data type, if possible.\n\
-");
+
+auto as_ndarray = bob::extension::FunctionDoc(
+  "as_ndarray",
+  ":py:class:`numpy.ndarray` accessor",
+  "This function wraps this array as a :py:class:`numpy.ndarray`. "
+  "If ``dtype`` is given and the current data type is not the same, then forces the creation of a copy conforming to the require data type, if possible.",
+  true
+)
+.add_prototype("[dtype]", "array")
+.add_parameter("dtype", ":py:class:`numpy.dtype` or dtype convertible object", "[optional] The data type of the array to create")
+.add_return("array", ":py:class:`numpy.ndarray`", "This array converted to a :py:class`numpy.ndarray`")
+;
 
 static PyObject* PyBlitzArray_AsNumpyArrayPrivate(PyBlitzArrayObject* self,
     PyObject* args, PyObject* kwds) {
@@ -207,16 +194,18 @@ static PyObject* PyBlitzArray_AsNumpyArrayPrivate(PyBlitzArrayObject* self,
 
 }
 
-PyDoc_STRVAR(s_cast_str, "cast");
-PyDoc_STRVAR(s_cast_doc,
-"x.cast(dtype) -> blitz array\n\
-\n\
-Casts an existing array into a (possibly) different data type,\n\
-without changing its shape. If the data type matches the current\n\
-array's data type, then a new view to the same array is returned.\n\
-Otherwise, a new array is allocated and returned.\n\
-");
 
+auto cast = bob::extension::FunctionDoc(
+  "cast",
+  "Casts an existing array into a (possibly) different data type, without changing its shape",
+  "If the data type matches the current array's data type, then a new view to the same array is returned. "
+  "Otherwise, a new array is allocated and returned.",
+  true
+)
+.add_prototype("dtype", "array")
+.add_parameter("dtype", ":py:class:`numpy.dtype` or dtype convertible object", "The data type to convert this array into")
+.add_return("array", ":py:class:`bob.blitz.array`", "This array converted to the given data type")
+;
 static PyObject* PyBlitzArray_SelfCast(PyBlitzArrayObject* self, PyObject* args, PyObject* kwds) {
 
   /* Parses input arguments in a single shot */
@@ -234,86 +223,91 @@ static PyObject* PyBlitzArray_SelfCast(PyBlitzArrayObject* self, PyObject* args,
 
 static PyMethodDef PyBlitzArray_methods[] = {
     {
-      s_as_ndarray_str,
+      as_ndarray.name(),
       (PyCFunction)PyBlitzArray_AsNumpyArrayPrivate,
       METH_VARARGS|METH_KEYWORDS,
-      s_private_array_doc
+      as_ndarray.doc()
     },
     {
-      s_private_array_str,
+      "__array__",
       (PyCFunction)PyBlitzArray_AsNumpyArrayPrivate,
       METH_VARARGS|METH_KEYWORDS,
-      s_private_array_doc
+      as_ndarray.doc("__array__")
     },
     {
-      s_cast_str,
+      cast.name(),
       (PyCFunction)PyBlitzArray_SelfCast,
       METH_VARARGS|METH_KEYWORDS,
-      s_cast_doc
+      cast.doc()
     },
     {0}  /* Sentinel */
 };
 
 /* Property API */
-PyDoc_STRVAR(s_shape_str, "shape");
-PyDoc_STRVAR(s_shape_doc,
-"A tuple indicating the shape of this array (in **elements**)"
+auto shape = bob::extension::VariableDoc(
+  "shape",
+  "tuple",
+  "A tuple indicating the shape of this array (in **elements**)"
 );
 
-PyDoc_STRVAR(s_stride_str, "stride");
-PyDoc_STRVAR(s_stride_doc,
-"A tuple indicating the strides of this array (in **bytes**)"
+auto stride = bob::extension::VariableDoc(
+  "stride",
+  "tuple",
+  "A tuple indicating the strides of this array (in **bytes**)"
 );
 
-PyDoc_STRVAR(s_dtype_str, "dtype");
-PyDoc_STRVAR(s_dtype_doc,
-"The :py:class:`numpy.dtype` for every element in this array"
+auto dtype = bob::extension::VariableDoc(
+  "dtype",
+  ":py:class:`numpy.dtype`",
+  "The data type for every element in this array"
 );
 
-PyDoc_STRVAR(s_writeable_str, "writeable");
-PyDoc_STRVAR(s_writeable_doc,
-"A flag, indicating if this array is writeable"
+auto writeable = bob::extension::VariableDoc(
+  "writeable",
+  "bool",
+  "A flag, indicating if this array is writeable"
 );
 
-PyDoc_STRVAR(s_base_str, "base");
-PyDoc_STRVAR(s_base_doc,
-"If the memory of this array is borrowed from some other object, this is it"
+auto base = bob::extension::VariableDoc(
+  "base",
+  "object",
+  "If the memory of this array is borrowed from some other object, this is it"
 );
 
 static PyGetSetDef PyBlitzArray_getseters[] = {
     {
-      s_dtype_str,
+      dtype.name(),
       (getter)PyBlitzArray_PyDTYPE,
       0,
-      s_dtype_doc,
+      dtype.doc(),
       0,
     },
     {
-      s_shape_str,
+      shape.name(),
       (getter)PyBlitzArray_PySHAPE,
       0,
-      s_shape_doc,
+      shape.doc(),
       0,
     },
     {
-      s_stride_str,
+      stride.name(),
       (getter)PyBlitzArray_PySTRIDE,
       0,
-      s_stride_doc,
+      stride.doc(),
       0,
     },
     {
-      s_writeable_str,
+      writeable.name(),
       (getter)PyBlitzArray_PyWRITEABLE,
       0,
-      s_writeable_doc,
+      writeable.doc(),
       0,
     },
     {
-      s_base_str,
+      base.name(),
       (getter)PyBlitzArray_PyBASE,
       0,
-      s_base_doc,
+      base.doc(),
       0,
     },
     {0}  /* Sentinel */
@@ -337,11 +331,7 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
   switch (o->ndim) {
     case 1:
       return
-#       if PY_VERSION_HEX >= 0x03000000
-        PyUnicode_FromFormat
-#       else
         PyString_FromFormat
-#       endif
           ("%s(%" PY_FORMAT_SIZE_T "d,'%s')",
           Py_TYPE(o)->tp_name,
           o->shape[0],
@@ -349,11 +339,7 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
           );
     case 2:
       return
-#       if PY_VERSION_HEX >= 0x03000000
-        PyUnicode_FromFormat
-#       else
         PyString_FromFormat
-#       endif
           ("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')",
           Py_TYPE(o)->tp_name,
           o->shape[0],
@@ -362,11 +348,7 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
           );
     case 3:
       return
-#       if PY_VERSION_HEX >= 0x03000000
-        PyUnicode_FromFormat
-#       else
         PyString_FromFormat
-#       endif
           ("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')",
           Py_TYPE(o)->tp_name,
           o->shape[0],
@@ -376,11 +358,7 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
           );
     case 4:
       return
-#       if PY_VERSION_HEX >= 0x03000000
-        PyUnicode_FromFormat
-#       else
         PyString_FromFormat
-#       endif
           ("%s((%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d,%" PY_FORMAT_SIZE_T "d),'%s')",
           Py_TYPE(o)->tp_name,
           o->shape[0],
@@ -391,11 +369,7 @@ static PyObject* PyBlitzArray_repr(PyBlitzArrayObject* o) {
           );
     default:
       return
-#       if PY_VERSION_HEX >= 0x03000000
-        PyUnicode_FromFormat
-#       else
         PyString_FromFormat
-#       endif
           ("[unsupported] %s(@%" PY_FORMAT_SIZE_T "d,'%s') %" PY_FORMAT_SIZE_T "d elements>",
           Py_TYPE(o)->tp_name,
           o->ndim,
@@ -412,41 +386,37 @@ static PyMemberDef PyBlitzArray_members[] = {
 
 PyTypeObject PyBlitzArray_Type = {
     PyVarObject_HEAD_INIT(0, 0)
-    s_array_str,                                /*tp_name*/
-    sizeof(PyBlitzArrayObject),                 /*tp_basicsize*/
-    0,                                          /*tp_itemsize*/
-    (destructor)PyBlitzArray_Delete,            /*tp_dealloc*/
-    0,                                          /*tp_print*/
-    0,                                          /*tp_getattr*/
-    0,                                          /*tp_setattr*/
-    0,                                          /*tp_compare*/
-    (reprfunc)PyBlitzArray_repr,                /*tp_repr*/
-    0,                                          /*tp_as_number*/
-    0,                                          /*tp_as_sequence*/
-    &PyBlitzArray_mapping,                      /*tp_as_mapping*/
-    0,                                          /*tp_hash */
-    0,                                          /*tp_call*/
-    (reprfunc)PyBlitzArray_str,                 /*tp_str*/
-    0,                                          /*tp_getattro*/
-    0,                                          /*tp_setattro*/
-    0,                                          /*tp_as_buffer*/
-    Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE,   /*tp_flags*/
-    s_array_doc,                                /* tp_doc */
-    0,		                                      /* tp_traverse */
-    0,		                                      /* tp_clear */
-    0,		                                      /* tp_richcompare */
-    0,		                                      /* tp_weaklistoffset */
-    0,		                                      /* tp_iter */
-    0,		                                      /* tp_iternext */
-    PyBlitzArray_methods,                       /* tp_methods */
-    PyBlitzArray_members,                       /* tp_members */
-    PyBlitzArray_getseters,                     /* tp_getset */
-    0,                                          /* tp_base */
-    0,                                          /* tp_dict */
-    0,                                          /* tp_descr_get */
-    0,                                          /* tp_descr_set */
-    0,                                          /* tp_dictoffset */
-    (initproc)PyBlitzArray_init,                /* tp_init */
-    0,                                          /* tp_alloc */
-    PyBlitzArray_New,                           /* tp_new */
+    0
 };
+
+bool init_BlitzArray(PyObject* module)
+{
+
+  // initialize the Gabor wavelet type struct
+  PyBlitzArray_Type.tp_name = array_doc.name();
+  PyBlitzArray_Type.tp_basicsize = sizeof(PyBlitzArrayObject);
+  PyBlitzArray_Type.tp_flags = Py_TPFLAGS_DEFAULT | Py_TPFLAGS_BASETYPE;
+  PyBlitzArray_Type.tp_doc = array_doc.doc();
+
+  // set the functions
+  PyBlitzArray_Type.tp_new = PyBlitzArray_New;
+  PyBlitzArray_Type.tp_init = reinterpret_cast<initproc>(PyBlitzArray_init);
+  PyBlitzArray_Type.tp_dealloc = reinterpret_cast<destructor>(PyBlitzArray_Delete);
+  PyBlitzArray_Type.tp_methods = PyBlitzArray_methods;
+  PyBlitzArray_Type.tp_members = PyBlitzArray_members;
+  PyBlitzArray_Type.tp_getset = PyBlitzArray_getseters;
+
+  PyBlitzArray_Type.tp_str = reinterpret_cast<reprfunc>(PyBlitzArray_str);
+  PyBlitzArray_Type.tp_repr = reinterpret_cast<reprfunc>(PyBlitzArray_repr);
+  PyBlitzArray_Type.tp_as_mapping = &PyBlitzArray_mapping;
+
+
+  // check that everyting is fine
+  if (PyType_Ready(&PyBlitzArray_Type) < 0)
+    return false;
+
+  // add the type to the module
+  Py_INCREF(&PyBlitzArray_Type);
+  return PyModule_AddObject(module, "array", (PyObject*)&PyBlitzArray_Type) >= 0;
+}
+

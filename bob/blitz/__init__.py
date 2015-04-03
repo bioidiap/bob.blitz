@@ -3,8 +3,6 @@
 # Andre Anjos <andre.anjos@idiap.ch>
 # Fri 20 Sep 14:45:01 2013
 
-"""Blitz++ Array bindings for Python"""
-
 import pkg_resources
 
 from ._library import array, as_blitz

@@ -11,6 +11,22 @@
 #define BOB_BLITZ_MODULE
 #include <bob.blitz/capi.h>
 #include <bob.blitz/cleanup.h>
+#include <bob.extension/documentation.h>
+
+extern bool init_BlitzArray(PyObject* module);
+
+auto as_blitz = bob::extension::FunctionDoc(
+  "as_blitz",
+  "Converts any compatible python object into a shallow :py:class:`" BOB_EXT_MODULE_PREFIX ".array`",
+  "This function works by first converting the input object ``x`` into a :py:class:`numpy.ndarray` and then shallow wrapping that ``ndarray`` into a new :py:class:`" BOB_EXT_MODULE_PREFIX ".array`. "
+  "You can access the converted ``ndarray`` using the returned value's :py:meth:`" BOB_EXT_MODULE_PREFIX ".array.base` attribute. "
+  "If the ``ndarray`` cannot be shallow-wrapped, a :py:class:`ValueError` is raised.\n\n"
+  "In the case the input object ``x`` is already a behaved (C-style, memory-aligned, contiguous) :py:class:`numpy.ndarray`, then this function only shallow wrap's it into a :py:class:`" BOB_EXT_MODULE_PREFIX ".array` skin."
+)
+.add_prototype("x", "array")
+.add_parameter("x", "object", "Any object convertible into a :py:class:`numpy.ndarray`")
+.add_return("array", ":py:class:`" BOB_EXT_MODULE_PREFIX ".array`", "The converted array")
+;
 
 static PyObject* PyBlitzArray_as_blitz(PyObject*, PyObject* args, PyObject* kwds) {
 
@@ -25,31 +41,12 @@ static PyObject* PyBlitzArray_as_blitz(PyObject*, PyObject* args, PyObject* kwds
 
 }
 
-PyDoc_STRVAR(s_as_blitz_str, "as_blitz");
-PyDoc_STRVAR(s_as_blitz__doc__,
-"as_blitz(x) -> bob.blitz.array\n\
-\n\
-Converts any compatible python object into a shallow " BOB_EXT_MODULE_PREFIX ".array\n\
-\n\
-This function works by first converting the input object ``x`` into\n\
-a :py:class:`numpy.ndarray` and then shallow wrapping that ``ndarray``\n\
-into a new :py:class:`" BOB_EXT_MODULE_PREFIX ".array`. You can access the converted\n\
-``ndarray`` using the returned value's ``base`` attribute. If the\n\
-``ndarray`` cannot be shallow-wrapped, a :py:class:`ValueError` is\n\
-raised.\n\
-\n\
-In the case the input object ``x`` is already a behaved (C-style,\n\
-memory-aligned, contiguous) :py:class:`numpy.ndarray`, then this\n\
-function only shallow wrap's it into a :py:class:`" BOB_EXT_MODULE_PREFIX ".array` skin.\n\
-"
-);
-
 static PyMethodDef module_methods[] = {
     {
-      s_as_blitz_str,
+      as_blitz.name(),
       (PyCFunction)PyBlitzArray_as_blitz,
       METH_VARARGS|METH_KEYWORDS,
-      s_as_blitz__doc__
+      as_blitz.doc()
     },
     {0}  /* Sentinel */
 };
@@ -89,8 +86,7 @@ static PyObject* create_module (void) {
     return 0;
 
   /* register the type object to python */
-  Py_INCREF(&PyBlitzArray_Type);
-  if (PyModule_AddObject(m, "array", (PyObject *)&PyBlitzArray_Type) < 0) return 0;
+  if (!init_BlitzArray(m)) return NULL;
 
   static void* PyBlitzArray_API[PyBlitzArray_API_pointers];
 
@@ -161,8 +157,7 @@ static PyObject* create_module (void) {
   /* imports the NumPy C-API as well */
   import_array1(0);
 
-  Py_INCREF(m);
-  return m;
+  return Py_BuildValue("O", m);
 
 }
 
