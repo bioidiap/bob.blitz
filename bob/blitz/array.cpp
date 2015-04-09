@@ -177,7 +177,7 @@ auto as_ndarray = bob::extension::FunctionDoc(
 .add_parameter("dtype", ":py:class:`numpy.dtype` or dtype convertible object", "[optional] The data type of the array to create")
 .add_return("array", ":py:class:`numpy.ndarray`", "This array converted to a :py:class`numpy.ndarray`")
 ;
-
+auto __array__ = as_ndarray.clone("__array__");
 static PyObject* PyBlitzArray_AsNumpyArrayPrivate(PyBlitzArrayObject* self,
     PyObject* args, PyObject* kwds) {
 
@@ -229,10 +229,10 @@ static PyMethodDef PyBlitzArray_methods[] = {
       as_ndarray.doc()
     },
     {
-      "__array__",
+      __array__.name(),
       (PyCFunction)PyBlitzArray_AsNumpyArrayPrivate,
       METH_VARARGS|METH_KEYWORDS,
-      as_ndarray.doc("__array__")
+      __array__.doc()
     },
     {
       cast.name(),
@@ -419,4 +419,3 @@ bool init_BlitzArray(PyObject* module)
   Py_INCREF(&PyBlitzArray_Type);
   return PyModule_AddObject(module, "array", (PyObject*)&PyBlitzArray_Type) >= 0;
 }
-
