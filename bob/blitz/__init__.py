@@ -14,20 +14,8 @@ def get_config():
   """Returns a string containing the configuration information.
   """
 
-  from .version import externals
-
-  packages = pkg_resources.require(__name__)
-  this = packages[0]
-  deps = packages[1:]
-
-  retval =  "%s: %s [api=0x%04x] (%s)\n" % (this.key, this.version,
-      version.api, this.location)
-  retval += "  - c/c++ dependencies:\n"
-  for k in sorted(externals): retval += "    - %s: %s\n" % (k, externals[k])
-  retval += "  - python dependencies:\n"
-  for d in deps: retval += "    - %s: %s (%s)\n" % (d.key, d.version, d.location)
-
-  return retval.strip()
+  import bob.extension
+  return bob.extension.get_config(__name__, version.externals, version.api)
 
 # gets sphinx autodoc done right - don't remove it
 __all__ = [_ for _ in dir() if not _.startswith('_')]
