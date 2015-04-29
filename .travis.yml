@@ -24,7 +24,7 @@ before_install:
 - pip install coveralls
 install:
 - python bootstrap-buildout.py
-- CPPFLAGS=--coverage LDFLAGS=--coverage ./bin/buildout buildout:debug=false buildout:develop=. buildout:extensions=bob.buildout buildout:auto-checkout=
+- CPPFLAGS=--coverage LDFLAGS=--coverage ./bin/buildout buildout:debug=false buildout:develop=src/bob.extension buildout:develop+=. buildout:auto-checkout=bob.extension
 script:
 - ./bin/python -c 'import pkg_resources; from bob.blitz import get_config; print(get_config())'
 - ./bin/coverage run --source=bob.blitz ./bin/nosetests -sv
