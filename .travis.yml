@@ -24,7 +24,7 @@ before_install:
 - pip install coveralls
 install:
 - python bootstrap-buildout.py
-- CPPFLAGS=--coverage LDFLAGS=--coverage ./bin/buildout buildout:debug=false buildout:develop=src/bob.extension buildout:develop+=. buildout:auto-checkout=bob.extension
+- CPPFLAGS=--coverage LDFLAGS=--coverage ./bin/buildout buildout:debug=false buildout:develop=. buildout:extensions=bob.buildout buildout:auto-checkout=
 script:
 - ./bin/python -c 'import pkg_resources; from bob.blitz import get_config; print(get_config())'
 - ./bin/coverage run --source=bob.blitz ./bin/nosetests -sv
@@ -33,5 +33,7 @@ script:
 after_success:
 - cpp-coveralls --build-root=`pwd` --exclude=src --dump=cpp_cov.json
 - coveralls --merge=cpp_cov.json
-- ./src/bob.extension/scripts/upload-sphinx.sh
-- ./src/bob.extension/scripts/upload-wheel.sh
+- wget https://raw.githubusercontent.com/bioidiap/bob.extension/master/scripts/upload-{sphinx,wheel}.sh
+- chmod a+x upload-sphinx.sh upload-wheel.sh
+- ./upload-sphinx.sh
+- ./upload-wheel.sh
