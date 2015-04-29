@@ -20,12 +20,13 @@ before_install:
 - sudo apt-get update -qq
 - sudo apt-get install -qq libboost-all-dev libblitz1-dev texlive-latex-recommended texlive-latex-extra texlive-fonts-recommended
 - pip install --find-links https://www.idiap.ch/software/bob/wheels/travis/ --use-wheel -r requirements.txt
-- pip install --find-links https://www.idiap.ch/software/bob/wheels/travis/ --use-wheel sphinx$SPHINXSPEC nose==1.3.0 jinja2==2.6 cpp-coveralls pygments==1.6
+- pip install --find-links https://www.idiap.ch/software/bob/wheels/travis/ --use-wheel sphinx$SPHINXSPEC nose==1.3.0 jinja2==2.6 coverage cpp-coveralls pygments==1.6
 - pip install coveralls
 install:
 - python bootstrap-buildout.py
 - CPPFLAGS=--coverage LDFLAGS=--coverage ./bin/buildout buildout:debug=false buildout:develop=. buildout:extensions=bob.buildout buildout:auto-checkout=
 script:
+- ./bin/python -c 'import site, os; open(os.path.join(site.getusersitepackages(), "usercustomize.py"),"w").write("import pkg_resources")'
 - ./bin/python -c 'from bob.blitz import get_config; print(get_config())'
 - ./bin/coverage run --source=bob.blitz ./bin/nosetests -sv
 - ./bin/sphinx-build -b doctest doc sphinx
