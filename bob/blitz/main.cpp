@@ -79,12 +79,6 @@ static PyObject* create_module (void) {
   if (!m) return 0;
   auto m_ = make_safe(m); ///< protects against early returns
 
-  /* register version numbers and constants */
-  if (PyModule_AddIntConstant(m, "__api_version__", BOB_BLITZ_API_VERSION) < 0)
-    return 0;
-  if (PyModule_AddStringConstant(m, "__version__", BOB_EXT_MODULE_VERSION) < 0)
-    return 0;
-
   /* register the type object to python */
   if (!init_BlitzArray(m)) return NULL;
 
@@ -158,7 +152,6 @@ static PyObject* create_module (void) {
   import_array1(0);
 
   return Py_BuildValue("O", m);
-
 }
 
 PyMODINIT_FUNC BOB_EXT_ENTRY_NAME (void) {
