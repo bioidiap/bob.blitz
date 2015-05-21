@@ -6,17 +6,9 @@
  */
 
 
-// include config.h without defining the bob_blitz_version function
-#include <bob.blitz/config.h>
-
 #define BOB_IMPORT_VERSION
-#ifdef NO_IMPORT_ARRAY
-#undef NO_IMPORT_ARRAY
-#endif
-
-// This will include config.h again, but will not do anything since its header guard is already defined.
-#include <bob.blitz/capi.h>
-
+#include <bob.blitz/config.h>
+#include <bob.blitz/cleanup.h>
 
 static PyObject* build_version_dictionary() {
 
@@ -24,7 +16,7 @@ static PyObject* build_version_dictionary() {
   if (!retval) return 0;
   auto retval_ = make_safe(retval);
 
-  if (!dict_set(retval, "Blitz++", BZ_VERSION)) return 0;
+  if (!dict_steal(retval, "Blitz++", blitz_version())) return 0;
   if (!dict_steal(retval, "Boost", boost_version())) return 0;
   if (!dict_steal(retval, "Compiler", compiler_version())) return 0;
   if (!dict_steal(retval, "Python", python_version())) return 0;
@@ -69,8 +61,8 @@ static PyObject* create_module (void) {
   if (!externals) return 0;
   if (PyModule_AddObject(m, "externals", externals) < 0) return 0;
 
-  /* Imports the numpy C-API */
-  if (import_bob_blitz() < 0) return 0;
+  // call bob_blitz_version once to avoid compiler warning
+  auto _ = make_safe(bob_blitz_version());
 
   return Py_BuildValue("O", m);
 }
