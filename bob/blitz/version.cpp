@@ -5,86 +5,18 @@
  * @brief Binds configuration information available from bob
  */
 
-#include <Python.h>
 
-#include <string>
-#include <cstdlib>
-#include <blitz/blitz.h>
-#include <boost/preprocessor/stringize.hpp>
-#include <boost/version.hpp>
-#include <boost/format.hpp>
+// include config.h without defining the bob_blitz_version function
+#include <bob.blitz/config.h>
 
+#define BOB_IMPORT_VERSION
 #ifdef NO_IMPORT_ARRAY
 #undef NO_IMPORT_ARRAY
 #endif
+
+// This will include config.h again, but will not do anything since its header guard is already defined.
 #include <bob.blitz/capi.h>
-#include <bob.blitz/cleanup.h>
 
-static int dict_set(PyObject* d, const char* key, const char* value) {
-  PyObject* v = Py_BuildValue("s", value);
-  if (!v) return 0;
-  int retval = PyDict_SetItemString(d, key, v);
-  Py_DECREF(v);
-  if (retval == 0) return 1; //all good
-  return 0; //a problem occurred
-}
-
-static int dict_steal(PyObject* d, const char* key, PyObject* value) {
-  if (!value) return 0;
-  int retval = PyDict_SetItemString(d, key, value);
-  Py_DECREF(value);
-  if (retval == 0) return 1; //all good
-  return 0; //a problem occurred
-}
-
-/**
- * Describes the version of Boost libraries installed
- */
-static PyObject* boost_version() {
-  boost::format f("%d.%d.%d");
-  f % (BOOST_VERSION / 100000);
-  f % (BOOST_VERSION / 100 % 1000);
-  f % (BOOST_VERSION % 100);
-  return Py_BuildValue("s", f.str().c_str());
-}
-
-/**
- * Describes the compiler version
- */
-static PyObject* compiler_version() {
-# if defined(__GNUC__) && !defined(__llvm__)
-  boost::format f("%s.%s.%s");
-  f % BOOST_PP_STRINGIZE(__GNUC__);
-  f % BOOST_PP_STRINGIZE(__GNUC_MINOR__);
-  f % BOOST_PP_STRINGIZE(__GNUC_PATCHLEVEL__);
-  return Py_BuildValue("{ssss}", "name", "gcc", "version", f.str().c_str());
-# elif defined(__llvm__) && !defined(__clang__)
-  return Py_BuildValue("{ssss}", "name", "llvm-gcc", "version", __VERSION__);
-# elif defined(__clang__)
-  return Py_BuildValue("{ssss}", "name", "clang", "version", __clang_version__);
-# else
-  return Py_BuildValue("{ssss}", "name", "unsupported", "version", "unknown");
-# endif
-}
-
-/**
- * Python version with which we compiled the extensions
- */
-static PyObject* python_version() {
-  boost::format f("%s.%s.%s");
-  f % BOOST_PP_STRINGIZE(PY_MAJOR_VERSION);
-  f % BOOST_PP_STRINGIZE(PY_MINOR_VERSION);
-  f % BOOST_PP_STRINGIZE(PY_MICRO_VERSION);
-  return Py_BuildValue("s", f.str().c_str());
-}
-
-/**
- * Numpy version
- */
-static PyObject* numpy_version() {
-  return Py_BuildValue("{ssss}", "abi", BOOST_PP_STRINGIZE(NPY_VERSION),
-      "api", BOOST_PP_STRINGIZE(NPY_API_VERSION));
-}
 
 static PyObject* build_version_dictionary() {
 
@@ -98,8 +30,7 @@ static PyObject* build_version_dictionary() {
   if (!dict_steal(retval, "Python", python_version())) return 0;
   if (!dict_steal(retval, "NumPy", numpy_version())) return 0;
 
-  Py_INCREF(retval);
-  return retval;
+  return Py_BuildValue("O", retval);
 }
 
 static PyMethodDef module_methods[] = {
@@ -138,6 +69,7 @@ static PyObject* create_module (void) {
   if (!externals) return 0;
   if (PyModule_AddObject(m, "externals", externals) < 0) return 0;
 
+  /* Imports the numpy C-API */
   if (import_bob_blitz() < 0) return 0;
 
   return Py_BuildValue("O", m);
