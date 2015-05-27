@@ -11,7 +11,7 @@ from pkg_resources import resource_filename
 from bob.extension import Extension as BobExtension
 # forward the build_ext command from bob.extension
 from bob.extension import build_ext, Library as BobLibrary
-from distutils.version import StrictVersion
+from distutils.version import LooseVersion
 
 class Extension(BobExtension):
   """Extension building with pkg-config packages and blitz.array.
@@ -43,7 +43,7 @@ class Extension(BobExtension):
           ("NO_IMPORT_ARRAY", "1"),
           ]
 
-    if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
+    if LooseVersion(numpy.__version__) >= LooseVersion('1.7'):
       macros.append(("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"))
 
     kwargs.setdefault('define_macros', []).extend(macros)
@@ -83,7 +83,7 @@ class Library (BobLibrary):
           ("NO_IMPORT_ARRAY", "1"),
           ]
 
-    if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
+    if LooseVersion(numpy.__version__) >= LooseVersion('1.7'):
       macros.append(("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"))
 
     kwargs.setdefault('define_macros', []).extend(macros)
