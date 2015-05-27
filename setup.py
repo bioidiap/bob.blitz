@@ -27,8 +27,8 @@ define_macros=[
     ("PY_ARRAY_UNIQUE_SYMBOL", "BOB_BLITZ_NUMPY_C_API"),
     ("NO_IMPORT_ARRAY", "1"),
     ]
-from distutils.version import StrictVersion
-if StrictVersion(numpy.__version__) >= StrictVersion('1.7'):
+from distutils.version import LooseVersion
+if LooseVersion(numpy.__version__) >= LooseVersion('1.7'):
   define_macros.append(("NPY_NO_DEPRECATED_API", "NPY_1_7_API_VERSION"))
 
 # Pkg-config requirements
