@@ -55,9 +55,7 @@ setup(
     include_package_data=True,
     zip_safe=False,
 
-    namespace_packages = [
-      'bob',
-    ],
+
 
     setup_requires = build_requires,
     install_requires = build_requires,
