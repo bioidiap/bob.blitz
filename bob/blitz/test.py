@@ -384,3 +384,11 @@ def test_array_cast():
   nose.tools.eq_(bz2[1,0], 2)
   nose.tools.eq_(bz2[1,1], 4)
 
+def test_constness():
+  from ._library import _test_const_numpy
+  data = _test_const_numpy()
+  assert data.flags['WRITEABLE'] == False
+
+  def _should_raise(x,y):
+    x[0] = y
+  nose.tools.assert_raises(ValueError, _should_raise, data, 4)

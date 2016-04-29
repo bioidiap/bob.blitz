@@ -9,7 +9,7 @@
 #undef NO_IMPORT_ARRAY
 #endif
 #define BOB_BLITZ_MODULE
-#include <bob.blitz/capi.h>
+#include <bob.blitz/cppapi.h>
 #include <bob.blitz/cleanup.h>
 #include <bob.extension/documentation.h>
 
@@ -38,8 +38,18 @@ static PyObject* PyBlitzArray_as_blitz(PyObject*, PyObject* args, PyObject* kwds
   if (!PyArg_ParseTupleAndKeywords(args, kwds, "O&", kwlist, &PyBlitzArray_Converter, &retval)) return 0;
 
   return retval;
-
 }
+
+static PyObject* PyBlitzArray_test_const_numpy(PyObject*, PyObject* , PyObject* ) {
+  // test function,
+  blitz::Array<int,2> example(5,2);
+  for (int i = 0; i < 10; ++i){
+    example(i%5,i/5) = i;
+  }
+
+  return PyBlitzArrayCxx_AsConstNumpy(example);
+}
+
 
 static PyMethodDef module_methods[] = {
     {
@@ -47,6 +57,12 @@ static PyMethodDef module_methods[] = {
       (PyCFunction)PyBlitzArray_as_blitz,
       METH_VARARGS|METH_KEYWORDS,
       as_blitz.doc()
+    },
+    {
+      "_test_const_numpy",
+      (PyCFunction)PyBlitzArray_test_const_numpy,
+      METH_VARARGS|METH_KEYWORDS,
+      0
     },
     {0}  /* Sentinel */
 };
