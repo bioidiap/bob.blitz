@@ -983,32 +983,39 @@ PyObject* PyBlitzArray_NUMPY_WRAP(PyObject* bz) {
 
   PyBlitzArrayObject* o = reinterpret_cast<PyBlitzArrayObject*>(bz);
 
+#if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
+  int flags = NPY_ARRAY_C_CONTIGUOUS | NPY_ARRAY_ALIGNED;
+  if (o->writeable)
+    flags |= NPY_ARRAY_WRITEABLE;
+#else
+  int flags = NPY_C_CONTIGUOUS | NPY_ALIGNED;
+  if (o->writeable)
+    flags |= NPY_WRITEABLE;
+#endif // NPY_FEATURE_VERSION
+
+
   // creates an ndarray from the blitz::Array<>.data()
   PyArray_Descr* dtype = PyArray_DescrFromType(o->type_num); //borrowed
-  PyObject* retval = PyArray_NewFromDescr(&PyArray_Type,
+  PyArrayObject* retval = reinterpret_cast<PyArrayObject*>(PyArray_NewFromDescr(&PyArray_Type,
       dtype,
       o->ndim, o->shape, o->stride, o->data,
-#     if NPY_FEATURE_VERSION >= NUMPY17_API /* NumPy C-API version >= 1.7 */
-      NPY_ARRAY_CARRAY,
-#     else
-      NPY_CARRAY,
-#     endif
-      0);
+      flags,
+      0)
+  );
 
   if (!retval) return 0;
+  auto retval_ = make_safe(retval);
 
   // link this object with the returned numpy ndarray
-
 #if NPY_FEATURE_VERSION < NUMPY17_API /* NumPy C-API version >= 1.7 */
-  PyArray_BASE(reinterpret_cast<PyArrayObject*>(retval)) = bz;
+  PyArray_BASE(retval) = bz;
 #else
-  if (PyArray_SetBaseObject(reinterpret_cast<PyArrayObject*>(retval), bz) != 0) {
-    Py_DECREF(retval);
+  if (PyArray_SetBaseObject(retval, bz) != 0) {
     return 0;
   }
 #endif
 
-  return retval;
+  return Py_BuildValue("O", retval);
 
 }
 
