@@ -391,4 +391,4 @@ def test_constness():
 
   def _should_raise(x,y):
     x[0] = y
-  nose.tools.assert_raises(ValueError, _should_raise, data, 4)
+  nose.tools.assert_raises((ValueError,RuntimeError), _should_raise, data, 4)
