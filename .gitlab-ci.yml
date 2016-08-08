@@ -22,8 +22,8 @@ stages:
   stage: build
   script:
     - git clean -ffdx
-    - ${CONDA_FOLDER}/bin/conda create --name ${CI_PROJECT_NAME}-build-env --prefix `pwd`/dev-env --clone `cat ${CONDA_FOLDER}/envs/latest-devel-${PYTHON_VER}.txt` --use-index-cache --yes --quiet
-    - ${CONDA_FOLDER}/bin/conda activate `pwd`/${CI_PROJECT_NAME}-build-env
+    - ${CONDA_FOLDER}/bin/conda create --prefix `pwd`/build-env --clone `cat ${CONDA_FOLDER}/envs/latest-devel-${PYTHON_VER}.txt` --use-index-cache --yes --quiet
+    - ${CONDA_FOLDER}/bin/conda activate `pwd`/build-env
     - which pip
     - pip install --find-links 'https://www.idiap.ch/software/bob/wheels/travis/' --use-wheel --pre --requirement requirements.txt
     - which pip
@@ -40,7 +40,7 @@ stages:
       - eggs/
       - develop-eggs/
       - sphinx/
-      - ${CI_PROJECT_NAME}-build-env/
+      - build-env/
 
 
 # Template for building on a Linux machine
@@ -64,7 +64,7 @@ stages:
 .test_template: &test_job
   stage: test
   script:
-    - ${CONDA_FOLDER}/bin/conda activate `pwd`/${CI_PROJECT_NAME}-build-env
+    - ${CONDA_FOLDER}/bin/conda activate `pwd`/build-env
     - which python
     - python bootstrap-buildout.py
     - ./bin/buildout -o
@@ -91,7 +91,7 @@ stages:
     - master
     - tags
   script:
-    - ${CONDA_FOLDER}/bin/conda activate `pwd`/${CI_PROJECT_NAME}-build-env
+    - ${CONDA_FOLDER}/bin/conda activate `pwd`/build-env
     - which python
     - python bootstrap-buildout.py
     - ./bin/buildout -o
@@ -109,7 +109,7 @@ stages:
   variables:
     BOB_DOCUMENTATION_SERVER: "http://www.idiap.ch/software/bob/docs/latest/bob/%s/master/"
   script:
-    - ${CONDA_FOLDER}/bin/conda activate `pwd`/${CI_PROJECT_NAME}-build-env
+    - ${CONDA_FOLDER}/bin/conda activate `pwd`/build-env
     - which python
     - python bootstrap-buildout.py
     - ./bin/buildout -o
