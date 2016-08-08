@@ -23,7 +23,7 @@ stages:
   script:
     - git clean -ffdx
     - ${CONDA_FOLDER}/bin/conda create --prefix `pwd`/build-env --clone `cat ${CONDA_FOLDER}/envs/latest-devel-${PYTHON_VER}.txt` --use-index-cache --yes
-    - ${CONDA_FOLDER}/bin/activate `pwd`/build-env
+    - source ${CONDA_FOLDER}/bin/activate `pwd`/build-env
     - which pip
     - pip install --find-links 'https://www.idiap.ch/software/bob/wheels/travis/' --use-wheel --pre --requirement requirements.txt
     - which pip
@@ -64,7 +64,7 @@ stages:
 .test_template: &test_job
   stage: test
   script:
-    - ${CONDA_FOLDER}/bin/activate `pwd`/build-env
+    - source ${CONDA_FOLDER}/bin/activate `pwd`/build-env
     - which python
     - python bootstrap-buildout.py
     - ./bin/buildout -o
@@ -91,7 +91,7 @@ stages:
     - master
     - tags
   script:
-    - ${CONDA_FOLDER}/bin/activate `pwd`/build-env
+    - source ${CONDA_FOLDER}/bin/activate `pwd`/build-env
     - which python
     - python bootstrap-buildout.py
     - ./bin/buildout -o
@@ -109,7 +109,7 @@ stages:
   variables:
     BOB_DOCUMENTATION_SERVER: "http://www.idiap.ch/software/bob/docs/latest/bob/%s/master/"
   script:
-    - ${CONDA_FOLDER}/bin/activate `pwd`/build-env
+    - source ${CONDA_FOLDER}/bin/activate `pwd`/build-env
     - which python
     - python bootstrap-buildout.py
     - ./bin/buildout -o
