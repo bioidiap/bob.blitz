@@ -1,0 +1,266 @@
+# This build file is defined in two parts: 1) a generic set of instructions you
+# probably **don't** need to change and 2) a part you have to tune to your
+# project, that you may not need to change. It heavily uses template features
+# from YAML to help you in only changing a minimal part of it and avoid code
+# duplication to a maximum while still providing a nice pipeline display on
+# your package.
+
+
+# 1) Generic instructions (only change if you know what you're doing)
+# -------------------------------------------------------------------
+
+# Definition of our build pipeline
+stages:
+  - build
+  - test
+  - docs
+  - wheels
+
+
+# Template for the build stage
+# Needs to run on all supported architectures, platforms and python versions
+.build_template: &build_job
+  stage: build
+  script:
+    - git clean -ffdx
+    - source ${CONDA_FOLDER}/bin/activate `cat ${CONDA_FOLDER}/envs/latest-devel-${PYTHON_VER}.txt`
+    - which python
+    - python -V
+    - python bootstrap-buildout.py
+    - ./bin/buildout
+    - ./bin/sphinx-build -b html doc sphinx
+  artifacts:
+    expire_in: 2 hours
+    paths:
+      - ${CI_PROJECT_NAME}.egg-info/
+      - .installed.cfg
+      - parts/
+      - bin/
+      - eggs/
+      - develop-eggs/
+      - sphinx/
+
+
+# Template for building on a Linux machine
+.build_linux_template: &linux_build_job
+  <<: *build_job
+  variables: &linux_variables
+    CONDA_FOLDER: "/idiap/group/torch5spro/conda"
+
+
+# Template for building on a Mac OSX machine
+.build_mac_template: &macosx_build_job
+  <<: *build_job
+  variables: &macosx_variables
+    CONDA_FOLDER: "/opt/conda"
+    MACOSX_DEPLOYMENT_TARGET: "10.9"
+    CFLAGS: "-pthread"
+
+
+# Template for the test stage
+# Needs to run on all supported architectures, platforms and python versions
+.test_template: &test_job
+  stage: test
+  script:
+    - ./bin/python bootstrap-buildout.py
+    - ./bin/buildout -o
+    - ./bin/python -c 'from bob.extension import get_config; print(get_config())'
+    - ./bin/coverage run --source=${CI_PROJECT_NAME} ./bin/nosetests -sv
+    - ./bin/sphinx-build -b doctest doc sphinx
+
+
+# Template for testing on a Mac OSX machine
+.test_mac_template: &macosx_test_job
+  <<: *test_job
+  variables:
+    MACOSX_DEPLOYMENT_TARGET: "10.9"
+    CFLAGS: "-pthread"
+
+
+# Template for the wheel uploading stage
+# Needs to run against one combination of python 2.x and 3.x if it is a python
+# only package, otherwise, needs to run in both pythons to all supported
+# architectures (Linux and Mac OSX 64-bit)
+.wheels_template: &wheels_job
+  stage: wheels
+  only:
+    - master
+    - tags
+  script:
+    - ./bin/python bootstrap-buildout.py
+    - ./bin/buildout -o
+    - wget https://gitlab.idiap.ch/bob/bob.extension/raw/master/scripts/upload-wheel.sh
+    - chmod 755 upload-wheel.sh
+    - ./scripts/upload-wheel.sh
+
+
+# Template for (latest) documentation upload stage
+# Only one real job needs to do this (normally, the latest python on OSX)
+.docs_template: &docs_job
+  stage: docs
+  only:
+    - master
+  variables:
+    BOB_DOCUMENTATION_SERVER: "http://www.idiap.ch/software/bob/docs/latest/bob/%s/master/"
+  script:
+    - ./bin/python bootstrap-buildout.py
+    - ./bin/buildout -o
+    - rm -rf sphinx
+    - ./bin/sphinx-build -b html doc sphinx
+    - wget https://gitlab.idiap.ch/bob/bob.extension/raw/master/scripts/upload-sphinx.sh
+    - chmod 755 upload-sphinx.sh
+    - ./upload-sphinx.sh
+
+
+# 2) Package specific instructions (you may tune this if needed)
+# --------------------------------------------------------------
+
+# Linux + Python 2.7: Builds and tests
+build_linux_27:
+  <<: *linux_build_job
+  variables:
+    <<: *linux_variables
+    PYTHON_VER: "2.7"
+  tags:
+    - conda-linux
+
+test_linux_27:
+  <<: *test_job
+  dependencies:
+    - build_linux_27
+  tags:
+    - conda-linux
+
+wheels_linux_27:
+  <<: *wheels_job
+  dependencies:
+    - build_linux_27
+  tags:
+    - conda-linux
+
+
+# Linux + Python 3.4: Builds and tests
+build_linux_34:
+  <<: *linux_build_job
+  variables:
+    <<: *linux_variables
+    PYTHON_VER: "3.4"
+  tags:
+    - conda-linux
+
+test_linux_34:
+  <<: *test_job
+  dependencies:
+    - build_linux_34
+  tags:
+    - conda-linux
+
+wheels_linux_34:
+  <<: *wheels_job
+  dependencies:
+    - build_linux_34
+  tags:
+    - conda-linux
+
+
+# Linux + Python 3.5: Builds and tests
+build_linux_35:
+  <<: *linux_build_job
+  variables:
+    <<: *linux_variables
+    PYTHON_VER: "3.5"
+  tags:
+    - conda-linux
+
+test_linux_35:
+  <<: *test_job
+  dependencies:
+    - build_linux_35
+  tags:
+    - conda-linux
+
+wheels_linux_35:
+  <<: *wheels_job
+  dependencies:
+    - build_linux_35
+  tags:
+    - conda-linux
+
+
+# Mac OSX + Python 2.7: Builds, tests and uploads the wheel
+build_macosx_27:
+  <<: *macosx_build_job
+  variables:
+    <<: *macosx_variables
+    PYTHON_VER: "2.7"
+  tags:
+    - conda-macosx
+
+test_macosx_27:
+  <<: *macosx_test_job
+  dependencies:
+    - build_macosx_27
+  tags:
+    - conda-macosx
+
+wheels_macosx_27:
+  <<: *wheels_job
+  dependencies:
+    - build_macosx_27
+  tags:
+    - conda-macosx
+
+
+# Mac OSX + Python 3.4: Builds and tests
+build_macosx_34:
+  <<: *macosx_build_job
+  variables:
+    <<: *macosx_variables
+    PYTHON_VER: "3.4"
+  tags:
+    - conda-macosx
+
+test_macosx_34:
+  <<: *macosx_test_job
+  dependencies:
+    - build_macosx_34
+  tags:
+    - conda-macosx
+
+wheels_macosx_34:
+  <<: *wheels_job
+  dependencies:
+    - build_macosx_34
+  tags:
+    - conda-macosx
+
+
+# Mac OSX + Python 3.5: Builds, tests, uploads the wheel and the latest docs
+build_macosx_35:
+  <<: *macosx_build_job
+  variables:
+    <<: *macosx_variables
+    PYTHON_VER: "3.5"
+  tags:
+    - conda-macosx
+
+test_macosx_35:
+  <<: *macosx_test_job
+  dependencies:
+    - build_macosx_35
+  tags:
+    - conda-macosx
+
+wheels_macosx_35:
+  <<: *wheels_job
+  dependencies:
+    - build_macosx_35
+  tags:
+    - conda-macosx
+
+docs_macosx_35:
+  <<: *docs_job
+  dependencies:
+    - build_macosx_35
+  tags:
+    - conda-macosx
