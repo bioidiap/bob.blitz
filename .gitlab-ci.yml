@@ -23,10 +23,10 @@ stages:
   stage: build
   script:
     - git clean -ffdx
-    - source ${CONDA_FOLDER}/bin/activate `cat ${CONDA_FOLDER}/envs/latest-devel-${PYTHON_VER}.txt`
-    - which python
-    - python -V
-    - python bootstrap-buildout.py
+    - virtualenv --system-site-packages --python=${CONDA_FOLDER}/envs/`cat ${CONDA_FOLDER}/envs/latest-devel-${PYTHON_VER}.txt`/bin/python local
+    - ./local/bin/python -V
+    - ./local/bin/pip install --find-links 'https://www.idiap.ch/software/bob/wheels/travis/' --use-wheel --pre --requirement requirements.txt
+    - ./local/bin/python bootstrap-buildout.py
     - ./bin/buildout
     - ./bin/sphinx-build -b html doc sphinx
   artifacts:
@@ -39,6 +39,7 @@ stages:
       - eggs/
       - develop-eggs/
       - sphinx/
+      - local/
 
 
 # Template for building on a Linux machine
@@ -62,7 +63,8 @@ stages:
 .test_template: &test_job
   stage: test
   script:
-    - ./bin/python bootstrap-buildout.py
+    - virtualenv --relocatable local
+    - ./local/bin/python bootstrap-buildout.py
     - ./bin/buildout -o
     - ./bin/python -c 'from bob.extension import get_config; print(get_config())'
     - ./bin/coverage run --source=${CI_PROJECT_NAME} ./bin/nosetests -sv
@@ -87,11 +89,12 @@ stages:
     - master
     - tags
   script:
-    - ./bin/python bootstrap-buildout.py
+    - virtualenv --relocatable local
+    - ./local/bin/python bootstrap-buildout.py
     - ./bin/buildout -o
     - wget https://gitlab.idiap.ch/bob/bob.extension/raw/master/scripts/upload-wheel.sh
     - chmod 755 upload-wheel.sh
-    - ./scripts/upload-wheel.sh
+    - ./upload-wheel.sh
 
 
 # Template for (latest) documentation upload stage
@@ -103,7 +106,8 @@ stages:
   variables:
     BOB_DOCUMENTATION_SERVER: "http://www.idiap.ch/software/bob/docs/latest/bob/%s/master/"
   script:
-    - ./bin/python bootstrap-buildout.py
+    - virtualenv --relocatable local
+    - ./local/bin/python bootstrap-buildout.py
     - ./bin/buildout -o
     - rm -rf sphinx
     - ./bin/sphinx-build -b html doc sphinx
