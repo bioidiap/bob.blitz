@@ -46,7 +46,7 @@ stages:
 # Template for building on a Linux machine
 .build_linux_template: &linux_build_job
   <<: *build_job
-  eariables: &linux_variables
+  variables: &linux_variables
     CONDA_FOLDER: "/idiap/group/torch5spro/conda"
 
 
