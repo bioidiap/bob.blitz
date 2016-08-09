@@ -48,6 +48,7 @@ variables:
       - eggs/
       - develop-eggs/
       - sphinx/
+      - build/
 
 
 # Template for building on a Linux machine
@@ -56,6 +57,7 @@ variables:
   variables: &linux_build_variables
     <<: *build_variables
     CONDA_FOLDER: "/local/conda"
+    CFLAGS: "-coverage"
 
 
 # Template for building on a Mac OSX machine
@@ -65,7 +67,7 @@ variables:
     <<: *build_variables
     CONDA_FOLDER: "/opt/conda"
     MACOSX_DEPLOYMENT_TARGET: "10.9"
-    CFLAGS: "-pthread"
+    CFLAGS: "-pthread -coverage"
 
 
 # Template for the test stage
@@ -78,6 +80,7 @@ variables:
   script:
     - ./bin/python -c 'from bob.extension import get_config; print(get_config())'
     - ./bin/coverage run --source=${CI_PROJECT_NAME} ./bin/nosetests -sv
+    - ./bin/coverage report
     - ./bin/sphinx-build -b doctest doc sphinx
   after_script:
     - rm -rf ${CONDA_PREFIX}
