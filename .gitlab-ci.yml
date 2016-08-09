@@ -238,6 +238,13 @@ wheels_linux_35:
   tags:
     - conda-linux
 
+docs_linux_35:
+  <<: *linux_docs_job
+  dependencies:
+    - build_linux_35
+  tags:
+    - conda-linux
+
 
 # Mac OSX + Python 2.7: Builds, tests and uploads the wheel
 build_macosx_27:
@@ -311,13 +318,6 @@ test_macosx_35:
 wheels_macosx_35:
   <<: *macosx_wheels_job
   variables: *macosx_35_build_variables
-  dependencies:
-    - build_macosx_35
-  tags:
-    - conda-macosx
-
-docs_macosx_35:
-  <<: *macosx_docs_job
   dependencies:
     - build_macosx_35
   tags:
