@@ -27,7 +27,7 @@ variables:
   stage: build
   before_script:
     - git clean -ffdx
-    - wget -O bootstrap-conda.sh https://gitlab.idiap.ch/bob/bob/snippets/7/raw
+    - wget -O- https://gitlab.idiap.ch/bob/bob/snippets/7/raw | tr -d '\r' > bootstrap-conda.sh
     - chmod 755 ./bootstrap-conda.sh
     - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
   script:
@@ -105,7 +105,7 @@ variables:
   before_script:
     - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
     - ./bin/buildout -o
-    - wget -O upload-wheel.sh https://gitlab.idiap.ch/bob/bob/snippets/8/raw
+    - wget -O- https://gitlab.idiap.ch/bob/bob/snippets/8/raw | tr -d '\r' > upload-wheel.sh
     - chmod 755 upload-wheel.sh
   script:
     - ./upload-wheel.sh
@@ -138,8 +138,7 @@ variables:
   before_script:
     - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
     - ./bin/buildout -o
-    - wget -O upload-sphinx.sh https://gitlab.idiap.ch/bob/bob/snippets/9/raw
-    - wget https://gitlab.idiap.ch/bob/bob.extension/raw/master/scripts/upload-sphinx.sh
+    - wget -O- https://gitlab.idiap.ch/bob/bob/snippets/9/raw | tr -d '\r' > upload-sphinx.sh
     - chmod 755 upload-sphinx.sh
     - rm -rf sphinx
   script:
