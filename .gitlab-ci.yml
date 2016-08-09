@@ -164,7 +164,7 @@ variables:
 # Linux + Python 2.7: Builds and tests
 build_linux_27:
   <<: *linux_build_job
-  variables:
+  variables: &linux_27_build_variables
     <<: *linux_build_variables
     PYTHON_VER: "2.7"
   tags:
@@ -172,6 +172,7 @@ build_linux_27:
 
 test_linux_27:
   <<: *linux_test_job
+  variables: *linux_27_build_variables
   dependencies:
     - build_linux_27
   tags:
@@ -179,6 +180,7 @@ test_linux_27:
 
 wheels_linux_27:
   <<: *linux_wheels_job
+  variables: *linux_27_build_variables
   dependencies:
     - build_linux_27
   tags:
@@ -188,7 +190,7 @@ wheels_linux_27:
 # Linux + Python 3.4: Builds and tests
 build_linux_34:
   <<: *linux_build_job
-  variables:
+  variables: &linux_34_build_variables
     <<: *linux_build_variables
     PYTHON_VER: "3.4"
   tags:
@@ -196,6 +198,7 @@ build_linux_34:
 
 test_linux_34:
   <<: *linux_test_job
+  variables: *linux_34_build_variables
   dependencies:
     - build_linux_34
   tags:
@@ -203,6 +206,7 @@ test_linux_34:
 
 wheels_linux_34:
   <<: *linux_wheels_job
+  variables: *linux_34_build_variables
   dependencies:
     - build_linux_34
   tags:
@@ -212,7 +216,7 @@ wheels_linux_34:
 # Linux + Python 3.5: Builds and tests
 build_linux_35:
   <<: *linux_build_job
-  variables:
+  variables: &linux_35_build_variables
     <<: *linux_build_variables
     PYTHON_VER: "3.5"
   tags:
@@ -220,6 +224,7 @@ build_linux_35:
 
 test_linux_35:
   <<: *linux_test_job
+  variables: *linux_35_build_variables
   dependencies:
     - build_linux_35
   tags:
@@ -227,6 +232,7 @@ test_linux_35:
 
 wheels_linux_35:
   <<: *linux_wheels_job
+  variables: *linux_35_build_variables
   dependencies:
     - build_linux_35
   tags:
@@ -236,7 +242,7 @@ wheels_linux_35:
 # Mac OSX + Python 2.7: Builds, tests and uploads the wheel
 build_macosx_27:
   <<: *macosx_build_job
-  variables:
+  variables: &macosx_27_build_variables
     <<: *macosx_build_variables
     PYTHON_VER: "2.7"
   tags:
@@ -244,6 +250,7 @@ build_macosx_27:
 
 test_macosx_27:
   <<: *macosx_test_job
+  variables: *macosx_27_build_variables
   dependencies:
     - build_macosx_27
   tags:
@@ -251,6 +258,7 @@ test_macosx_27:
 
 wheels_macosx_27:
   <<: *macosx_wheels_job
+  variables: *macosx_27_build_variables
   dependencies:
     - build_macosx_27
   tags:
@@ -260,7 +268,7 @@ wheels_macosx_27:
 # Mac OSX + Python 3.4: Builds and tests
 build_macosx_34:
   <<: *macosx_build_job
-  variables:
+  variables: &macosx_34_build_variables
     <<: *macosx_build_variables
     PYTHON_VER: "3.4"
   tags:
@@ -268,6 +276,7 @@ build_macosx_34:
 
 test_macosx_34:
   <<: *macosx_test_job
+  variables: *macosx_34_build_variables
   dependencies:
     - build_macosx_34
   tags:
@@ -275,6 +284,7 @@ test_macosx_34:
 
 wheels_macosx_34:
   <<: *macosx_wheels_job
+  variables: *macosx_34_build_variables
   dependencies:
     - build_macosx_34
   tags:
@@ -284,7 +294,7 @@ wheels_macosx_34:
 # Mac OSX + Python 3.5: Builds, tests, uploads the wheel and the latest docs
 build_macosx_35:
   <<: *macosx_build_job
-  variables:
+  variables: &macosx_35_build_variables
     <<: *macosx_build_variables
     PYTHON_VER: "3.5"
   tags:
@@ -292,6 +302,7 @@ build_macosx_35:
 
 test_macosx_35:
   <<: *macosx_test_job
+  variables: *macosx_35_build_variables
   dependencies:
     - build_macosx_35
   tags:
@@ -299,6 +310,7 @@ test_macosx_35:
 
 wheels_macosx_35:
   <<: *macosx_wheels_job
+  variables: *macosx_35_build_variables
   dependencies:
     - build_macosx_35
   tags:
