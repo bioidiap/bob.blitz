@@ -16,17 +16,25 @@ stages:
   - wheels
 
 
+# Global variables
+variables:
+  CONDA_PREFIX: build-dev
+
+
 # Template for the build stage
 # Needs to run on all supported architectures, platforms and python versions
 .build_template: &build_job
   stage: build
-  script:
+  before_script:
     - git clean -ffdx
-    - wget https://gitlab.idiap.ch/bob/bob.extension/raw/master/scripts/bootstrap-conda.sh
+    - wget -O bootstrap-conda.sh https://gitlab.idiap.ch/bob/bob/snippets/6/raw
     - chmod 755 ./bootstrap-conda.sh
-    - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER}
+    - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
+  script:
     - ./bin/buildout
     - ./bin/sphinx-build -b html doc sphinx
+  after_script:
+    - rm -rf ${CONDA_PREFIX}
   artifacts:
     expire_in: 2 hours
     paths:
@@ -44,7 +52,7 @@ stages:
 .build_linux_template: &linux_build_job
   <<: *build_job
   variables: &linux_variables
-    CONDA_FOLDER: "/idiap/group/torch5spro/conda"
+    CONDA_FOLDER: "/local/conda"
 
 
 # Template for building on a Mac OSX machine
@@ -60,12 +68,15 @@ stages:
 # Needs to run on all supported architectures, platforms and python versions
 .test_template: &test_job
   stage: test
-  script:
-    - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER}
+  before_script:
+    - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
     - ./bin/buildout -o
+  script:
     - ./bin/python -c 'from bob.extension import get_config; print(get_config())'
     - ./bin/coverage run --source=${CI_PROJECT_NAME} ./bin/nosetests -sv
     - ./bin/sphinx-build -b doctest doc sphinx
+  after_script:
+    - rm -rf ${CONDA_PREFIX}
 
 
 # Template for testing on a Linux machine
@@ -91,12 +102,15 @@ stages:
   only:
     - master
     - tags
-  script:
-    - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER}
+  before_script:
+    - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
     - ./bin/buildout -o
-    - wget https://gitlab.idiap.ch/bob/bob.extension/raw/master/scripts/upload-wheel.sh
+    - wget -O upload-wheel.sh https://gitlab.idiap.ch/bob/bob/snippets/8/raw
     - chmod 755 upload-wheel.sh
+  script:
     - ./upload-wheel.sh
+  after_script:
+    - rm -rf ${CONDA_PREFIX}
 
 
 # Template for making wheels on a Linux machine
@@ -121,14 +135,18 @@ stages:
     - master
   variables:
     BOB_DOCUMENTATION_SERVER: "http://www.idiap.ch/software/bob/docs/latest/bob/%s/master/"
-  script:
-    - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER}
+  before_script:
+    - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
     - ./bin/buildout -o
-    - rm -rf sphinx
-    - ./bin/sphinx-build -b html doc sphinx
+    - wget -O upload-sphinx.sh https://gitlab.idiap.ch/bob/bob/snippets/9/raw
     - wget https://gitlab.idiap.ch/bob/bob.extension/raw/master/scripts/upload-sphinx.sh
     - chmod 755 upload-sphinx.sh
+    - rm -rf sphinx
+  script:
+    - ./bin/sphinx-build -b html doc sphinx
     - ./upload-sphinx.sh
+  after_script:
+    - rm -rf ${CONDA_PREFIX}
 
 
 # Template for uploading docs on a Linux machine
