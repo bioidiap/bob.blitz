@@ -30,6 +30,8 @@ variables:
     - wget -O- https://gitlab.idiap.ch/bob/bob/snippets/7/raw | tr -d '\r' > bootstrap-conda.sh
     - chmod 755 ./bootstrap-conda.sh
     - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
+  variables: &build_variables
+    BOB_DOCUMENTATION_SERVER: "http://www.idiap.ch/software/bob/docs/latest/bob/%s/master/"
   script:
     - ./bin/buildout
     - ./bin/sphinx-build -b html doc sphinx
@@ -51,14 +53,16 @@ variables:
 # Template for building on a Linux machine
 .build_linux_template: &linux_build_job
   <<: *build_job
-  variables: &linux_variables
+  variables: &linux_build_variables
+    <<: *build_variables
     CONDA_FOLDER: "/local/conda"
 
 
 # Template for building on a Mac OSX machine
 .build_mac_template: &macosx_build_job
   <<: *build_job
-  variables: &macosx_variables
+  variables: &macosx_build_variables
+    <<: *build_variables
     CONDA_FOLDER: "/opt/conda"
     MACOSX_DEPLOYMENT_TARGET: "10.9"
     CFLAGS: "-pthread"
@@ -83,14 +87,14 @@ variables:
 .test_linux_template: &linux_test_job
   <<: *test_job
   variables:
-    <<: *linux_variables
+    <<: *linux_build_variables
 
 
 # Template for testing on a Mac OSX machine
 .test_mac_template: &macosx_test_job
   <<: *test_job
   variables:
-    <<: *macosx_variables
+    <<: *macosx_build_variables
 
 
 # Template for the wheel uploading stage
@@ -117,14 +121,14 @@ variables:
 .wheels_linux_template: &linux_wheels_job
   <<: *wheels_job
   variables:
-    <<: *linux_variables
+    <<: *linux_build_variables
 
 
 # Template for making wheels on a Mac OSX machine
 .wheels_mac_template: &macosx_wheels_job
   <<: *wheels_job
   variables:
-    <<: *macosx_variables
+    <<: *macosx_build_variables
 
 
 # Template for (latest) documentation upload stage
@@ -133,33 +137,25 @@ variables:
   stage: docs
   only:
     - master
-  variables:
-    BOB_DOCUMENTATION_SERVER: "http://www.idiap.ch/software/bob/docs/latest/bob/%s/master/"
   before_script:
-    - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
-    - ./bin/buildout -o
     - wget -O- https://gitlab.idiap.ch/bob/bob/snippets/9/raw | tr -d '\r' > upload-sphinx.sh
     - chmod 755 upload-sphinx.sh
-    - rm -rf sphinx
   script:
-    - ./bin/sphinx-build -b html doc sphinx
     - ./upload-sphinx.sh
-  after_script:
-    - rm -rf ${CONDA_PREFIX}
 
 
 # Template for uploading docs on a Linux machine
 .docs_linux_template: &linux_docs_job
   <<: *docs_job
   variables:
-    <<: *linux_variables
+    <<: *linux_build_variables
 
 
 # Template for uploading docs on a Mac OSX machine
 .docs_mac_template: &macosx_docs_job
   <<: *docs_job
   variables:
-    <<: *macosx_variables
+    <<: *macosx_build_variables
 
 
 # 2) Package specific instructions (you may tune this if needed)
@@ -169,7 +165,7 @@ variables:
 build_linux_27:
   <<: *linux_build_job
   variables:
-    <<: *linux_variables
+    <<: *linux_build_variables
     PYTHON_VER: "2.7"
   tags:
     - conda-linux
@@ -193,7 +189,7 @@ wheels_linux_27:
 build_linux_34:
   <<: *linux_build_job
   variables:
-    <<: *linux_variables
+    <<: *linux_build_variables
     PYTHON_VER: "3.4"
   tags:
     - conda-linux
@@ -217,7 +213,7 @@ wheels_linux_34:
 build_linux_35:
   <<: *linux_build_job
   variables:
-    <<: *linux_variables
+    <<: *linux_build_variables
     PYTHON_VER: "3.5"
   tags:
     - conda-linux
@@ -241,7 +237,7 @@ wheels_linux_35:
 build_macosx_27:
   <<: *macosx_build_job
   variables:
-    <<: *macosx_variables
+    <<: *macosx_build_variables
     PYTHON_VER: "2.7"
   tags:
     - conda-macosx
@@ -265,7 +261,7 @@ wheels_macosx_27:
 build_macosx_34:
   <<: *macosx_build_job
   variables:
-    <<: *macosx_variables
+    <<: *macosx_build_variables
     PYTHON_VER: "3.4"
   tags:
     - conda-macosx
@@ -289,7 +285,7 @@ wheels_macosx_34:
 build_macosx_35:
   <<: *macosx_build_job
   variables:
-    <<: *macosx_variables
+    <<: *macosx_build_variables
     PYTHON_VER: "3.5"
   tags:
     - conda-macosx
