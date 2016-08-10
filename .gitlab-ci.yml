@@ -33,7 +33,7 @@ variables:
   variables: &build_variables
     BOB_DOCUMENTATION_SERVER: "http://www.idiap.ch/software/bob/docs/latest/bob/%s/master/"
   script:
-    - ./bin/buildout
+    - ./bin/buildout "buildout:prefix=${CONDA_FOLDER}/envs/`cat ${CONDA_FOLDER}/envs/latest-devel-${PYTHON_VER}.txt`"
     - ./bin/sphinx-build -b html doc sphinx
   after_script:
     - rm -rf ${CONDA_PREFIX}
@@ -58,7 +58,6 @@ variables:
     <<: *build_variables
     CONDA_FOLDER: "/local/conda"
     CFLAGS: "-coverage"
-    LDFLAGS: "-static"
 
 
 # Template for building on a Mac OSX machine
@@ -69,7 +68,6 @@ variables:
     CONDA_FOLDER: "/opt/conda"
     MACOSX_DEPLOYMENT_TARGET: "10.9"
     CFLAGS: "-pthread -coverage"
-    LDFLAGS: "-static"
 
 
 # Template for the test stage
@@ -81,7 +79,7 @@ variables:
     - ./bin/buildout -o
   script:
     - ./bin/python -c "from ${CI_PROJECT_NAME} import get_config; print(get_config())"
-    - ./bin/coverage run --source=${CI_PROJECT_NAME} ./bin/nosetests -sv
+    - ./bin/coverage run --source=${CI_PROJECT_NAME} ./bin/nosetests -sv ${CI_PROJECT_NAME}
     - ./bin/coverage report
     - ./bin/sphinx-build -b doctest doc sphinx
   after_script:
