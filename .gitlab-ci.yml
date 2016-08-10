@@ -58,6 +58,7 @@ variables:
     <<: *build_variables
     CONDA_FOLDER: "/local/conda"
     CFLAGS: "-coverage"
+    LDFLAGS: "-static"
 
 
 # Template for building on a Mac OSX machine
@@ -68,6 +69,7 @@ variables:
     CONDA_FOLDER: "/opt/conda"
     MACOSX_DEPLOYMENT_TARGET: "10.9"
     CFLAGS: "-pthread -coverage"
+    LDFLAGS: "-static"
 
 
 # Template for the test stage
@@ -76,9 +78,9 @@ variables:
   stage: test
   before_script:
     - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
-    - ./bin/buildout
+    - ./bin/buildout -o
   script:
-    - ./bin/python -c 'from bob.extension import get_config; print(get_config())'
+    - ./bin/python -c "from ${CI_PROJECT_NAME} import get_config; print(get_config())"
     - ./bin/coverage run --source=${CI_PROJECT_NAME} ./bin/nosetests -sv
     - ./bin/coverage report
     - ./bin/sphinx-build -b doctest doc sphinx
@@ -111,7 +113,7 @@ variables:
     - tags
   before_script:
     - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
-    - ./bin/buildout
+    - ./bin/buildout -o
     - curl --silent https://gitlab.idiap.ch/bob/bob/snippets/8/raw | tr -d '\r' > upload-wheel.sh
     - chmod 755 upload-wheel.sh
   script:
