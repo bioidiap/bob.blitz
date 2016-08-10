@@ -171,6 +171,7 @@ build_linux_27:
     <<: *linux_build_variables
     PYTHON_VER: "2.7"
   tags:
+    - beat-ubuntu-12.04
     - conda-linux
 
 test_linux_27:
@@ -197,6 +198,7 @@ build_linux_34:
     <<: *linux_build_variables
     PYTHON_VER: "3.4"
   tags:
+    - beat-ubuntu-12.04
     - conda-linux
 
 test_linux_34:
@@ -223,6 +225,7 @@ build_linux_35:
     <<: *linux_build_variables
     PYTHON_VER: "3.5"
   tags:
+    - beat-ubuntu-12.04
     - conda-linux
 
 test_linux_35:
