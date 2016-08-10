@@ -76,7 +76,7 @@ variables:
   stage: test
   before_script:
     - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
-    - ./bin/buildout -o
+    - ./bin/buildout
   script:
     - ./bin/python -c 'from bob.extension import get_config; print(get_config())'
     - ./bin/coverage run --source=${CI_PROJECT_NAME} ./bin/nosetests -sv
@@ -111,7 +111,7 @@ variables:
     - tags
   before_script:
     - ./bootstrap-conda.sh ${CONDA_FOLDER} ${PYTHON_VER} ${CONDA_PREFIX}
-    - ./bin/buildout -o
+    - ./bin/buildout
     - curl --silent https://gitlab.idiap.ch/bob/bob/snippets/8/raw | tr -d '\r' > upload-wheel.sh
     - chmod 755 upload-wheel.sh
   script:
