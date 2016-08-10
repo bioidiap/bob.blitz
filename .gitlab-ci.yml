@@ -33,7 +33,7 @@ variables:
   variables: &build_variables
     BOB_DOCUMENTATION_SERVER: "http://www.idiap.ch/software/bob/docs/latest/bob/%s/master/"
   script:
-    - BOB_PREFIX_PATH="${CONDA_FOLDER}/envs/`cat ${CONDA_FOLDER}/envs/latest-devel-${PYTHON_VER}.txt`" && ./bin/buildout
+    - BOB_PREFIX_PATH="${CONDA_FOLDER}/envs/`cat ${CONDA_FOLDER}/envs/latest-devel-${PYTHON_VER}.txt`" ./bin/buildout
     - ./bin/sphinx-build -b html doc sphinx
   after_script:
     - rm -rf ${CONDA_PREFIX}
