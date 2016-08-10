@@ -78,7 +78,7 @@ variables:
     - python -c "from ${CI_PROJECT_NAME} import get_config; print(get_config())"
     - coverage run --source=${CI_PROJECT_NAME} ./bin/nosetests -sv ${CI_PROJECT_NAME}
     - coverage report
-    - sphinx-build -b doctest doc sphinx
+    - sphinx-build -b doctest ../doc ../sphinx
   after_script:
     - rm -rf ${CONDA_PREFIX}
 
