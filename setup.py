@@ -44,7 +44,7 @@ setup(
     name='bob.blitz',
     version=version,
     description='Bindings for Blitz++ (a C++ array template library)',
-    url='http://github.com/bioidiap/bob.blitz',
+    url='http://gitlab.idiap.ch/bob/bob.blitz',
     license='BSD',
     author='Andre Anjos',
     author_email='andre.anjos@idiap.ch',
