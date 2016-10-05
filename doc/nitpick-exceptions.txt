@@ -1,0 +1,28 @@
+# ignore c/c++ references
+c:type Py_ssize_t
+c:type PyArrayDescr
+cpp:type blitz
+cpp:type blitz::Array
+cpp:type PyObject
+cpp:type T
+cpp:type N
+
+# not really documented
+py:meth bob.blitz.array.__array__
+
+# not available in NumPy's manual, nor replacements
+py:class numpy.bool_
+py:class numpy.int8
+py:class numpy.int16
+py:class numpy.int32
+py:class numpy.int64
+py:class numpy.uint8
+py:class numpy.uint16
+py:class numpy.uint32
+py:class numpy.uint64
+py:class numpy.float32
+py:class numpy.float64
+py:class numpy.float128
+py:class numpy.complex64
+py:class numpy.complex128
+py:class numpy.complex256

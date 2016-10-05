@@ -9,7 +9,7 @@
 ===============
 
 This section includes information for using the pure C or C++ API for
-manipulating :py:class:`bob.bob.blitz` objects in compiled code.
+manipulating :py:mod:`bob.blitz` objects in compiled code.
 
 C API
 -----
@@ -49,6 +49,7 @@ the import function:
 Array Structure
 ===============
 
+.. cpp:type:: PyBlitzArrayObject
 .. c:type:: PyBlitzArrayObject
 
    The basic array structure represents a ``bob.blitz.array`` instance from
@@ -462,7 +463,8 @@ explained on the C-API section of this document.
 Basic Properties and Checking
 =============================
 
-.. cpp:function:: template <typename T, int N> int PyBlitzArrayCxx_IsBehaved<T,N>(blitz::Array<T,N>& a)
+.. cpp:function:: template <typename T, int N> \
+                  int PyBlitzArrayCxx_IsBehaved<T,N>(blitz::Array<T,N>& a)
 
    Tells if a ``blitz::Array<>`` is memory contiguous and C-style.
 
@@ -470,36 +472,36 @@ Basic Properties and Checking
 Construction and Destruction
 ============================
 
-.. cpp:function:: template <typename T, int N> PyObject* PyBlitzArrayCxx_NewFromConstArray<T,N>(const blitz::Array<T,N>& a)
+.. cpp:function:: template <typename T, int N> PyObject* PyBlitzArrayCxx_NewFromConstArray(const blitz::Array<T,N>& a)
 
    Builds a new read-only ``PyBlitzArrayObject`` from an existing Blitz++
    array, without copying the data. Returns a new reference.
 
 
-.. cpp:function:: template <typename T, int N> PyObject* PyBlitzArrayCxx_NewFromArray<T,N>(blitz::Array<T,N>& a)
+.. cpp:function:: template <typename T, int N> PyObject* PyBlitzArrayCxx_NewFromArray(blitz::Array<T,N>& a)
 
    Builds a new writeable ``PyBlitzArrayObject`` from an existing Blitz++
    array, without copying the data. Returns a new reference.
 
 
-.. cpp:function:: template <typename T, int N> PyObject* PyBlitzArrayCxx_AsConstNumpy<T,N>(const blitz::Array<T,N>& a)
+.. cpp:function:: template <typename T, int N> PyObject* PyBlitzArrayCxx_AsConstNumpy(const blitz::Array<T,N>& a)
 
    Builds a new read-only :py:class:`numpy.ndarray` object from the given Blitz++ array
    without copying the data. Returns a new reference.
 
-   In fact, it actually calls two of the above mentioned functions :cpp:func:`PyBlitzArrayCxx_NewFromConstArray` and :cpp:func:`PyBlitzArray_NUMPY_WRAP`:
+   In fact, it actually calls two of the above mentioned functions :cpp:func:`PyBlitzArrayCxx_NewFromConstArray` and :c:func:`PyBlitzArray_NUMPY_WRAP`:
 
    .. code-block:: c++
 
       PyBlitzArray_NUMPY_WRAP(PyBlitzArrayCxx_NewFromConstArray(a));
 
 
-.. cpp:function:: template <typename T, int N> PyObject* PyBlitzArrayCxx_AsNumpy<T,N>(blitz::Array<T,N>& a)
+.. cpp:function:: template <typename T, int N> PyObject* PyBlitzArrayCxx_AsNumpy(blitz::Array<T,N>& a)
 
    Builds a new writeable :py:class:`numpy.ndarray` object from the given Blitz++ array
    without copying the data. Returns a new reference.
 
-   In fact, it actually calls two of the above mentioned functions :cpp:func:`PyBlitzArrayCxx_NewFromArray` and :cpp:func:`PyBlitzArray_NUMPY_WRAP`:
+   In fact, it actually calls two of the above mentioned functions :cpp:func:`PyBlitzArrayCxx_NewFromArray` and :c:func:`PyBlitzArray_NUMPY_WRAP`:
 
    .. code-block:: c++
 
@@ -519,7 +521,7 @@ Other Utilities
 
 .. cpp:function:: template <typename T, int N> blitz::Array<T,N>* PyBlitzArrayCxx_AsBlitz(PyBlitzArrayObject* o, const char* name)
 
-   Casts a ``PyBlitzArrayObject`` to a specific ``blitz::Array<>`` type after checking that the dimensions and the data type of the underlying :cpp:type:`PyBlitzArrayObject` fits to the template parameters.
+   Casts a ``PyBlitzArrayObject`` to a specific ``blitz::Array<>`` type after checking that the dimensions and the data type of the underlying :c:type:`PyBlitzArrayObject` fits to the template parameters.
    If the check fails, an Python error is set, using the given ``name`` parameter as the name of the object that was passed to the python function, **and** ``NULL`` **is returned**.
    Hence, please check the result of this function for ``NULL``:
 
@@ -549,7 +551,7 @@ Other Utilities
    .. note:: This version of the function might be slightly slower than the first version.
 
 
-.. cpp:function:: template <typename T> int PyBlitzArrayCxx_CToTypenum<T>()
+.. cpp:function:: template <typename T> int PyBlitzArrayCxx_CToTypenum()
 
    Converts from C/C++ type to ndarray type_num.
 
@@ -565,7 +567,7 @@ Other Utilities
       if (PyErr_Occurred()) return 0; ///< propagate exception
 
 
-.. cpp:function:: template <typename T> T PyBlitzArrayCxx_AsCScalar<T>(PyObject* o)
+.. cpp:function:: template <typename T> T PyBlitzArrayCxx_AsCScalar(PyObject* o)
 
    Extraction API for **simple** types.
 
@@ -580,7 +582,7 @@ Other Utilities
       auto z = extract<uint8_t>(obj);
       if (PyErr_Occurred()) return 0; ///< propagate exception
 
-.. cpp:function:: template <typename T> PyBlitzArrayCxx_FromCScalar<T>(T v)
+.. cpp:function:: template <typename T> PyBlitzArrayCxx_FromCScalar(T v)
 
    Converts **simple** C types into numpy scalars
 
