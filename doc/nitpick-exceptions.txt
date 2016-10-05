@@ -26,3 +26,7 @@ py:class numpy.float128
 py:class numpy.complex64
 py:class numpy.complex128
 py:class numpy.complex256
+
+# not sure why these don't work
+py:exc ValueError
+py:exc TypeError

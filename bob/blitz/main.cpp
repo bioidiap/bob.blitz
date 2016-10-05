@@ -20,7 +20,7 @@ auto as_blitz = bob::extension::FunctionDoc(
   "Converts any compatible python object into a shallow :py:class:`" BOB_EXT_MODULE_PREFIX ".array`",
   "This function works by first converting the input object ``x`` into a :py:class:`numpy.ndarray` and then shallow wrapping that ``ndarray`` into a new :py:class:`" BOB_EXT_MODULE_PREFIX ".array`. "
   "You can access the converted ``ndarray`` using the returned value's :py:meth:`" BOB_EXT_MODULE_PREFIX ".array.base` attribute. "
-  "If the ``ndarray`` cannot be shallow-wrapped, a :py:class:`ValueError` is raised.\n\n"
+  "If the ``ndarray`` cannot be shallow-wrapped, a :py:exc:`ValueError` is raised.\n\n"
   "In the case the input object ``x`` is already a behaved (C-style, memory-aligned, contiguous) :py:class:`numpy.ndarray`, then this function only shallow wrap's it into a :py:class:`" BOB_EXT_MODULE_PREFIX ".array` skin."
 )
 .add_prototype("x", "array")

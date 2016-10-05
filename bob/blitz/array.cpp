@@ -22,7 +22,7 @@ auto array_doc = bob::extension::ClassDoc(
     "array",
     "Constructs a new :py:class:`bob.blitz.array`",
     "The implementation current supports a maximum of 4 dimensions. "
-    "Building an array with more dimensions will raise a :py:class:`TypeError`. "
+    "Building an array with more dimensions will raise a :py:exc:`TypeError`. "
     "There are no explicit limits for the size in each dimension, except for the machine's maximum address size.\n\n"
     "The following numpy data types are supported by this library:\n\n"
     " * :py:class:`numpy.bool_`\n"
