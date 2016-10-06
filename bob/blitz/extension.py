@@ -90,4 +90,3 @@ class Library (BobLibrary):
 
     # Run the constructor for the base class
     BobLibrary.__init__(self, *args, **kwargs)
-

@@ -30,3 +30,6 @@ py:class numpy.complex256
 # not sure why these don't work
 py:exc ValueError
 py:exc TypeError
+
+# not linked
+py:class distutils.extension.Extension
