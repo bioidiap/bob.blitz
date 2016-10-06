@@ -16,10 +16,13 @@ Classes and Functions
    bob.blitz.array
    bob.blitz.as_blitz
    bob.blitz.get_config
+   bob.blitz.extension.Extension
+   bob.blitz.extension.Library
 
 
 Detailed Information
 --------------------
 
-.. automodule::
-   bob.blitz
+.. automodule:: bob.blitz
+
+.. automodule:: bob.blitz.extension
