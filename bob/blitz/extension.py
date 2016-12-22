@@ -53,7 +53,7 @@ class Extension(BobExtension):
 
 
 class Library (BobLibrary):
-  """Pure C++ library builing with blitz array.
+  """Pure C++ library building with blitz array.
 
   See the documentation for :py:class:`bob.extension.Extension` for more
   details on input parameters.
