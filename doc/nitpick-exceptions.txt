@@ -4,6 +4,9 @@ c:type PyArrayDescr
 cpp:type blitz
 cpp:type blitz::Array
 cpp:type PyObject
+cpp:typeOrConcept blitz
+cpp:typeOrConcept blitz::Array
+cpp:typeOrConcept PyObject
 cpp:type T
 cpp:type N
 
