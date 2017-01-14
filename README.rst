@@ -9,9 +9,9 @@
    :target: https://gitlab.idiap.ch/bob/bob.blitz/commits/master
 .. image:: https://img.shields.io/badge/gitlab-project-0000c0.svg
    :target: https://gitlab.idiap.ch/bob/bob.blitz
-.. image:: http://img.shields.io/pypi/v/bob.blitz.png
+.. image:: http://img.shields.io/pypi/v/bob.blitz.svg
    :target: https://pypi.python.org/pypi/bob.blitz
-.. image:: http://img.shields.io/pypi/dm/bob.blitz.png
+.. image:: http://img.shields.io/pypi/dm/bob.blitz.svg
    :target: https://pypi.python.org/pypi/bob.blitz
 
 
