@@ -1,9 +1,9 @@
 .. vim: set fileencoding=utf-8 :
 .. Mon 08 Aug 2016 10:52:47 CEST
 
-.. image:: http://img.shields.io/badge/docs-stable-yellow.png
+.. image:: http://img.shields.io/badge/docs-stable-yellow.svg
    :target: http://pythonhosted.org/bob.blitz/index.html
-.. image:: http://img.shields.io/badge/docs-latest-orange.png
+.. image:: http://img.shields.io/badge/docs-latest-orange.svg
    :target: https://www.idiap.ch/software/bob/docs/latest/bob/bob.blitz/master/index.html
 .. image:: https://gitlab.idiap.ch/bob/bob.blitz/badges/master/build.svg
    :target: https://gitlab.idiap.ch/bob/bob.blitz/commits/master
@@ -45,5 +45,5 @@ development `mailing list`_.
 
 .. Place your references here:
 .. _bob: https://www.idiap.ch/software/bob
-.. _installation: https://gitlab.idiap.ch/bob/bob/wikis/Installation
+.. _installation: https://www.idiap.ch/software/bob/install
 .. _mailing list: https://groups.google.com/forum/?fromgroups#!forum/bob-devel
