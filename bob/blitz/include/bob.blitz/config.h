@@ -42,7 +42,7 @@
    * Describes the version of Blitz++ library
    */
   static PyObject* blitz_version() {
-    return Py_BuildValue("s", BZ_VERSION);
+    return Py_BuildValue("s", BLITZ_VERSION);
   }
 
   /**
