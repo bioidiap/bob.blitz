@@ -36,7 +36,7 @@ You can build a new :py:class:`bob.blitz.array` using one of two possible ways:
 
       >>> a = bob.blitz.array((2,), 'uint8')
       >>> a[0] # doctest: +SKIP
-      145
+      a[0]==145
 
 2. Use the :py:func:`bob.blitz.as_blitz` generic converter. This function takes any
    object that is convertible to a :py:class:`numpy.ndarray`, convert it to a
@@ -80,8 +80,8 @@ using the normal python indexing operatiors ``[]``:
    >>> a = bob.blitz.array(2, 'float64')
    >>> a[0] = 3.2
    >>> a[1] = 6.14
-   >>> print(a)
-   [ 3.2   6.14]
+   >>> numpy.allclose(numpy.array([3.2, 6.14]), a)
+   True
    >>> t = a[1]
    >>> print(t)
    6.14
@@ -95,8 +95,8 @@ You can convert :py:class:`bob.blitz.array` objects into either (shallow)
    >>> a[0] = complex(3,4)
    >>> a[1] = complex(2,2)
    >>> npy = a.as_ndarray()
-   >>> print(npy)
-   [ 3.+4.j  2.+2.j]
+   >>> numpy.allclose(numpy.array([ 3.+4.j,  2.+2.j]),a)
+   True
    >>> id(npy.base) == id(a)
    True
    >>> print(npy.flags.owndata)
