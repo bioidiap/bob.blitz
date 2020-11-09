@@ -53,11 +53,9 @@ test:
     - sphinx
     - sphinx_rtd_theme
     - cmake
-    - boost
+    - make
     - pkg-config
-    - libblitz
     - freetype
-    - numpy
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - bob.buildout
