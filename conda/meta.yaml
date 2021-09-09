@@ -33,8 +33,8 @@ requirements:
   run:
     - python
     - setuptools
-    - {{ pin_compatible('numpy') }}
     - boost
+    - {{ pin_compatible('numpy') }}
 
 test:
   imports:
@@ -47,14 +47,14 @@ test:
     - conda inspect linkages -p $PREFIX {{ name }}  # [not win]
     - conda inspect objects -p $PREFIX {{ name }}  # [osx]
   requires:
-    - nose
-    - coverage
-    - sphinx
-    - sphinx_rtd_theme
-    - cmake
-    - make
-    - pkg-config
-    - freetype
+    - nose {{ nose }}
+    - coverage {{ coverage }}
+    - sphinx {{ sphinx }}
+    - sphinx_rtd_theme {{ sphinx_rtd_theme }}
+    - cmake {{ cmake }}
+    - make {{ make }}
+    - pkg-config {{ pkg_config }}
+    - freetype {{ freetype }}
     - {{ compiler('c') }}
     - {{ compiler('cxx') }}
     - bob.buildout
