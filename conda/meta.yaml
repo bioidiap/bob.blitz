@@ -52,13 +52,6 @@ test:
     - coverage {{ coverage }}
     - sphinx {{ sphinx }}
     - sphinx_rtd_theme {{ sphinx_rtd_theme }}
-    - cmake {{ cmake }}
-    - make {{ make }}
-    - pkg-config {{ pkg_config }}
-    - freetype {{ freetype }}
-    - {{ compiler('c') }}
-    - {{ compiler('cxx') }}
-    - bob.buildout
 
 about:
   home: https://www.idiap.ch/software/bob/
